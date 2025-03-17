@@ -1,12 +1,16 @@
 import axio from '~/axios/index'
 
 
-export function getPostsByPage(currentPage, limit){
+export function getPostsByPage(currentPage, orderMode, limit){
 	
-	let request;
+	let request
+	request = `/home/${currentPage}`
 	if (limit)
-		request = `/home/${currentPage}?limit=${limit}`
-	else
-		request = `/home/${currentPage}`
+		request += `?limit=${limit}`
+	if (limit && orderMode)
+		request += `&orderMode=${orderMode}`
+	else if (orderMode)
+		request += `?orderMode=${orderMode}`
+		
 	return axio.get(request)
 }

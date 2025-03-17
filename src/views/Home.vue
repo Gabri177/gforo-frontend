@@ -146,21 +146,35 @@
 	</el-main>
 	<!-- 固定 Post -->
 	<div class="fixed bottom-10 right-10 z-50">
-		<Post @add="addPostClicked" />
+		<AddPost @add="addPostClicked" />
 	</div>
+
+	
+	<Hint v-model:visible="isHintVisible" :confirmButton="false"
+			title="this is the title" message="this is is the message"
+			@confirm="console.log('confirm clicked')"
+	/>
+
+	<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false"
+			@publish="publishPost"
+	/>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import AddPost from '~/components/AddPost.vue';
+import Hint from '~/tools/Hint.vue';
+import NewPost from '~/tools/NewPost.vue';
 import {
 	getPostsByPage
 } from '~/api/homeApi'
 
+const isHintVisible = ref(false); 
+const isPostVisible = ref(false);
+const newPostRef = ref(null);
 const allUnreadCount = ref(5);
 const keyword = ref('');
 const orderMode = ref(0);
-const publishModalVisible = ref(false);
-const hintModalVisible = ref(false);
 const loginUser = ref({
 	id: 1,
 	username: 'testuser',
@@ -186,20 +200,19 @@ const search = () => {
 	// 搜索功能实现
 };
 const setOrderMode = (mode) => {
+	fetchPosts(orderMode.value);
 	orderMode.value = mode;
-	fetchPosts();
 };
-const showPublishModal = () => {
-	publishModalVisible.value = true;
-};
-const publishPost = () => {
+
+const publishPost = (content) => {
+
+	console.log('publish post', content);
 	// 发布帖子功能实现
-	publishModalVisible.value = false;
-	hintModalVisible.value = true;
+	isPostVisible.value = false;
 };
-const fetchPosts = (currentPage) => {
-	page.value.current = currentPage || page.value.current;
-	initPosts();
+const fetchPosts = (mode) => {
+	console.log('fetch posts', mode);
+	initPosts(mode);
 	window.scrollTo(0, 0);
 };
 const formatDate = (date) => {
@@ -209,8 +222,12 @@ const formatDate = (date) => {
 const handleSelect = (key, keyPath) => {
 	console.log(key, keyPath);
 };
-const addPostClicked = (id) => {
-	console.log('add post clicked', id);
+const addPostClicked = () => {
+	isPostVisible.value = !isPostVisible.value;
+	if (newPostRef.value) {
+		newPostRef.value.clearForm();
+	}
+	console.log('add post clicked');
 }
 
 const seeUserPrifile = (id) => {
@@ -218,8 +235,11 @@ const seeUserPrifile = (id) => {
 }
 
 
-const initPosts = () => {
-	getPostsByPage(page.value.current, page.value.pageSize)
+const initPosts = (originalOrderVal) => {
+
+	console.log('init posts', originalOrderVal);
+	// 获取帖子列表
+	getPostsByPage(page.value.current, orderMode.value, page.value.pageSize)
 		.then((res) => {
 			console.log(res);
 			if (res.discussPosts)
@@ -230,6 +250,9 @@ const initPosts = () => {
 		})
 		.catch((err) => {
 			console.log(err);
+			if (originalOrderVal !== undefined) {
+				orderMode.value = originalOrderVal;
+			}
 		});
 };
 initPosts()
