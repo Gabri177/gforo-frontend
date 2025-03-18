@@ -1,3 +1,59 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Message 组件莫兰迪风格 */
+.el-message {
+  background-color: #E3E0DB !important;
+  border-color: #C1B8A8 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.el-message--success {
+  background-color: #E3E0DB !important;
+  border-color: #A1A8C1 !important;
+}
+
+.el-message--success .el-message__icon {
+  color: #A1A8C1 !important;
+}
+
+.el-message--warning {
+  background-color: #E3E0DB !important;
+  border-color: #C1B8A8 !important;
+}
+
+.el-message--warning .el-message__icon {
+  color: #C1B8A8 !important;
+}
+
+.el-message--error {
+  background-color: #E3E0DB !important;
+  border-color: #A87A7A !important;
+}
+
+.el-message--error .el-message__icon {
+  color: #A87A7A !important;
+}
+
+.el-message--info {
+  background-color: #E3E0DB !important;
+  border-color: #6B7C93 !important;
+}
+
+.el-message--info .el-message__icon {
+  color: #6B7C93 !important;
+}
+
+.el-message__content {
+  color: #4A4A4A !important;
+}
+
+.el-message__closeBtn {
+  color: #6B7C93 !important;
+}
+
+.el-message__closeBtn:hover {
+  color: #A1A8C1 !important;
+}

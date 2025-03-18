@@ -1,26 +1,26 @@
 <template>
 	<!-- 内容 -->
-	<el-main class="main flex-grow">
-		<div class="container mx-auto">
+	<el-main class="main flex-grow bg-[#E3E0DB]">
+		<div class="container mx-auto px-4 pb-3">
 			<div class="flex justify-between">
 				<!-- 筛选条件 -->
 				<ul class="mb-3 flex">
 					<li class="mr-3">
 						<el-tag size="large" @click="setOrderMode(0)" :class="[
-							'cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all',
+							'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
 							orderMode === 0
-								? 'bg-[#A8B5A2] text-white'
-								: 'bg-[#E3E0DB] text-[#6B6E70] hover:bg-[#CFCAC2]'
+								? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
+								: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
 						]">
 							Newest
 						</el-tag>
 					</li>
 					<li>
 						<el-tag size="large" @click="setOrderMode(1)" :class="[
-							'cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all',
+							'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
 							orderMode === 1
-								? 'bg-[#A3A8B0] text-white'
-								: 'bg-[#E3E0DB] text-[#6B6E70] hover:bg-[#CFCAC2]'
+								? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
+								: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
 						]">
 							Hottest
 						</el-tag>
@@ -48,35 +48,24 @@
 			<!-- <el-dialog :visible.sync="hintModalVisible" title="提示">
 				<div>发布完毕!</div>
 			</el-dialog> -->
-			<ul class="bg-gray-50 shadow-lg rounded-2xl p-4 space-y-3" v-if="discussPosts.length === 0">
-				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated />
-				</li>
-				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated />
-				</li>
-				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated />
-				</li>
-				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated />
-				</li>
-				<li class="relative media pb-3 pt-3 mb-3 border-b">
+			<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-if="discussPosts.length === 0">
+				<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="i in 5" :key="i">
 					<el-skeleton :rows="3" animated />
 				</li>
 			</ul>
 			<!-- 帖子列表 -->
-			<ul class="bg-gray-50 shadow-lg rounded-2xl p-4 space-y-3" v-else>
-				<li class="relative media pb-3 pt-3 mb-3 border-b " v-for="map in discussPosts" :key="map.post.id">
+			<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-else>
+				<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="map in discussPosts"
+					:key="map.post.id">
 
 					<!-- 置顶标签 -->
 					<div v-if="map.post.type == 1"
-						class="absolute top-8 right-2 bg-[#C1B8A8] text-white text-xs px-2 py-1 rounded shadow-md transform -rotate-12 cursor-default">
+						class="absolute top-8 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform -rotate-12 cursor-default">
 						<span class="font-bold">TOP</span>
 					</div>
 					<!-- 精华标签 -->
 					<div v-if="map.post.status == 1"
-						class="absolute top-2 right-2 bg-[#A8B0AE] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
+						class="absolute top-2 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
 						<span class="font-bold">Essence</span>
 					</div>
 					<!-- 帖子内容 -->
@@ -94,7 +83,7 @@
 						<!-- 标题动效 -->
 						<div>
 							<a @click="detailPostClicked(map.post.id)"
-								class="text-xl font-medium text-gray-700 hover:text-[#7E8D85] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
+								class="text-xl font-medium text-[#4A4A4A] hover:text-[#A1A8C1] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
 								{{ map.post.title }}
 							</a>
 						</div>
@@ -102,7 +91,7 @@
 
 
 					<div>
-						<div class="text-gray-600 text-sm">
+						<div class="text-[#6B7C93] text-sm">
 							<div class="flex justify-between items-center">
 								<div class="flex justify-between items-center">
 									<div class="w-[5rem] flex items-center justify-center">
@@ -110,21 +99,21 @@
 									</div>
 									<div>
 										<span class="font-bold cursor-default">Posted on &nbsp</span>
-										<b class="text-blue-400 cursor-default">{{ formatDate(map.post.createTime) }}
-										</b>
+										<b class="text-[#A1A8C1] cursor-default">{{ formatDate(map.post.createTime)
+											}}</b>
 									</div>
 								</div>
 
 								<div>
 									<ul class="inline float-right">
 										<li class="inline ml-2">
-											<el-button type="text">👍🏻 &nbsp; <span>{{ map.likeCount
-													}}</span></el-button>
+											<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">👍🏻
+												&nbsp; <span>{{ map.likeCount }}</span></el-button>
 										</li>
-										<li class="inline ml-2">|</li>
+										<li class="inline ml-2 text-[#C1B8A8]">|</li>
 										<li class="inline ml-2">
-											<el-button type="text">📝 &nbsp; <span>{{ map.post.commentCount
-													}}</span></el-button>
+											<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">📝 &nbsp;
+												<span>{{ map.post.commentCount }}</span></el-button>
 										</li>
 									</ul>
 								</div>
@@ -137,7 +126,8 @@
 				</li>
 			</ul>
 			<!-- 分页 -->
-			<div class="bottom-0 left-0 w-full flex justify-center items-center py-4 bg-white mt-3">
+			<div
+				class="bottom-0 left-0 w-full flex justify-center items-center py-4 bg-white mt-3 rounded-2xl shadow-lg">
 				<el-pagination v-if="page.rows > 0" background layout="prev, pager, next" :total="page.rows"
 					:page-size="page.pageSize" :current-page="page.current"
 					@current-change="handleChangePage"></el-pagination>
@@ -196,16 +186,18 @@ const search = () => {
 	// 搜索功能实现
 };
 const setOrderMode = (mode) => {
-	console.log('set order mode', page.value.current);
+	console.log('set order mode', mode);
 	initPosts(mode, page.value.current);
 	orderMode.value = mode;
 };
 
 const publishPost = (content) => {
 
-	// console.log('publish post', content);
+	console.log('publish post', content);
 	// 发布帖子功能实现
 	isPostVisible.value = false;
+	const html = newPostRef.value.getHtml(content.content);
+	console.log('html', html);
 };
 const handleChangePage = (newPage) => {
 	// console.log('newPage', newPage);
@@ -270,41 +262,45 @@ initPosts(orderMode.value, page.value.current);
 /* 添加必要的样式 */
 .main {
 	flex-grow: 1;
+	margin-top: 60px;
 }
 
 
 /* 分页按钮默认背景 */
-::v-deep(.el-pagination.is-background .el-pager li) {
+:deep(.el-pagination.is-background .el-pager li) {
 	background-color: #E3E0DB;
-	/* 雾米白 */
-	color: #5C5F60;
-	/* 深灰 */
+	color: #4A4A4A;
 	border: none;
 	transition: all 0.3s;
 }
 
 /* 激活页 */
-::v-deep(.el-pagination.is-background .el-pager li.is-active) {
-	background-color: #A3A8B0;
-	/* 青灰蓝 */
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+	background-color: #A1A8C1;
 	color: #fff;
 }
 
 /* 上一页、下一页按钮 */
-::v-deep(.el-pagination.is-background button) {
+:deep(.el-pagination.is-background button) {
 	background-color: #E3E0DB;
-	/* 雾米白 */
-	color: #5C5F60;
-	/* 深灰 */
+	color: #4A4A4A;
 	border: none;
 	transition: all 0.3s;
 }
 
 /* 悬停效果 */
-::v-deep(.el-pagination.is-background button:hover),
-::v-deep(.el-pagination.is-background .el-pager li:hover) {
-	background-color: #C1C8C0;
-	/* 浅青灰 */
+:deep(.el-pagination.is-background button:hover),
+:deep(.el-pagination.is-background .el-pager li:hover) {
+	background-color: #C1B8A8;
 	color: #fff;
+}
+
+/* 按钮样式 */
+:deep(.el-button--text) {
+	color: #6B7C93;
+}
+
+:deep(.el-button--text:hover) {
+	color: #A1A8C1;
 }
 </style>

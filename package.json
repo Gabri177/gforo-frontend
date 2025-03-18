@@ -15,6 +15,7 @@
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^0.27.2",
     "element-plus": "^2.2.30",
+    "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.1.6",
     "vuex": "^4.0.2"

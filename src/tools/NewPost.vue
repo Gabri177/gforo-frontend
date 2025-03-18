@@ -8,7 +8,7 @@
   >
     <div class="p-6 mt-0 py-0">
       <el-form :model="postForm">
-        <el-form-item>
+        <el-form-item v-if="props.needReplyTitle">
           <el-input v-model="postForm.title" class="title-input"></el-input>
         </el-form-item>
         <el-form-item>
@@ -16,7 +16,8 @@
             v-model="postForm.content"
             height="400px"
             class="content-editor"
-            left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code"
+            left-toolbar="clear | h bold italic strikethrough quote | ul ol table hr | link image code"
+            right-toolbar="sync-scroll fullscreen"
             @save="handleSave" 
           ></v-md-editor>  <!-- 上面我先隐藏了save组件  后续可以扩展  -->
 
@@ -24,12 +25,16 @@
       </el-form>
     </div>
     <template #footer>
-      <el-button class="cancel-button" @click="$emit('update:visible', false)">
+      <div class="mr-2">
+        <el-button class="cancel-button" @click="$emit('update:visible', false)" 
+      size="large" style="margin-top: -16px;">
         <span class="text-white font-bold">cancel</span>
       </el-button>
-      <el-button class="confirm-button" type="primary" @click="handleConfirm">
+      <el-button class="confirm-button" type="primary" @click="handleConfirm" 
+      size="large" style="margin-top: -16px;">
         <span class="text-white font-bold">post</span>
       </el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -40,6 +45,7 @@ import VMdEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
+import VueMarkdownEditor, { xss } from '@kangc/v-md-editor';
 
 VMdEditor.use(githubTheme);
 
@@ -50,6 +56,11 @@ const handleSave = (text, html) => {
     console.log('html:', html);
 };
 
+const getHtml = (markdownContent) => {
+  const html = xss.process(VueMarkdownEditor.vMdParser.themeConfig.markdownParser.render(markdownContent));
+  return html;
+}
+
 const props = defineProps({
   title: {
     type: String,
@@ -58,6 +69,10 @@ const props = defineProps({
   visible: {
     type: Boolean,
     default: false
+  },
+  needReplyTitle: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -87,7 +102,8 @@ const clearForm = () => {
 };
 
 defineExpose({
-  clearForm
+  clearForm,
+  getHtml
 });
 
 </script>
@@ -99,6 +115,16 @@ defineExpose({
   border-radius: 8px; /* 圆角 */
   padding: 20px; /* 内边距 */
 }
+
+:deep(.el-dialog__body) {
+  padding: 0 !important;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 0 !important;
+  margin-top: 20px;
+}
+
 .el-button.cancel-button {
   background-color: #C1A1A1; /* 莫兰迪红色 */
   color: #ffffff; /* 按钮字体颜色 */
@@ -130,9 +156,6 @@ defineExpose({
   padding: 10px; /* 内边距 */
 }
 
-:deep(.el-dialog .el-dialog__footer) {
-  --el-dialog-padding-primary: 0px !important;
-}
 </style>
 
 

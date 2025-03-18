@@ -1,128 +1,201 @@
 <template>
-	<el-header class=" sticky top-0 px-0 z-50" v-if="loginUser">
-		<div class="flex items-center">
-			<!-- 导航 -->
-			<div class="h-full w-full">
-				<el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect"
-				class="backdrop-blur-md bg-black/30 shadow-md"
-				background-color="#545c64" text-color="#fff"
-				:ellipsis="false"
-				>
-					<el-menu-item index="1">
-						<span class="font-semibold text-xl tracking-tight text-white">GForo</span>
-					</el-menu-item>
-					<el-menu-item index="2">
-						<span class="font-semibold text-xl tracking-tight text-white">Message</span>
-					</el-menu-item>
-					<el-menu-item index="3" >
-						<span class="font-semibold text-xl tracking-tight text-white">Login</span>
-					</el-menu-item>
-					<el-menu-item index="4" >  <!-- v-if="loginUser" -->
-						Register
-						<!-- <span class="badge badge-danger" v-if="allUnreadCount != 0">{{ allUnreadCount }}</span> -->
-					</el-menu-item>
-					<el-sub-menu index="5">
-						<template #title><el-avatar :src="loginUser.headerUrl"></el-avatar></template>
-						<el-menu-item index="5-1">Profile</el-menu-item>
-						<el-menu-item index="5-2">Setting</el-menu-item>
-						<el-menu-item index="5-3">Logout</el-menu-item>
-					</el-sub-menu>
-					<el-menu-item index="6" class="flex-grow-0 flex-shrink-0" >
-						<el-input v-model="input3" style="max-width: 600px; width:100%" placeholder="Please input"
-							class="input-with-selec mr-4">
-							<template #append>
-								<el-button type="primary" @click="search">
-									<el-icon>
-										<Search />
-									</el-icon>
-								</el-button>
-							</template>
-						</el-input>
-					</el-menu-item>
-
-
-				</el-menu>
+	<el-header class="bg-[#E3E0DB] border-b border-[#C1B8A8] fixed top-0 left-0 right-0 z-50">
+		<div class="container mx-auto px-4 h-full flex items-center justify-between">
+			<!-- 左侧导航 -->
+			<div class="flex items-center">
+				<router-link to="/" class="text-2xl font-bold text-[#4A4A4A] hover:text-[#6B7C93] transition-colors duration-300">
+					GForo
+				</router-link>
+				<nav class="ml-8 flex space-x-6">
+					<router-link v-for="item in navItems" :key="item.path" 
+						:to="item.path"
+						class="nav-link">
+						{{ item.name }}
+					</router-link>
+				</nav>
 			</div>
 
+			<!-- 右侧搜索和用户信息 -->
+			<div class="flex items-center space-x-6">
+				<!-- 搜索框 -->
+				<div class="relative">
+					<el-input
+						v-model="searchQuery"
+						placeholder="Search Post ..."
+						class="w-[300px]"
+					>
+						<template #prefix>
+							<el-icon class="text-[#6B7C93]"><Search /></el-icon>
+						</template>
+					</el-input>
+				</div>
+
+				<!-- 用户信息 -->
+				<div v-if="userStore.isLoggedIn" class="flex items-center space-x-4">
+					<el-dropdown trigger="click">
+						<div class="flex items-center space-x-2 cursor-pointer">
+							<el-avatar :size="32" :src="userStore.userInfo.avatar" />
+							<span class="text-[#4A4A4A]">{{ userStore.userInfo.name }}</span>
+						</div>
+						<template #dropdown>
+							<el-dropdown-menu>
+								<el-dropdown-item @click="router.push('/profile')">Profile</el-dropdown-item>
+								<el-dropdown-item @click="router.push('/settings')">Setting</el-dropdown-item>
+								<el-dropdown-item divided @click="handleLogout">Logout</el-dropdown-item>
+							</el-dropdown-menu>
+						</template>
+					</el-dropdown>
+				</div>
+				<div v-else class="flex items-center space-x-4">
+					<router-link to="/login" class="nav-link">Login</router-link>
+				</div>
+			</div>
 		</div>
 	</el-header>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '~/stores/user';
+import { Search } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
-const loginUser = ref({
-	id: 1,
-	username: 'testuser',
-	headerUrl: 'https://via.placeholder.com/30'
+const userStore = useUserStore();
+const searchQuery = ref('');
+
+// 根据登录状态显示不同的导航项
+const navItems = computed(() => {
+	if (userStore.isLoggedIn) {
+		return [
+			{ name: 'Home', path: '/' },
+			{ name: 'Message', path: '/message' }
+		];
+	} else {
+		return [
+			{ name: 'Home', path: '/' },
+			{ name: 'Message', path: '/message' }
+		];
+	}
 });
-const allUnreadCount = ref(5);
-const keyword = ref('');
-const activeIndex = ref('1');
 
-
-watch(
-  () => route.path,
-  (newPath) => {
-    if (newPath === '/') {
-      activeIndex.value = '1';
-    } else if (newPath.startsWith('/message')) {
-      activeIndex.value = '2';
-    } else if (newPath.startsWith('/login')) {
-      activeIndex.value = '3';
-    } else if (newPath.startsWith('/register')) {
-      activeIndex.value = '4';
-    } else if (newPath.startsWith('/profile') || newPath.startsWith('/setting')) {
-      activeIndex.value = '5';
-    }
-  },
-  { immediate: true }
-);
+const handleLogout = () => {
+	userStore.logout();
+	router.push('/login');
+};
 
 const search = () => {
 	// 搜索功能实现
 	console.log('search');
 };
-const handleSelect = (key, keyPath) => {
-	console.log(key, keyPath);
-	// console.log('handleSelect', key);
-	switch (key) {
-		case '1':
-			router.push('/');
-			break;
-		case '2':
-			router.push('/message');
-			break;
-		case '3':
-			router.push('/login');
-			break;
-		case '4':
-			router.push('/register');
-			break;
-		case '5-1':
-			router.push('/profile');
-			break;
-		case '5-2':
-			router.push('/setting');
-			break;
-		case '5-3':
-			router.push('/logout');
-			break;
-		case '6':
-			search();
-			break;
-		default:
-			break;
-	}
-
-};
 </script>
 
 <style scoped>
-.el-menu--horizontal>.el-menu-item:nth-child(4) {
-	margin-right: auto;
+/* 导航链接样式 */
+.nav-link {
+	@apply text-[#6B7C93] transition-all duration-300 relative;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+}
+
+/* 鼠标移入效果 */
+.nav-link:hover {
+	color: #4A4A4A;
+	background-color: #F1F5F9;
+}
+
+/* 点击效果 */
+.nav-link:active {
+	background-color: #bccdb9;
+	transform: scale(0.98);
+}
+
+/* 选中效果 */
+.nav-link.router-link-active {
+	color: #4A4A4A;
+	background-color: #8cb29cd4;
+	font-weight: 500;
+}
+
+.nav-link.router-link-active::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 20px;
+	height: 2px;
+	background-color: #161313;
+	border-radius: 2px;
+}
+
+/* 搜索框样式 */
+:deep(.el-input__wrapper) {
+	background-color: #F8FAFC;
+	border: 1px solid #C1B8A8;
+	border-radius: 8px;
+	box-shadow: none;
+	transition: all 0.3s ease;
+}
+
+:deep(.el-input__wrapper:hover) {
+	border-color: #A1A8C1;
+	background-color: #F1F5F9;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+	border-color: #A1A8C1;
+	box-shadow: 0 0 0 1px #A1A8C1;
+}
+
+:deep(.el-input__inner) {
+	color: #4A4A4A;
+}
+
+:deep(.el-input__inner::placeholder) {
+	color: #6B7C93;
+}
+
+/* 下拉菜单样式 */
+:deep(.el-dropdown-menu) {
+	background-color: #F8FAFC;
+	border: 1px solid #C1B8A8;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-dropdown-menu__item) {
+	color: #4A4A4A;
+}
+
+:deep(.el-dropdown-menu__item:hover) {
+	background-color: #F1F5F9;
+	color: #A1A8C1;
+}
+
+:deep(.el-dropdown-menu__item.is-divided) {
+	border-top-color: #C1B8A8;
+}
+
+/* 头像样式 */
+:deep(.el-avatar) {
+	border: 2px solid #C1B8A8;
+	transition: all 0.3s ease;
+}
+
+:deep(.el-avatar:hover) {
+	border-color: #A1A8C1;
+	transform: scale(1.05);
+}
+
+/* 添加一个占位元素，防止内容被固定定位的header遮挡 */
+:deep(.el-header) {
+	height: 60px;
+}
+
+/* 为固定定位的header添加阴影效果 */
+.el-header {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
