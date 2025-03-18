@@ -140,7 +140,7 @@
 			<div class="bottom-0 left-0 w-full flex justify-center items-center py-4 bg-white mt-3">
 				<el-pagination v-if="page.rows > 0" background layout="prev, pager, next" :total="page.rows"
 					:page-size="page.pageSize" :current-page="page.current"
-					@current-change="fetchPosts"></el-pagination>
+					@current-change="handleChangePage"></el-pagination>
 			</div>
 		</div>
 	</el-main>
@@ -162,6 +162,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
 import AddPost from '~/components/AddPost.vue';
 import Hint from '~/tools/Hint.vue';
 import NewPost from '~/tools/NewPost.vue';
@@ -191,7 +192,6 @@ const page = ref({
 	current: 1
 });
 const dropdownOpen = ref(false);
-const activeIndex = ref('1');
 
 const toggleDropdown = () => {
 	dropdownOpen.value = !dropdownOpen.value;
@@ -200,19 +200,20 @@ const search = () => {
 	// 搜索功能实现
 };
 const setOrderMode = (mode) => {
-	fetchPosts(orderMode.value);
+	console.log('set order mode', page.value.current);
+	initPosts(mode, page.value.current);
 	orderMode.value = mode;
 };
 
 const publishPost = (content) => {
 
-	console.log('publish post', content);
+	// console.log('publish post', content);
 	// 发布帖子功能实现
 	isPostVisible.value = false;
 };
-const fetchPosts = (mode) => {
-	console.log('fetch posts', mode);
-	initPosts(mode);
+const handleChangePage = (newPage) => {
+	// console.log('newPage', newPage);
+	initPosts(orderMode.value, newPage);
 	window.scrollTo(0, 0);
 };
 const formatDate = (date) => {
@@ -235,27 +236,34 @@ const seeUserPrifile = (id) => {
 }
 
 
-const initPosts = (originalOrderVal) => {
+const initPosts = (originalOrderVal, pageChanged) => {
 
-	console.log('init posts', originalOrderVal);
+	if (originalOrderVal === undefined)
+		originalOrderVal = 0;
+	if (pageChanged === undefined)
+		pageChanged = page.value.current;
 	// 获取帖子列表
-	getPostsByPage(page.value.current, orderMode.value, page.value.pageSize)
+	
+	// console.log(page.value);
+	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
 		.then((res) => {
-			console.log(res);
+			page.value.current = res.current;
+			// console.log(res);
 			if (res.discussPosts)
 				discussPosts.value = res.discussPosts;
 			if (res.totalRows)
 				page.value.rows = res.totalRows;
-			console.log(page.value);
+			// console.log(page.value);
 		})
 		.catch((err) => {
-			console.log(err);
+			// console.log(err);
+			ElMessage.error('Failed to get posts');
 			if (originalOrderVal !== undefined) {
 				orderMode.value = originalOrderVal;
 			}
 		});
 };
-initPosts()
+initPosts(orderMode.value, page.value.current);
 </script>
 
 <style scoped>

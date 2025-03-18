@@ -4,26 +4,30 @@
 			<div v-if="isRegister"
 				class="w-1/2 p-8 border border-opacity-20 backdrop-blur-md bg-morandi-card shadow-md rounded-lg flex flex-col justify-center items-center">
 				<h2 class="text-2xl font-bold mb-6 text-center text-morandi-text">Register New Account</h2>
-				<el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="w-3/4">
+				<el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="w-3/4"
+					label-position="top">
 					<el-form-item label="Account" prop="username">
-						<el-input v-model="form.username" placeholder="input your account name" clearable />
+						<el-input v-model="form.username" placeholder="input your account name" clearable
+						class="h-[2.80rem] px-3" />
 					</el-form-item>
 					<el-form-item label="Password" prop="password">
-						<el-input v-model="form.password" type="password" placeholder="input your password" :show-password="true" clearable />
+						<el-input v-model="form.password" type="password" placeholder="input your password" :show-password="true" clearable
+						class="h-[2.80rem] px-3" />
 					</el-form-item>
 					<el-form-item label="Confirm Pw" prop="confirmPassword" clearable>
 						<el-input v-model="form.confirmPassword" type="password" placeholder="repeat your password"
-							clearable :show-password="true" />
+							clearable :show-password="true" class="h-[2.80rem] px-3"/>
 					</el-form-item>
 					<el-form-item label="Email" prop="email">
-						<el-input v-model="form.email" placeholder="input your email address" clearable />
+						<el-input v-model="form.email" placeholder="input your email address" clearable
+						class="h-[2.80rem] px-3" />
 					</el-form-item>
 
-					<el-form-item class="flex justify-center mb-0">
-						<div class="w-full flex items-center mt-3">
-							<el-button type="primary" class="morandi-button2 mx-7" @click="onSubmit"
+					<el-form-item class="flex justify-center mb-0 h-[2.80rem] px-3 ">
+						<div class="w-full flex items-center justify-center mt-4">
+							<el-button type="primary" class="morandi-button2 mx-6" @click="onSubmit" size="large"	
 								:loading="registerLoading">Register</el-button>
-							<el-button type="primary" class="morandi-button mx-10" @click="onCancel">Cancel</el-button>
+							<el-button type="primary" class="morandi-button mx-6" @click="onCancel" size="large">Cancel</el-button>
 						</div>
 					</el-form-item>
 				</el-form>
@@ -219,4 +223,15 @@ const goLogin = () => {
 	background-color: #6D6875;
 	border-color: #6D6875;
 }
+
+:deep(.el-input__inner) {
+	color: #6D6875;
+}
+
+:deep(.el-form-item__label) {
+	color: #96939b;
+	font-size: medium;
+	font-weight: bold;
+}
+
 </style>
