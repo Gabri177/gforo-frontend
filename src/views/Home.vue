@@ -93,7 +93,7 @@
 
 						<!-- 标题动效 -->
 						<div>
-							<a @click="addPostClicked(map.post.id)"
+							<a @click="detailPostClicked(map.post.id)"
 								class="text-xl font-medium text-gray-700 hover:text-[#7E8D85] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
 								{{ map.post.title }}
 							</a>
@@ -233,6 +233,10 @@ const addPostClicked = () => {
 
 const seeUserPrifile = (id) => {
 	console.log('see user profile', id);
+}
+
+const detailPostClicked = (id) => {
+	console.log('detail post clicked', id);
 }
 
 
