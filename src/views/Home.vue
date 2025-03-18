@@ -50,19 +50,19 @@
 			</el-dialog> -->
 			<ul class="bg-gray-50 shadow-lg rounded-2xl p-4 space-y-3" v-if="discussPosts.length === 0">
 				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated/>
+					<el-skeleton :rows="3" animated />
 				</li>
 				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated/>
+					<el-skeleton :rows="3" animated />
 				</li>
 				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated/>
+					<el-skeleton :rows="3" animated />
 				</li>
 				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated/>
+					<el-skeleton :rows="3" animated />
 				</li>
 				<li class="relative media pb-3 pt-3 mb-3 border-b">
-					<el-skeleton :rows="3" animated/>
+					<el-skeleton :rows="3" animated />
 				</li>
 			</ul>
 			<!-- 帖子列表 -->
@@ -106,12 +106,11 @@
 							<div class="flex justify-between items-center">
 								<div class="flex justify-between items-center">
 									<div class="w-[5rem] flex items-center justify-center">
-										<u class="text-center cursor-default">{{ map.user.username }}</u> 
+										<u class="text-center cursor-default">{{ map.user.username }}</u>
 									</div>
 									<div>
-										<span class="font-bold cursor-default">Posted on &nbsp</span> 
-										<b 
-											class="text-blue-400 cursor-default">{{ formatDate(map.post.createTime)}}
+										<span class="font-bold cursor-default">Posted on &nbsp</span>
+										<b class="text-blue-400 cursor-default">{{ formatDate(map.post.createTime) }}
 										</b>
 									</div>
 								</div>
@@ -119,19 +118,20 @@
 								<div>
 									<ul class="inline float-right">
 										<li class="inline ml-2">
-											<el-button type="text">👍🏻 &nbsp; <span>{{ map.likeCount }}</span></el-button>
+											<el-button type="text">👍🏻 &nbsp; <span>{{ map.likeCount
+													}}</span></el-button>
 										</li>
 										<li class="inline ml-2">|</li>
 										<li class="inline ml-2">
 											<el-button type="text">📝 &nbsp; <span>{{ map.post.commentCount
-											}}</span></el-button>
+													}}</span></el-button>
 										</li>
 									</ul>
 								</div>
 							</div>
-							
-							
-							
+
+
+
 						</div>
 					</div>
 				</li>
@@ -149,15 +149,11 @@
 		<AddPost @add="addPostClicked" />
 	</div>
 
-	
-	<Hint v-model:visible="isHintVisible" :confirmButton="false"
-			title="this is the title" message="this is is the message"
-			@confirm="console.log('confirm clicked')"
-	/>
 
-	<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false"
-			@publish="publishPost"
-	/>
+	<Hint v-model:visible="isHintVisible" :confirmButton="false" title="this is the title"
+		message="this is is the message" @confirm="console.log('confirm clicked')" />
+
+	<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false" @publish="publishPost" />
 </template>
 
 <script setup>
@@ -170,7 +166,7 @@ import {
 	getPostsByPage
 } from '~/api/homeApi'
 
-const isHintVisible = ref(false); 
+const isHintVisible = ref(false);
 const isPostVisible = ref(false);
 const newPostRef = ref(null);
 const allUnreadCount = ref(5);
@@ -247,7 +243,7 @@ const initPosts = (originalOrderVal, pageChanged) => {
 	if (pageChanged === undefined)
 		pageChanged = page.value.current;
 	// 获取帖子列表
-	
+
 	// console.log(page.value);
 	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
 		.then((res) => {
