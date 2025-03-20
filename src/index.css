@@ -2,34 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Message 组件莫兰迪风格 */
+/* Message 组件莫兰迪冷色调风格 */
 .el-message {
-  background-color: #E3E0DB !important;
-  border-color: #C1B8A8 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background-color: #F5F5F5 !important;
+  border-color: #A1A8C1 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(161, 168, 193, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
 .el-message--success {
-  background-color: #E3E0DB !important;
-  border-color: #A1A8C1 !important;
+  background-color: #F0F4F8 !important;
+  border-color: #7A87A8 !important;
 }
 
 .el-message--success .el-message__icon {
-  color: #A1A8C1 !important;
+  color: #7A87A8 !important;
 }
 
 .el-message--warning {
-  background-color: #E3E0DB !important;
-  border-color: #C1B8A8 !important;
+  background-color: #F0F4F8 !important;
+  border-color: #A1A8C1 !important;
 }
 
 .el-message--warning .el-message__icon {
-  color: #C1B8A8 !important;
+  color: #A1A8C1 !important;
 }
 
 .el-message--error {
-  background-color: #E3E0DB !important;
+  background-color: #F0F4F8 !important;
   border-color: #A87A7A !important;
 }
 
@@ -38,7 +39,7 @@
 }
 
 .el-message--info {
-  background-color: #E3E0DB !important;
+  background-color: #F0F4F8 !important;
   border-color: #6B7C93 !important;
 }
 
@@ -48,12 +49,27 @@
 
 .el-message__content {
   color: #4A4A4A !important;
+  font-weight: 500 !important;
 }
 
 .el-message__closeBtn {
   color: #6B7C93 !important;
+  transition: all 0.3s ease !important;
 }
 
 .el-message__closeBtn:hover {
   color: #A1A8C1 !important;
+  transform: rotate(90deg) !important;
+}
+
+/* 添加消息出现和消失的动画 */
+.el-message-fade-enter-active,
+.el-message-fade-leave-active {
+  transition: all 0.3s ease !important;
+}
+
+.el-message-fade-enter-from,
+.el-message-fade-leave-to {
+  opacity: 0 !important;
+  transform: translateY(-20px) !important;
 }

@@ -51,10 +51,13 @@ import { ElMessage } from 'element-plus';
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-	loginUser,
-	getCaptcha,
-	deleteCaptcha
+	loginUser
 } from '~/api/loginApi';
+import {
+	getCaptcha,
+	deleteCaptcha,
+	verifyCaptcha
+} from '~/api/captchaApi';
 // import { loginUser } from '../api/loginApi';
 
 const router = useRouter();
@@ -119,7 +122,10 @@ const onLogin = () => {
 	formRef.value.validate((valid) => {
 		if (valid) {
 			loginLoading.value = true;
-			loginUser(form, captchaInput.value, captchaId.value)
+
+			verifyCaptcha(captchaInput.value, captchaId.value, form.username)
+			.then(res => {
+				loginUser(form)
 				.then(res => {
 					console.log('Login successful: ', res);
 					ElMessage.success('Login successful');
@@ -134,6 +140,16 @@ const onLogin = () => {
 				.finally(() => {
 					loginLoading.value = false;
 				});
+			})
+			.catch(err => {
+				console.log('Error: ', err);
+				ElMessage.error(err.message);
+				changeCaptcha();
+				captchaInput.value = '';
+			})
+			.finally(() => {
+				loginLoading.value = false;
+			});
 		} else {
 			ElMessage.error('Please check the form');
 			return false;

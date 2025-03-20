@@ -30,6 +30,19 @@
 						class="h-[2.80rem] px-3" />
 					</el-form-item>
 
+					<!-- 图形验证码 -->
+					<div class="flex justify-center items-center mb-5">
+						<el-input v-model="captchaInput" placeholder="input captcha"
+							class="rounded rounded-2xl ml-10 pl-5 w-[130px] h-[2.80rem]" clearable />
+
+						<img ref="captchaImg" alt="captcha"
+							class="mx-3 rounded rounded-xl border border-solid border-[#C1B8A8]" />
+						<el-button @click="changeCaptcha" type="text"
+							class="text-[#A1A8C1] hover:text-[#7A87A8]"><el-icon size="30">
+								<Refresh />
+							</el-icon></el-button>
+					</div>
+
 					<el-form-item class="flex justify-center mb-0 h-[2.80rem] px-3">
 						<div class="w-full flex items-center justify-center mt-4">
 							<el-button type="primary" class="morandi-button2 mx-6" @click="onSubmit" size="large"	
@@ -91,7 +104,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
 	registerUser,
@@ -100,7 +113,15 @@ import {
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { avatarsPage1, avatarsPage2, avatarsPage3 } from '../assets/avatars'
+import {
+	getCaptcha,
+	deleteCaptcha,
+	verifyCaptcha
+} from '~/api/captchaApi';
 
+const captchaImg = ref(null); // 图形验证码
+const captchaId = ref('');  // 图形验证码ID
+const captchaInput = ref(''); // 图形验证码输入
 const route = useRoute()
 const isRegister = ref(true)
 const isVerifying = ref(true)
@@ -223,7 +244,9 @@ const onSubmit = () => {
 	formRef.value.validate((valid) => {
 		if (valid) {
 			registerLoading.value = true;
-			registerUser(form)
+			verifyCaptcha(captchaInput.value, captchaId.value, form.username)
+			.then(res => {
+				registerUser(form)
 				.then(res => {
 					ElMessage.success('Please check your email to activate your account');
 					registerLoading.value = false;
@@ -241,6 +264,14 @@ const onSubmit = () => {
 					ElMessage.error(err.message);
 					registerLoading.value = false;
 				})
+			})
+			.catch(err => {
+				console.error(err);
+				ElMessage.error(err.message);
+				registerLoading.value = false;
+				changeCaptcha();
+				captchaInput.value = '';
+			});
 		} else {
 			ElMessage.error('Please check the form');
 			return false;
@@ -257,6 +288,39 @@ const goLogin = () => {
 };
 
 const showAvatarDialog = ref(false);
+
+// 图形验证码 
+// 在组件挂载后初始化
+onMounted(() => {
+	getCaptcha()
+		.then(res => {
+			captchaImg.value.src = res.captchaBase64;
+			captchaId.value = res.captchaId;
+		})
+		.catch(err => {
+			console.error(err);
+		});
+});
+
+const changeCaptcha = () => {
+	deleteCaptcha(captchaId.value)
+		.then(() => {
+			getCaptcha()
+				.then(res => {
+					captchaImg.value.src = res.captchaBase64;
+					captchaId.value = res.captchaId;
+					captchaInput.value = '';
+				})
+				.catch(err => {
+					console.error(err);
+					ElMessage.error('Failed to get captcha');
+				});
+		})
+		.catch(err => {
+			console.error(err);
+		});
+};
+
 </script>
 
 <style scoped>
