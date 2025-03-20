@@ -180,7 +180,7 @@ const selectAvatar = (avatar) => {
 
 const validatePass = (rule, value, callback) => {
 	if (value === '') {
-		callback(new Error('请输入密码'))
+		callback(new Error('Please enter your password'))
 	} else {
 		if (form.confirmPassword !== '') {
 			formRef.value?.validateField('confirmPassword')
@@ -191,9 +191,9 @@ const validatePass = (rule, value, callback) => {
 
 const validatePass2 = (rule, value, callback) => {
 	if (value === '') {
-		callback(new Error('请再次输入密码'))
+		callback(new Error('Please enter your password again'))
 	} else if (value !== form.password) {
-		callback(new Error('两次输入密码不一致!'))
+		callback(new Error('The two passwords do not match'))
 	} else {
 		callback()
 	}
