@@ -155,7 +155,7 @@ import NewPost from '~/tools/NewPost.vue';
 import {
 	getPostsByPage
 } from '~/api/homeApi'
-
+import { getToken } from '~/utils/auth'
 const isHintVisible = ref(false);
 const isPostVisible = ref(false);
 const newPostRef = ref(null);
@@ -235,7 +235,6 @@ const initPosts = (originalOrderVal, pageChanged) => {
 	if (pageChanged === undefined)
 		pageChanged = page.value.current;
 	// 获取帖子列表
-
 	// console.log(page.value);
 	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
 		.then((res) => {
@@ -248,7 +247,6 @@ const initPosts = (originalOrderVal, pageChanged) => {
 			// console.log(page.value);
 		})
 		.catch((err) => {
-			// console.log(err);
 			ElMessage.error('Failed to get posts');
 			if (originalOrderVal !== undefined) {
 				orderMode.value = originalOrderVal;

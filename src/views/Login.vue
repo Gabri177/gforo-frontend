@@ -17,7 +17,7 @@
 					<!-- 图形验证码 -->
 					<div class="flex justify-center items-center mb-5">
 						<el-input v-model="captchaInput" placeholder="input captcha"
-							class="rounded rounded-2xl ml-10 pl-5 w-[130px] h-[2.80rem]" clearable />
+							class="rounded rounded-2xl ml-10 pl-5 w-[140px] h-[3.00rem]" clearable />
 
 						<img ref="captchaImg" alt="captcha"
 							class="mx-3 rounded rounded-xl border border-solid border-[#C1B8A8]" />
@@ -52,15 +52,18 @@ import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
 	loginUser
-} from '~/api/loginApi';
+} from '~/api/authApi';
 import {
 	getCaptcha,
 	deleteCaptcha,
 	verifyCaptcha
 } from '~/api/captchaApi';
+import { useUserStore } from '~/stores/user';
+import { setToken, setRefreshToken } from '~/utils/auth';
 // import { loginUser } from '../api/loginApi';
 
 const router = useRouter();
+const userStore = useUserStore();
 const loginLoading = ref(false);
 const formRef = ref(null); // 表单引用
 const captchaImg = ref(null); // 图形验证码
@@ -128,6 +131,19 @@ const onLogin = () => {
 				loginUser(form)
 				.then(res => {
 					console.log('Login successful: ', res);
+					// 存储 token
+					if (res.access_token) {
+						setToken(res.access_token);
+					}
+					if (res.refresh_token) {
+						setRefreshToken(res.refresh_token);
+					}
+					// 更新用户状态
+					userStore.setUserInfo({
+						username: res.username,
+						email: res.email,
+						headerUrl: res.headerUrl,
+					});
 					ElMessage.success('Login successful');
 					router.push('/'); // 登录成功跳转首页
 				})

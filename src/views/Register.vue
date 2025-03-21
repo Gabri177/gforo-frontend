@@ -33,7 +33,7 @@
 					<!-- 图形验证码 -->
 					<div class="flex justify-center items-center mb-5">
 						<el-input v-model="captchaInput" placeholder="input captcha"
-							class="rounded rounded-2xl ml-10 pl-5 w-[130px] h-[2.80rem]" clearable />
+							class="rounded rounded-2xl ml-10 pl-5 w-[140px] h-[3.00rem]" clearable />
 
 						<img ref="captchaImg" alt="captcha"
 							class="mx-3 rounded rounded-xl border border-solid border-[#C1B8A8]" />

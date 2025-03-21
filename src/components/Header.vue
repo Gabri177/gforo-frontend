@@ -31,11 +31,15 @@
 				</div>
 
 				<!-- 用户信息 -->
-				<div v-if="userStore.isLoggedIn" class="flex items-center space-x-4">
+				<div v-if="userStore.isLoggedInState" class="flex items-center space-x-4">
 					<el-dropdown trigger="click">
 						<div class="flex items-center space-x-2 cursor-pointer">
-							<el-avatar :size="32" :src="userStore.userInfo.avatar" />
-							<span class="text-[#4A4A4A]">{{ userStore.userInfo.name }}</span>
+							<el-avatar 
+								:size="32" 
+								:src="userStore.userInfo.headerUrl || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
+								@error="() => true"
+							/>
+							<span class="text-[#4A4A4A]">{{ userStore.userInfo.username }}</span>
 						</div>
 						<template #dropdown>
 							<el-dropdown-menu>
@@ -67,7 +71,7 @@ const searchQuery = ref('');
 
 // 根据登录状态显示不同的导航项
 const navItems = computed(() => {
-	if (userStore.isLoggedIn) {
+	if (userStore.isLoggedInState) {
 		return [
 			{ name: 'Home', path: '/' },
 			{ name: 'Message', path: '/message' }
@@ -81,7 +85,7 @@ const navItems = computed(() => {
 });
 
 const handleLogout = () => {
-	userStore.logout();
+	userStore.clearUserInfo();
 	router.push('/login');
 };
 
