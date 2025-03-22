@@ -50,8 +50,8 @@
 							<el-button type="primary" class="morandi-button mx-6" @click="onCancel" size="large">Cancel</el-button>
 						</div>
 					</el-form-item>
-					<div class="w-full flex justify-center mt-7" >
-						<el-link @click="goLogin" class="text-[#A1A8C1] hover:text-[#7A87A8]">Already have an account? Login</el-link>
+					<div class="w-full flex justify-center mt-7 link-style1">
+						<el-link @click="goLogin" class="text-[#acbad6] hover:text-[#788295]">Already have an account? Login</el-link>
 					</div>
 				</el-form>
 			</div>
@@ -472,5 +472,9 @@ const changeCaptcha = () => {
 
 :deep(.el-link:hover) {
 	text-decoration: none;
+}
+
+.link-style1:deep(.el-link::after) {
+	border-bottom-color: #acbad6 !important;
 }
 </style>

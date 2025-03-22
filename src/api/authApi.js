@@ -3,7 +3,7 @@ import pureAxios from '~/axios/pureAxios'
 
 export function loginUser(userInfo){
 
-	return axio.post(`/auth`, userInfo)
+	return axio.post(`/auth/login`, userInfo)
 }
 
 export function getNewToken(refreshToken){
@@ -12,5 +12,9 @@ export function getNewToken(refreshToken){
 		  Authorization: `Bearer ${refreshToken}`
 		}
 	})
+}
+
+export function logoutUser(){
+	return axio.delete('/auth/logout')
 }
 

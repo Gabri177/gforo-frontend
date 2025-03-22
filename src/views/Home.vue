@@ -133,6 +133,7 @@
 					@current-change="handleChangePage"></el-pagination>
 			</div>
 		</div>
+
 	</el-main>
 	<!-- 固定 Post -->
 	<div class="fixed bottom-10 right-10 z-50">
@@ -155,6 +156,7 @@ import NewPost from '~/tools/NewPost.vue';
 import {
 	getPostsByPage
 } from '~/api/homeApi'
+import { getUserInfo } from '~/api/userApi'
 import { getToken } from '~/utils/auth'
 const isHintVisible = ref(false);
 const isPostVisible = ref(false);
@@ -177,6 +179,7 @@ const page = ref({
 	pageSize: 10,
 	current: 1
 });
+
 const dropdownOpen = ref(false);
 
 const toggleDropdown = () => {

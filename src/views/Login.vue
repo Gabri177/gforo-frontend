@@ -36,9 +36,14 @@
 						</div>
 					</el-form-item>
 
-					<div class="w-full text-center mt-4">
-						<el-link @click="goToRegister" class="text-[#A1A8C1] hover:text-[#7A87A8]">Don't have an
+					<div class="w-full text-center mt-4 link-style1">
+						<el-link @click="goToRegister" class="text-[#acbad6] hover:text-[#788295]">Don't have an
 							account? Register here</el-link>
+					</div>
+
+					<div class="w-full text-center mt-1 link-style2 ">
+						<el-link @click="goToRegister" class="text-[#a4ccb1] hover:text-[#728e7b]">Forgot password? 
+							Click to reset</el-link>
 					</div>
 				</el-form>
 			</div>
@@ -60,6 +65,7 @@ import {
 } from '~/api/captchaApi';
 import { useUserStore } from '~/stores/user';
 import { setToken, setRefreshToken } from '~/utils/auth';
+import { getUserInfo } from '~/api/userApi';
 // import { loginUser } from '../api/loginApi';
 
 const router = useRouter();
@@ -121,57 +127,43 @@ const clearForm = () => {
 	form.password = '';
 };
 
-const onLogin = () => {
-	formRef.value.validate((valid) => {
-		if (valid) {
-			loginLoading.value = true;
+const onLogin = async () => {
+  const valid = await formRef.value.validate().catch(() => false);
+  if (!valid) {
+    ElMessage.error('Please check the form');
+    return;
+  }
 
-			verifyCaptcha(captchaInput.value, captchaId.value, form.username)
-			.then(res => {
-				loginUser(form)
-				.then(res => {
-					console.log('Login successful: ', res);
-					// 存储 token
-					if (res.access_token) {
-						setToken(res.access_token);
-					}
-					if (res.refresh_token) {
-						setRefreshToken(res.refresh_token);
-					}
-					// 更新用户状态
-					userStore.setUserInfo({
-						username: res.username,
-						email: res.email,
-						headerUrl: res.headerUrl,
-					});
-					ElMessage.success('Login successful');
-					router.push('/'); // 登录成功跳转首页
-				})
-				.catch(err => {
-					console.log('Error: ', err);
-					ElMessage.error(err.message);
-					changeCaptcha();
-					clearForm();
-				})
-				.finally(() => {
-					loginLoading.value = false;
-				});
-			})
-			.catch(err => {
-				console.log('Error: ', err);
-				ElMessage.error(err.message);
-				changeCaptcha();
-				captchaInput.value = '';
-			})
-			.finally(() => {
-				loginLoading.value = false;
-			});
-		} else {
-			ElMessage.error('Please check the form');
-			return false;
-		}
-	});
+  loginLoading.value = true;
+  try {
+    await verifyCaptcha(captchaInput.value, captchaId.value, form.username);
+
+    const loginRes = await loginUser(form);
+    if (loginRes.access_token) setToken(loginRes.access_token);
+    if (loginRes.refresh_token) setRefreshToken(loginRes.refresh_token);
+
+    const userInfoRes = await getUserInfo();
+	console.log('userInfoRes', userInfoRes);
+    userStore.setUserInfo({
+      username: userInfoRes.username,
+      email: userInfoRes.email,
+      headerUrl: userInfoRes.headerUrl,
+    });
+
+    ElMessage.success('Login successful');
+    router.push('/');
+  } catch (err) {
+    console.error('Login error:', err);
+    ElMessage.error(err.message || 'Login failed');
+    changeCaptcha();
+    captchaInput.value = '';
+    clearForm();
+  } finally {
+    loginLoading.value = false;
+	
+  }
 };
+
 
 const onCancel = () => {
 	router.push('/');
@@ -239,4 +231,14 @@ const goToRegister = () => {
 :deep(.el-button--text:hover) {
 	color: #7A87A8;
 }
+
+.link-style1:deep(.el-link::after) {
+	border-bottom-color: #acbad6 !important;
+}
+
+.link-style2:deep(.el-link::after) {
+	border-bottom-color: #a4ccb1 !important;
+}
+
+
 </style>

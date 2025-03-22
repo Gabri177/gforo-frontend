@@ -63,6 +63,8 @@ import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '~/stores/user';
 import { Search } from '@element-plus/icons-vue';
+import { logoutUser } from '~/api/authApi';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
 const route = useRoute();
@@ -85,8 +87,18 @@ const navItems = computed(() => {
 });
 
 const handleLogout = () => {
-	userStore.clearUserInfo();
-	router.push('/login');
+
+	logoutUser()
+	.then((res)=> {
+		ElMessage.success("Logout successfully")
+	})
+	.catch((err)=> {
+		ElMessage.error(err.message)
+	})
+	.finally(()=> {
+		userStore.clearUserInfo();
+		router.push('/login');
+	});
 };
 
 const search = () => {
