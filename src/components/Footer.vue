@@ -12,7 +12,7 @@
 
 <style scoped>
 .nk-footer {
-	margin-top: auto;
+	margin-top: 0;
 	padding: 1.5rem 0;
 }
 

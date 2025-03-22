@@ -32,9 +32,10 @@ const isHome = computed(() => route.path === '/')
   min-height: 100vh;
 }
 
+/* 淡入淡出滑动效果 */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: all 0.4s ease;
+  transition: all 0.5s ease;
 }
 
 .fade-slide-enter-from {
@@ -42,18 +43,72 @@ const isHome = computed(() => route.path === '/')
   transform: translateY(20px);
 }
 
-.fade-slide-enter-to {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-slide-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-20px);
+}
+
+/* 淡入淡出缩放效果 */
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+/* 淡入淡出水平滑动效果 */
+.fade-horizontal-enter-active,
+.fade-horizontal-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-horizontal-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.fade-horizontal-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* 淡入淡出旋转效果 */
+.fade-rotate-enter-active,
+.fade-rotate-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-rotate-enter-from {
+  opacity: 0;
+  transform: rotate(-5deg) scale(0.95);
+}
+
+.fade-rotate-leave-to {
+  opacity: 0;
+  transform: rotate(5deg) scale(1.05);
+}
+
+/* 淡入淡出模糊效果 */
+.fade-blur-enter-active,
+.fade-blur-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-blur-enter-from {
+  opacity: 0;
+  filter: blur(10px);
+}
+
+.fade-blur-leave-to {
+  opacity: 0;
+  filter: blur(10px);
 }
 </style>

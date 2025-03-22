@@ -175,23 +175,49 @@ const search = () => {
 
 /* 下拉菜单样式 */
 :deep(.el-dropdown-menu) {
-	background-color: #F8FAFC;
-	border: 1px solid #C1B8A8;
-	border-radius: 8px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	background-color: #E3E0DB !important;
+	border: 1px solid #acbad6 !important;
+	border-radius: 8px !important;
+	box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
 }
 
-:deep(.el-dropdown-menu__item) {
-	color: #4A4A4A;
+:deep(.el-dropdown-menu__item),
+:deep([data-el-collection-item]) {
+	color: #666 !important;
+	padding: 8px 16px !important;
+	transition: all 0.3s ease !important;
 }
 
-:deep(.el-dropdown-menu__item:hover) {
-	background-color: #F1F5F9;
-	color: #A1A8C1;
+:deep(.el-dropdown-menu__item:hover),
+:deep([data-el-collection-item]:hover) {
+	background-color: #a4ccb1 !important;
+	color: #fff !important;
 }
 
-:deep(.el-dropdown-menu__item.is-divided) {
-	border-top-color: #C1B8A8;
+:deep(.el-dropdown-menu__item:active),
+:deep([data-el-collection-item]:active) {
+	background-color: #8ab39c !important;
+}
+
+:deep(.el-dropdown-menu__item--divided),
+:deep([data-el-collection-item].el-dropdown-menu__item--divided) {
+	border-top: 1px solid #acbad6 !important;
+}
+
+:deep(.el-dropdown-menu__item--divided:before),
+:deep([data-el-collection-item].el-dropdown-menu__item--divided:before) {
+	background-color: #acbad6 !important;
+}
+
+:deep(.el-dropdown-menu__item--divided:hover),
+:deep([data-el-collection-item].el-dropdown-menu__item--divided:hover) {
+	background-color: #a4ccb1 !important;
+	color: #fff !important;
+}
+
+:deep(.el-dropdown-menu__item--divided:active),
+:deep([data-el-collection-item].el-dropdown-menu__item--divided:active) {
+	background-color: #8ab39c !important;
 }
 
 /* 头像样式 */

@@ -1,38 +1,41 @@
 <template>
-	<el-main class="flex justify-center items-center bg-[#E3E0DB]" style="margin-top: 60px;">
+	<el-main class="flex justify-center items-center bg-[#E3E0DB] min-h-[calc(100vh-60px)" style="margin-top: 60px;">
 		<div class="w-full h-full flex justify-center items-center">
 			<div v-if="isRegister"
 				class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
-				<h2 class="text-2xl font-bold mb-6 text-center text-morandi-dark">Register New Account</h2>
-				<el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="w-3/4"
+				<h2 class="mt-1 text-center text-3xl font-extrabold text-[#6B7C93] mb-3">Register New Account</h2>
+				<p class="mt-0 text-center text-m text-[#6B7C93] mb-2">
+					Enter your account name, password and email address to register
+				</p>
+				<el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="w-3/4 space-y-6"
 					label-position="top">
-					<el-form-item label="Avatar" class="flex flex-col justify-center items-center">
+					<el-form-item class="flex flex-col justify-center items-center"> <!-- label="Avatar" -->
 						<div class="avatar-selector">
 							<div class="avatar-preview mr-3" @click="showAvatarDialog = true">
 								<el-avatar :size="100" :src="currentAvatarUrl" class="cursor-pointer hover:shadow-lg transition-all duration-300"></el-avatar>
 							</div>
 						</div>
 					</el-form-item>
-					<el-form-item label="Account" prop="username">
-						<el-input v-model="form.username" placeholder="input your account name" clearable
+					<el-form-item prop="username"> <!-- label="Account" -->
+						<el-input v-model="form.username" placeholder="Input your account name" clearable
 						class="h-[2.80rem] px-3" />
 					</el-form-item>
-					<el-form-item label="Password" prop="password">
-						<el-input v-model="form.password" type="password" placeholder="input your password" :show-password="true" clearable
+					<el-form-item prop="password"> <!-- label="Password" -->
+						<el-input v-model="form.password" type="password" placeholder="Input your password" :show-password="true" clearable
 						class="h-[2.80rem] px-3" />
 					</el-form-item>
-					<el-form-item label="Confirm Password" prop="confirmPassword" clearable>
-						<el-input v-model="form.confirmPassword" type="password" placeholder="repeat your password"
+					<el-form-item prop="confirmPassword" clearable> <!-- label="Confirm Password" -->
+						<el-input v-model="form.confirmPassword" type="password" placeholder="Repeat your password"
 							clearable :show-password="true" class="h-[2.80rem] px-3"/>
 					</el-form-item>
-					<el-form-item label="Email" prop="email">
-						<el-input v-model="form.email" placeholder="input your email address" clearable
+					<el-form-item prop="email"> <!-- label="Email" -->
+						<el-input v-model="form.email" placeholder="Input your email address" clearable
 						class="h-[2.80rem] px-3" />
 					</el-form-item>
 
 					<!-- 图形验证码 -->
-					<div class="flex justify-center items-center mb-5">
-						<el-input v-model="captchaInput" placeholder="input captcha"
+					<div class="flex justify-center items-center mb-5 pt-1">
+						<el-input v-model="captchaInput" placeholder="Input captcha"
 							class="rounded rounded-2xl ml-10 pl-5 w-[140px] h-[3.00rem]" clearable />
 
 						<img ref="captchaImg" alt="captcha"
@@ -43,15 +46,15 @@
 							</el-icon></el-button>
 					</div>
 
-					<el-form-item class="flex justify-center mb-0 h-[2.80rem] px-3">
+					<el-form-item class="flex justify-center mb-0 h-[2.80rem] px-5 pt-3" style="margin-top: -10px;">
 						<div class="w-full flex items-center justify-center mt-4">
-							<el-button type="primary" class="morandi-button2 mx-6" @click="onSubmit" size="large"	
+							<el-button type="primary" class="morandi-button2 mx-6 w-[120px]" @click="onSubmit" size="large"	
 								:loading="registerLoading">Register</el-button>
-							<el-button type="primary" class="morandi-button mx-6" @click="onCancel" size="large">Cancel</el-button>
+							<el-button type="primary" class="morandi-button mx-6 w-[120px]" @click="onCancel" size="large">Cancel</el-button>
 						</div>
 					</el-form-item>
-					<div class="w-full flex justify-center mt-7 link-style1">
-						<el-link @click="goLogin" class="text-[#acbad6] hover:text-[#788295]">Already have an account? Login</el-link>
+					<div class="w-full flex justify-center pt-5 link-style1">
+						<el-link @click="goLogin" class="text-[#6e668e] hover:text-[#24222f]">Already have an account? Login</el-link>
 					</div>
 				</el-form>
 			</div>
@@ -332,35 +335,49 @@ const changeCaptcha = () => {
 	background-color: #FFFFFF;
 }
 
+/* 隐藏必填项星号 */
+:deep(.el-form-item__label::before) {
+	display: none;
+}
+
 .morandi-button {
 	background-color: #A1A8C1;
-	border-color: #7A87A8;
+	border: none;
 	color: white;
+	transition: all 0.3s ease !important;
 }
 
 .morandi-button2 {
 	background-color: #83b59d;
-	border-color: #7A87A8;
+	border: none;
 	color: white;
+	transition: all 0.3s ease !important;
 }
 
-.morandi-button2:hover{
-	background-color: #498c6c;
+.morandi-button2:hover {
+	background-color: #559274d8;
 	border-color: #5A6788;
 }
+
 .morandi-button:hover {
 	background-color: #7A87A8;
+	border-color: #5A6788;
+}
+
+.morandi-button:active,
+.morandi-button2:active {
+	background-color: #5A6788;
 	border-color: #5A6788;
 }
 
 :deep(.el-input__inner) {
 	color: #4A4A4A;
 	background-color: #F8FAFC;
-	border-color: #C1B8A8;
+	border-color: #B8A6C9;
 }
 
 :deep(.el-input__inner:focus) {
-	border-color: #A1A8C1;
+	border-color: #9B85B3;
 }
 
 :deep(.el-form-item__label) {
@@ -371,6 +388,139 @@ const changeCaptcha = () => {
 
 :deep(.el-form-item__content) {
 	margin-left: 0 !important;
+}
+
+:deep(.el-button--text) {
+	color: #B8A6C9;
+}
+
+:deep(.el-button--text:hover) {
+	color: #9B85B3;
+}
+
+.link-style1:deep(.el-link::after) {
+	border-bottom-color: #8f7db1 !important;
+}
+
+.link-style2:deep(.el-link::after) {
+	border-bottom-color: #be9cde !important;
+}
+
+/* 表单错误提示样式 */
+:deep(.el-form-item__error) {
+	color: #9B85B3 !important;
+	font-size: 12px !important;
+	padding-top: 4px !important;
+}
+
+:deep(.el-form-item.is-error .el-input__wrapper) {
+	box-shadow: 0 0 0 1px #9B85B3 !important;
+	border-color: #9B85B3 !important;
+}
+
+:deep(.el-form-item.is-error .el-input__wrapper:hover) {
+	box-shadow: 0 0 0 1px #8A73A2 !important;
+	border-color: #8A73A2 !important;
+}
+
+.morandi-input :deep(.el-input__wrapper) {
+	background-color: #F8FAFC;
+	border: 1px solid #B8A6C9;
+	border-radius: 8px;
+	box-shadow: none;
+	transition: all 0.3s ease;
+}
+
+.morandi-input :deep(.el-input__wrapper:hover) {
+	border-color: #9B85B3;
+	background-color: #F1F5F9;
+}
+
+.morandi-input :deep(.el-input__wrapper.is-focus) {
+	border-color: #9B85B3;
+	box-shadow: 0 0 0 1px #9B85B3;
+}
+
+.morandi-input :deep(.el-input__inner) {
+	color: #4A4A4A;
+}
+
+.morandi-input :deep(.el-input__inner::placeholder) {
+	color: #6B7C93;
+}
+
+/* 添加 ElMessage 样式 */
+:deep(.el-message) {
+	background-color: #F8FAFC !important;
+	border-color: #B8A6C9 !important;
+	color: #4A4A4A !important;
+}
+
+:deep(.el-message--success) {
+	background-color: #F1F5F9 !important;
+	border-color: #9B85B3 !important;
+}
+
+:deep(.el-message--warning) {
+	background-color: #F1F5F9 !important;
+	border-color: #9B85B3 !important;
+}
+
+:deep(.el-message--error) {
+	background-color: #F1F5F9 !important;
+	border-color: #9B85B3 !important;
+}
+
+:deep(.el-message__icon) {
+	color: #B8A6C9 !important;
+}
+
+:deep(.el-message--success .el-message__icon) {
+	color: #B8A6C9 !important;
+}
+
+:deep(.el-message--warning .el-message__icon) {
+	color: #B8A6C9 !important;
+}
+
+:deep(.el-message--error .el-message__icon) {
+	color: #B8A6C9 !important;
+}
+
+:deep(.el-message__closeBtn) {
+	color: #6B7C93 !important;
+}
+
+:deep(.el-message__closeBtn:hover) {
+	color: #4A4A4A !important;
+}
+
+/* 验证码输入框样式 */
+:deep(.el-input__wrapper) {
+	background-color: #F8FAFC !important;
+	border: 1px solid #B8A6C9 !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	transition: all 0.3s ease !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+	border-color: #9B85B3 !important;
+	background-color: #F1F5F9 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+	border-color: #9B85B3 !important;
+	box-shadow: 0 0 0 1px #9B85B3 !important;
+}
+
+/* 验证码刷新按钮样式 */
+:deep(.el-button--text) {
+	color: #B8A6C9 !important;
+}
+
+:deep(.el-button--text:hover) {
+	color: #9B85B3 !important;
 }
 
 .avatar-selector {
@@ -455,16 +605,6 @@ const changeCaptcha = () => {
 	text-decoration: underline;
 }
 
-:deep(.el-button--text) {
-	padding: 0;
-	height: auto;
-	line-height: 1.5;
-}
-
-:deep(.el-button--text:hover) {
-	background-color: transparent;
-}
-
 :deep(.el-link) {
 	font-size: 14px;
 	transition: all 0.3s ease;
@@ -472,9 +612,5 @@ const changeCaptcha = () => {
 
 :deep(.el-link:hover) {
 	text-decoration: none;
-}
-
-.link-style1:deep(.el-link::after) {
-	border-bottom-color: #acbad6 !important;
 }
 </style>
