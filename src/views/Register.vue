@@ -246,6 +246,10 @@ const router = useRouter();
 const onSubmit = () => {
 	formRef.value.validate((valid) => {
 		if (valid) {
+			if (captchaInput.value === '') {
+				ElMessage.error('Please input captcha');
+				return;
+			}
 			registerLoading.value = true;
 			verifyCaptcha(captchaInput.value, captchaId.value, form.username)
 			.then(res => {

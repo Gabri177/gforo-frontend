@@ -142,6 +142,10 @@ const onLogin = async () => {
     ElMessage.error('Please check the form');
     return;
   }
+  if (captchaInput.value === '') {
+    ElMessage.error('Please input captcha');
+    return;
+  }
 
   loginLoading.value = true;
   try {
