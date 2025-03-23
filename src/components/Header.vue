@@ -76,12 +76,14 @@ const navItems = computed(() => {
 	if (userStore.isLoggedInState) {
 		return [
 			{ name: 'Home', path: '/' },
-			{ name: 'Message', path: '/message' }
+			{ name: 'Message', path: '/message' },
+			{ name: 'Post', path: '/post' }
 		];
 	} else {
 		return [
 			{ name: 'Home', path: '/' },
-			{ name: 'Message', path: '/message' }
+			{ name: 'Message', path: '/message' },
+			{ name: 'Post', path: '/post' }
 		];
 	}
 });

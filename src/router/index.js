@@ -6,8 +6,9 @@ import Login from '~/views/Login.vue'
 import Message from '~/views/Message.vue'
 import ForgetPassword from '~/views/ForgetPassword.vue'
 import ForgetResetPassword from '~/views/ForgetResetPassword.vue'
-
-
+import Profile from '~/views/Profile.vue'
+import Settings from '~/views/Settings.vue'
+import Post from '~/views/Post.vue'
 
 import CaptchaExample from '~/example/CaptchaExample.vue'
 
@@ -67,9 +68,30 @@ const routes = [
     //meta: { transition: 'fade-slide' }
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+    meta: { 
+      requiresAuth: true  // 需要登录才能访问
+    }
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings,
+    meta: { 
+      requiresAuth: true  // 需要登录才能访问
+    }
+  },
+  {
     path: '/captcha-example',
     name: 'CaptchaExample',
     component: CaptchaExample,
+  },
+  {
+    path: '/post',
+    name: 'Post',
+    component: Post,
   }
 ]
 
