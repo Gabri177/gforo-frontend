@@ -264,7 +264,7 @@ const onSubmit = () => {
 				})
 				.catch(err => {
 					// console.log('Error: ' , err.response.data.message);
-					ElMessage.error(err.message);
+					ElMessage.error("register failed: " + err);
 					registerLoading.value = false;
 				})
 			})

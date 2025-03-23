@@ -63,15 +63,32 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { forgetPasswordResetPassword } from '~/api/authApi'
+
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 const formRef = ref(null)
 
+const username = route.params.username
+
+onMounted(() => {
+	if (username) {
+		console.log("username: " + username)
+		form.username = username
+	} else {
+		console.log("username is null")
+		form.username = ''
+	}
+})
+
+
 const form = reactive({
+  username: username,
   password: '',
   confirmPassword: ''
 })
@@ -103,10 +120,12 @@ const handleSubmit = async () => {
     if (valid) {
       loading.value = true
       try {
+		await forgetPasswordResetPassword(form)
         // TODO: 调用重置密码API
         ElMessage.success('Password reset successfully')
         router.push('/login')
       } catch (error) {
+		console.log("error: " + error)
         ElMessage.error(error.message || 'Failed to reset password')
       } finally {
         loading.value = false

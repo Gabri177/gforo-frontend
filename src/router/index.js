@@ -7,6 +7,10 @@ import Message from '~/views/Message.vue'
 import ForgetPassword from '~/views/ForgetPassword.vue'
 import ForgetResetPassword from '~/views/ForgetResetPassword.vue'
 
+
+
+import CaptchaExample from '~/example/CaptchaExample.vue'
+
 const routes = [
   {
     path: '/',
@@ -55,6 +59,17 @@ const routes = [
     name: 'ForgetResetPassword',
     component: ForgetResetPassword,
     //meta: { transition: 'fade-slide' }
+  },
+  {
+    path: '/forget-reset-password/:username',
+    name: 'ForgetResetPasswordWithUsername',
+    component: ForgetResetPassword,
+    //meta: { transition: 'fade-slide' }
+  },
+  {
+    path: '/captcha-example',
+    name: 'CaptchaExample',
+    component: CaptchaExample,
   }
 ]
 

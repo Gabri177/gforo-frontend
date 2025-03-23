@@ -66,10 +66,13 @@
 							Back to Login
 						</router-link>
 					</div>
+					
 				</el-form>
 			</div>
 		</div>
+		
 		</div>
+		
 	</div>
 
 	<!-- 使用验证码对话框组件 -->
@@ -91,6 +94,10 @@ import {
 	deleteCaptcha,
 	verifyCaptcha
 } from '~/api/captchaApi'
+import { 
+	forgetPassword,
+	forgetPasswordVerifyCode
+} from '~/api/authApi'
 
 const router = useRouter()
 const loading = ref(false)
@@ -99,6 +106,8 @@ const formRef = ref(null)
 const captchaImg = ref(null)
 const captchaInput = ref('')
 const captchaId = ref('')
+
+
 
 const form = reactive({
 	username: '',
@@ -117,12 +126,22 @@ const rules = {
 }
 
 const changeCaptcha = async () => {
-	try {
-		const response = await getCaptcha()
-		captchaImg.value.src = response.data
-	} catch (error) {
-		ElMessage.error('Failed to load captcha')
-	}
+	deleteCaptcha(captchaId.value)
+		.then(() => {
+			getCaptcha()
+				.then(res => {
+					captchaImg.value.src = res.captchaBase64;
+					captchaId.value = res.captchaId;
+					captchaInput.value = '';
+				})
+				.catch(err => {
+					console.error(err);
+					ElMessage.error('Failed to get captcha');
+				});
+		})
+		.catch(err => {
+			console.error(err);
+		});
 }
 
 onMounted(() => {
@@ -137,28 +156,36 @@ onMounted(() => {
 });
 
 const handleSubmit = async () => {
-	verifyCodeDialogRef.value.showVerifyCode()
+	//verifyCodeDialogRef.value.showVerifyCode()
 	//verifyCodeDialogRef.value.setVerifying(true)
-	router.push('/forget-reset-password')
+	//router.push('/forget-reset-password')
 	if (!formRef.value) return
 	
 	await formRef.value.validate(async (valid) => {
 		if (valid) {
 			if (!captchaInput.value) {
+				console.log("captchaInput.value: " + captchaInput.value)
 				ElMessage.warning('Please enter the captcha')
 				return
 			}
 			loading.value = true
 			try {
-				// 模拟验证通过
+				await verifyCaptcha(captchaInput.value, captchaId.value, form.username)
+				const forgetPasswordRes = await forgetPassword(form)
+				console.log("forgetPasswordRes: " + forgetPasswordRes)
+				
 				ElMessage.success('Verification code has been sent to your email')
 				verifyCodeDialogRef.value?.showVerifyCode()
-				router.push('/forget-reset-password')
+				//router.push('/forget-reset-password')
 			} catch (error) {
+				console.log("error: " + error)
 				ElMessage.error(error.message || 'Failed to send verification code')
 			} finally {
 				loading.value = false
 			}
+		} else {
+			ElMessage.error('Please check the form')
+			return false
 		}
 	})
 }
@@ -166,10 +193,10 @@ const handleSubmit = async () => {
 const handleVerifyCode = async (code) => {
 	console.log('Parent Component - Verification Code:', code)
 	try {
-		// TODO: 调用验证码验证API
-		// const response = await verifyCode(code)
+
+		await forgetPasswordVerifyCode(form, code)
 		ElMessage.success('Verification successful')
-		//router.push('/login')
+		router.push(`/forget-reset-password/${form.username}`)
 	} catch (error) {
 		ElMessage.error(error.message || 'Verification failed')
 	}
