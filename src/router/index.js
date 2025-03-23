@@ -9,6 +9,7 @@ import ForgetResetPassword from '~/views/ForgetResetPassword.vue'
 import Profile from '~/views/Profile.vue'
 import Settings from '~/views/Settings.vue'
 import Post from '~/views/Post.vue'
+import NotFound from '~/views/NotFound.vue'
 
 import CaptchaExample from '~/example/CaptchaExample.vue'
 
@@ -92,6 +93,11 @@ const routes = [
     path: '/post',
     name: 'Post',
     component: Post,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 
