@@ -14,25 +14,31 @@
                 :rules="profileRules"
                 label-position="top"
               >
-                <!-- 头像上传 -->
+                <!-- 头像Url设置 -->
                 <div class="mb-6">
                   <label class="block text-[#6B7C93] mb-2">Avatar</label>
-                  <div class="flex items-center">
-                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-[#A1A8C1]">
+                  <div class="flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-[#A1A8C1] cursor-pointer" @click="showAvatarDialog = true">
                       <img 
-                        :src="profileForm.avatar || '/default-avatar.png'" 
+                        :src="profileForm.headerUrl || '/default-avatar.png'" 
                         alt="avatar"
                         class="w-full h-full object-cover"
                       >
                     </div>
-                    <el-upload
-                      class="ml-4"
-                      action="/api/upload"
-                      :show-file-list="false"
-                      :on-success="handleAvatarSuccess"
-                    >
-                      <el-button class="morandi-button">Change Avatar</el-button>
-                    </el-upload>
+                    <div class="flex flex-col mt-2 justify-center items-center">
+                      <div class="text-[#6B7C93] text-sm font-medium mb-2">
+                        Set your own avatar
+                      </div>
+                      <el-input
+                        v-model="customUrl"
+                        placeholder="Input image URL"
+                        class="ml-2 mt-2 w-64"
+                      >
+                        <template #append>
+                          <el-button @click="previewCustomUrl">Preview</el-button>
+                        </template>
+                      </el-input>
+                    </div>
                   </div>
                 </div>
 
@@ -118,23 +124,34 @@
       </div>
     </div>
   </div>
+
+  <!-- 将 AvatarChoose 组件移到这里 -->
+  <AvatarChoose
+    ref="avatarChooseRef"
+    v-model="showAvatarDialog"
+    :selected-url="profileForm.headerUrl"
+    @select="handleAvatarSelect"
+  />
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '~/stores/user'
+import AvatarChoose from '~/components/AvatarChoose.vue'
 
 const router = useRouter()
 const loading = ref(false)
 const profileFormRef = ref(null)
 const securityFormRef = ref(null)
+const userStore = useUserStore()
 
 const profileForm = reactive({
-  username: '',
-  email: '',
+  username: userStore.userInfo.username,
+  email: userStore.userInfo.email,
   bio: '',
-  avatar: ''
+  headerUrl: userStore.userInfo.headerUrl
 })
 
 const securityForm = reactive({
@@ -142,6 +159,10 @@ const securityForm = reactive({
   newPassword: '',
   confirmPassword: ''
 })
+
+const showAvatarDialog = ref(false)
+const avatarChooseRef = ref(null)
+const customUrl = ref(userStore.userInfo.headerUrl)
 
 const profileRules = {
   username: [
@@ -177,9 +198,15 @@ const securityRules = {
   ]
 }
 
-const handleAvatarSuccess = (res) => {
-  profileForm.avatar = res.url
-  ElMessage.success('Avatar uploaded successfully')
+const handleAvatarSelect = async (url) => {
+  try {
+    // TODO: 调用API更新头像
+    // userStore.updateAvatar(url)
+    profileForm.headerUrl = url
+    ElMessage.success('Avatar updated successfully')
+  } catch (error) {
+    ElMessage.error('Failed to update avatar')
+  }
 }
 
 const handleSave = async () => {
@@ -198,6 +225,17 @@ const handleSave = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const previewCustomUrl = () => {
+  if (!customUrl.value) {
+    ElMessage.warning('Please input URL first')
+    return
+  }
+  // 直接设置图片，不打开对话框
+  avatarChooseRef.value?.setImgUrl(customUrl.value)
+  profileForm.headerUrl = customUrl.value
+  
 }
 </script>
 
@@ -255,5 +293,18 @@ const handleSave = async () => {
 
 .morandi-tabs :deep(.el-tabs__active-bar) {
   background-color: #A1A8C1;
+}
+
+/* 添加输入框组样式 */
+:deep(.el-input-group__append) {
+  background-color: #F8FAFC !important;
+  border: 1px solid #A1A8C1 !important;
+  color: #6B7C93 !important;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-input-group__append:hover) {
+  background-color: #F1F5F9 !important;
+  border-color: #8B93B1 !important;
 }
 </style> 

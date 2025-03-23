@@ -1,5 +1,6 @@
-// 第一页头像
-export const avatarsPage1 = [
+// 所有头像数据统一管理
+export const avatars = [
+    // 第一页头像 (1-16)
     {
         id: 1,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar1',
@@ -79,11 +80,9 @@ export const avatarsPage1 = [
         id: 16,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar16',
         name: 'Avatar 16'
-    }
-];
+    },
 
-// 第二页头像
-export const avatarsPage2 = [
+    // 第二页头像 (17-32)
     {
         id: 17,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar17',
@@ -163,11 +162,9 @@ export const avatarsPage2 = [
         id: 32,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar32',
         name: 'Avatar 32'
-    }
-];
+    },
 
-// 第三页头像
-export const avatarsPage3 = [
+    // 第三页头像 (33-48)
     {
         id: 33,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar33',
@@ -247,11 +244,9 @@ export const avatarsPage3 = [
         id: 48,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar48',
         name: 'Avatar 48'
-    }
-];
+    },
 
-// 第四页头像
-export const avatarsPage4 = [
+    // 第四页头像 (49-64)
     {
         id: 49,
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar49',
@@ -332,4 +327,21 @@ export const avatarsPage4 = [
         url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=avatar64',
         name: 'Avatar 64'
     }
-]; 
+];
+
+// 获取指定页码的头像数据
+export const getAvatarsByPage = (page, pageSize = 16) => {
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    return avatars.slice(start, end);
+};
+
+// 获取总页数
+export const getTotalPages = (pageSize = 16) => {
+    return Math.ceil(avatars.length / pageSize);
+};
+
+// 根据ID获取头像
+export const getAvatarById = (id) => {
+    return avatars.find(avatar => avatar.id === id);
+}; 

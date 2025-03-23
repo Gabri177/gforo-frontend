@@ -3,11 +3,14 @@ import { ref } from 'vue';
 import { isLoggedIn, clearTokens } from '~/utils/auth';
 
 export const useUserStore = defineStore('user', () => {
+    // 从 localStorage 获取存储的用户信息
+    const savedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    
     const isLoggedInState = ref(isLoggedIn());
     const userInfo = ref({
-        username: '',
-        email: '',
-        headerUrl: '',
+        username: savedUserInfo.username || '',
+        email: savedUserInfo.email || '',
+        headerUrl: savedUserInfo.headerUrl || '',
     });
 
     // 设置用户信息
@@ -18,6 +21,8 @@ export const useUserStore = defineStore('user', () => {
             headerUrl: info.headerUrl || '',
         };
         isLoggedInState.value = true;
+        // 保存到 localStorage
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.value));
     }
 
     // 清除用户信息
@@ -28,12 +33,16 @@ export const useUserStore = defineStore('user', () => {
             headerUrl: '',
         };
         isLoggedInState.value = false;
+        // 清除 localStorage
+        localStorage.removeItem('userInfo');
         clearTokens();
     }
 
     // 更新头像
     function updateAvatar(newHeaderUrl) {
         userInfo.value.headerUrl = newHeaderUrl;
+        // 更新 localStorage
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.value));
     }
 
     return {

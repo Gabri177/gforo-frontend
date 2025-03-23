@@ -9,7 +9,7 @@
 				</p>
 				<el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="w-3/4 space-y-6"
 					label-position="top">
-					<el-form-item class="flex flex-col justify-center items-center"> <!-- label="Avatar" -->
+					<el-form-item class="flex flex-col justify-center items-center">
 						<div class="avatar-selector">
 							<div class="avatar-preview mr-3" @click="showAvatarDialog = true">
 								<el-avatar :size="100" :src="currentAvatarUrl" class="cursor-pointer hover:shadow-lg transition-all duration-300"></el-avatar>
@@ -74,36 +74,12 @@
 		</div>
 	</el-main>
 
-	<!-- 头像选择对话框 -->
-	<el-dialog
+	<!-- 使用头像选择组件 -->
+	<AvatarChoose
 		v-model="showAvatarDialog"
-		title="Choose your avatar"
-		width="600px"
-		class="avatar-dialog"
-	>
-		<div class="avatar-dialog-content">
-			<div class="avatar-pages">
-				<el-pagination
-					v-model:current-page="currentPage"
-					:page-size="1"
-					:total="4"
-					layout="prev, pager, next"
-					@current-change="handlePageChange"
-				/>
-			</div>
-			<div class="avatar-grid">
-				<div
-					v-for="avatar in currentPageAvatars"
-					:key="avatar.id"
-					class="avatar-item"
-					:class="{ 'selected': form.avatarId === avatar.id }"
-					@click="selectAvatar(avatar)"
-				>
-					<el-avatar :size="70" :src="avatar.url"></el-avatar>
-				</div>
-			</div>
-		</div>
-	</el-dialog>
+		:selected-url="form.headerUrl"
+		@select="handleAvatarSelect"
+	/>
 </template>
 
 <script setup>
@@ -115,12 +91,13 @@ import {
 } from '~/api/registerApi'
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { avatarsPage1, avatarsPage2, avatarsPage3 } from '../assets/avatars'
+import { getAvatarsByPage, getTotalPages } from '~/assets/avatars.js'
 import {
 	getCaptcha,
 	deleteCaptcha,
 	verifyCaptcha
 } from '~/api/captchaApi';
+import AvatarChoose from '~/components/AvatarChoose.vue'
 
 const captchaImg = ref(null); // 图形验证码
 const captchaId = ref('');  // 图形验证码ID
@@ -165,41 +142,23 @@ if (token && userId) {
 const registerLoading = ref(false);
 const formRef = ref(null);
 const currentPage = ref(1)
+const pageSize = 16
+const totalPages = getTotalPages(pageSize)
 
 const form = reactive({
 	username: '',
 	password: '',
 	confirmPassword: '',
 	email: '',
-	avatarId: 1 // 默认选择第一个头像
+	headerUrl: getAvatarsByPage(1, 16)[0].url // 默认使用第一个头像的 URL
 });
 
-const currentPageAvatars = computed(() => {
-	switch (currentPage.value) {
-		case 1:
-			return avatarsPage1
-		case 2:
-			return avatarsPage2
-		case 3:
-			return avatarsPage3
-		default:
-			return avatarsPage1
-	}
-})
-
 const currentAvatarUrl = computed(() => {
-	const allAvatars = [...avatarsPage1, ...avatarsPage2, ...avatarsPage3]
-	const selectedAvatar = allAvatars.find(avatar => avatar.id === form.avatarId)
-	return selectedAvatar ? selectedAvatar.url : avatarsPage1[0].url
+	return form.headerUrl
 })
 
-const handlePageChange = (page) => {
-	currentPage.value = page
-}
-
-const selectAvatar = (avatar) => {
-	form.avatarId = avatar.id
-	showAvatarDialog.value = false
+const handleAvatarSelect = (url) => {
+	form.headerUrl = url
 }
 
 const validatePass = (rule, value, callback) => {
@@ -267,8 +226,9 @@ const onSubmit = () => {
 					}, 2000);
 				})
 				.catch(err => {
+					
 					// console.log('Error: ' , err.response.data.message);
-					ElMessage.error("register failed: " + err);
+					ElMessage.error("register failed: " + err.message);
 					registerLoading.value = false;
 				})
 			})
@@ -579,20 +539,60 @@ const changeCaptcha = () => {
 	transform: scale(1.05);
 }
 
-.avatar-dialog :deep(.el-dialog__body) {
-	padding: 0;
+/* 对话框样式 */
+.avatar-dialog .el-dialog {
+	border-radius: 1rem !important;
+	border: 1px solid #B5A8B5 !important;
+	overflow: hidden !important;
 }
 
-.avatar-dialog-content {
-	padding: 20px;
+.avatar-dialog .el-dialog__header {
+	margin: 0 !important;
+	padding: 1.25rem !important;
+	border-bottom: 1px solid #E3E0DB !important;
+	background-color: #F8F6F9 !important;
 }
 
-.avatar-pages {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 20px;
-	padding: 10px;
-	border-bottom: 1px solid #E3E0DB;
+.avatar-dialog .el-dialog__title {
+	color: #7B6E7B !important;
+	font-size: 1.25rem !important;
+	font-weight: 600 !important;
+}
+
+.avatar-dialog .el-dialog__headerbtn {
+	width: 2rem !important;
+	height: 2rem !important;
+	top: 1rem !important;
+	right: 1rem !important;
+}
+
+.avatar-dialog .el-dialog__close {
+	color: #B5A8B5 !important;
+	transition: all 0.3s ease !important;
+}
+
+.avatar-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+	color: #9B8E9B !important;
+}
+
+.avatar-dialog .el-dialog__body {
+	padding: 1.5rem !important;
+	background-color: white !important;
+}
+
+/* 分页器样式 */
+.avatar-dialog .el-pagination.is-background .el-pager li {
+	background-color: #F8F6F9 !important;
+	color: #7B6E7B !important;
+	border: 1px solid #E3E0DB !important;
+	transition: all 0.3s ease !important;
+}
+
+.avatar-dialog .el-pagination.is-background .el-pager li.is-active,
+.avatar-dialog .el-pagination.is-background .el-pager li:hover {
+	background-color: #9B8E9B !important;
+	color: white !important;
+	border-color: #9B8E9B !important;
 }
 
 .text-morandi-link {
@@ -617,4 +617,6 @@ const changeCaptcha = () => {
 :deep(.el-link:hover) {
 	text-decoration: none;
 }
+
+
 </style>
