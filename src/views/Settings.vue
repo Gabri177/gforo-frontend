@@ -20,11 +20,14 @@
                 <div class="mb-6">
                   <label class="block text-[#6B7C93] mb-2">Avatar</label>
                   <div class="flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-[#A1A8C1] cursor-pointer" @click="showAvatarDialog = true">
+                    <div 
+                      class="selected-avatar-wrapper cursor-pointer" 
+                      @click="showAvatarDialog = true"
+                    >
                       <img 
                         :src="profileForm.headerUrl || '/default-avatar.png'" 
                         alt="avatar"
-                        class="w-full h-full object-cover"
+                        class="w-20 h-20 rounded-full object-cover"
                       >
                     </div>
                     <div class="flex flex-col mt-2 justify-center items-center">
@@ -463,5 +466,32 @@ const previewCustomUrl = () => {
 /* 表单项的间距 */
 :deep(.el-form-item) {
   margin-bottom: 24px !important;
+}
+
+/* 选中的头像样式 */
+.selected-avatar-wrapper {
+  border: 2px solid #A1A8C1;
+  border-radius: 50%;
+  padding: 3px;
+  transition: all 0.3s ease;
+  width: 86px;  /* 80px + 2 * (padding + border) */
+  height: 86px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.selected-avatar-wrapper:hover {
+  transform: scale(1.05);
+  border-color: #83B59D;
+  box-shadow: 0 4px 12px rgba(131, 181, 157, 0.15);
+}
+
+.selected-avatar-wrapper img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: transparent !important;
 }
 </style> 

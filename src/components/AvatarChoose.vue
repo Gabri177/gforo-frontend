@@ -10,11 +10,20 @@
       <div
         v-for="avatar in currentAvatars"
         :key="avatar.id"
-        class="flex justify-center items-center bg-[#F8F6F9] hover:bg-white border border-[#E3E0DB] hover:border-[#B5A8B5] rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1"
-        :class="{ 'border-[#9B8E9B] bg-white shadow-md -translate-y-1': selectedUrl === avatar.url }"
+        class="flex justify-center items-center rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 border border-[#E3E0DB] hover:border-[#C1B8A8] avatar-card"
+        :class="{ 'selected-card': selectedUrl === avatar.url }"
         @click="handleSelect(avatar)"
       >
-        <el-avatar :size="80" :src="avatar.url" />
+        <div 
+          class="avatar-wrapper"
+          :class="{ 'avatar-selected': selectedUrl === avatar.url }"
+        >
+          <el-avatar 
+            :size="80" 
+            :src="avatar.url" 
+            class="avatar-image"
+          />
+        </div>
       </div>
     </div>
     
@@ -82,7 +91,7 @@ defineExpose({
 /* 对话框样式 */
 .avatar-dialog .el-dialog {
   border-radius: 1rem !important;
-  border: 1px solid #B5A8B5 !important;
+  border: 1px solid #C1B8A8 !important;
   overflow: hidden !important;
 }
 
@@ -90,11 +99,11 @@ defineExpose({
   margin: 0 !important;
   padding: 1.25rem !important;
   border-bottom: 1px solid #E3E0DB !important;
-  background-color: #F8F6F9 !important;
+  background-color: #FFFFFF !important;
 }
 
 .avatar-dialog .el-dialog__title {
-  color: #7B6E7B !important;
+  color: #6B7C93 !important;
   font-size: 1.25rem !important;
   font-weight: 600 !important;
 }
@@ -107,12 +116,12 @@ defineExpose({
 }
 
 .avatar-dialog .el-dialog__close {
-  color: #B5A8B5 !important;
+  color: #C1B8A8 !important;
   transition: all 0.3s ease !important;
 }
 
 .avatar-dialog .el-dialog__headerbtn:hover .el-dialog__close {
-  color: #9B8E9B !important;
+  color: #A1A8C1 !important;
 }
 
 .avatar-dialog .el-dialog__body {
@@ -133,5 +142,57 @@ defineExpose({
   background-color: #9B8E9B !important;
   color: white !important;
   border-color: #9B8E9B !important;
+}
+
+/* 卡片样式 */
+.avatar-card {
+  background: linear-gradient(135deg, #FFFFFF, #FAFAFA);
+  transition: all 0.3s ease;
+}
+
+.avatar-card:hover {
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(193, 184, 168, 0.08);
+}
+
+/* 选中状态的卡片样式 */
+.selected-card {
+  background: #FFFFFF;
+  border: 2px solid #C1B8A8 !important;
+  box-shadow: 0 4px 12px rgba(193, 184, 168, 0.08);
+}
+
+/* 头像容器和边框样式 */
+.avatar-wrapper {
+  border: 2px solid #E3E0DB;
+  border-radius: 50%;
+  padding: 3px;
+  transition: all 0.3s ease;
+  width: 86px;  /* 80px + 2 * (border + padding) */
+  height: 86px; /* 确保宽高相等 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-wrapper:hover {
+  border-color: #C1B8A8;
+  transform: scale(1.05);
+}
+
+.avatar-wrapper.avatar-selected {
+  border: 2px solid #C1B8A8;
+  transform: scale(1.05);
+}
+
+.avatar-image {
+  background: transparent !important;
+  border-radius: 50%;
+  width: 80px !important;  /* 确保大小固定 */
+  height: 80px !important;
+}
+
+.el-avatar {
+  background: transparent !important;
 }
 </style> 

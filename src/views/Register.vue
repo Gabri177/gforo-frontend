@@ -59,16 +59,36 @@
 				</el-form>
 			</div>
 			<div v-else
-				class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
-				<h2 class="text-2xl font-bold mb-6 text-center text-morandi-dark">{{ verifyInfo.title }}</h2>
+				class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center verify-container">
+				<h2 class="text-2xl font-bold mb-6 text-center text-morandi-dark verify-title">
+					{{ verifyInfo.title }}
+				</h2>
 				<el-skeleton :rows="5" animated class="my-3" v-if="isVerifying" />
-				<div class="text-center font-bold text-xl text-[#A1A8C1] mb-4" v-else>
-					<span>{{ verifyInfo.content }}</span>
+				<div v-else 
+					class="verify-content"
+					:class="{ 'verify-success': isActivated, 'verify-error': !isActivated }"
+				>
+					<div class="verify-icon mb-4">
+						<el-icon :size="48" v-if="isActivated">
+							<CircleCheckFilled />
+						</el-icon>
+						<el-icon :size="48" v-else>
+							<CircleCloseFilled />
+						</el-icon>
+					</div>
+					<div class="text-center font-bold text-xl mb-4">
+						<span>{{ verifyInfo.content }}</span>
+					</div>
 				</div>
 
-				<div>
-					<el-button type="primary" class="morandi-button mx-10" @click="onCancel">Home</el-button>
-					<!-- <el-button type="success" class="morandi-button2 mx-10" @click="goLogin" v-if="isActivated">Login</el-button> -->
+				<div class="verify-buttons">
+					<el-button 
+						type="primary" 
+						class="morandi-button mx-10" 
+						@click="onCancel"
+					>
+						Home
+					</el-button>
 				</div>
 			</div>
 		</div>
@@ -623,5 +643,102 @@ const changeCaptcha = () => {
 	text-decoration: none;
 }
 
+.verify-container {
+	animation: fadeIn 0.5s ease;
+}
+
+.verify-title {
+	animation: slideDown 0.5s ease;
+}
+
+.verify-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	animation: scaleIn 0.5s ease;
+}
+
+.verify-icon {
+	animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.verify-success {
+	color: #83B59D;
+}
+
+.verify-success .verify-icon {
+	color: #83B59D;
+}
+
+.verify-error {
+	color: #C4A0A0;
+}
+
+.verify-error .verify-icon {
+	color: #C4A0A0;
+}
+
+.verify-buttons {
+	margin-top: 2rem;
+	animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideDown {
+	from {
+		transform: translateY(-20px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes scaleIn {
+	from {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes bounceIn {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.1);
+		opacity: 0.8;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		transform: translateY(20px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
 
 </style>

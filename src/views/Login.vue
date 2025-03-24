@@ -175,7 +175,7 @@ const onLogin = async () => {
     ElMessage.error(err.message || 'Login failed');
     changeCaptcha();
     captchaInput.value = '';
-    clearForm();
+    // clearForm();
   } finally {
     loginLoading.value = false;
 	
