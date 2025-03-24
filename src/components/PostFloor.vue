@@ -402,6 +402,10 @@ const shouldShowReplyExpandButton = (content) => {
     transition: max-height 0.3s ease-in-out;
 }
 
+:deep(.github-markdown-body) {
+    background-color: #F8FAFC;
+}
+
 .content-wrapper.content-collapsed :deep(.github-markdown-body) {
     max-height: 150px;
     overflow: hidden;

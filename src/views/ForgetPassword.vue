@@ -179,7 +179,7 @@ const handleSubmit = async () => {
 				//router.push('/forget-reset-password')
 			} catch (error) {
 				console.log("error: " + error)
-				ElMessage.error(error.message || 'Failed to send verification code')
+				ElMessage.error(error?.message || 'Failed to send verification code')
 			} finally {
 				loading.value = false
 			}

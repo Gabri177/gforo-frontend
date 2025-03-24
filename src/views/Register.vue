@@ -232,7 +232,7 @@ const onSubmit = () => {
 			})
 			.catch(err => {
 				console.error(err);
-				ElMessage.error(err.message);
+				ElMessage.error(err?.message || 'Register failed');
 				registerLoading.value = false;
 				changeCaptcha();
 				captchaInput.value = '';

@@ -260,7 +260,7 @@ const handleProfileSave = async () => {
     // router.push('/profile')
   } catch (error) {
     console.error('Failed to save profile:', error)
-    ElMessage.error(error.message || 'Failed to save profile')
+    ElMessage.error(error?.message || 'Failed to save profile')
 	profileFormRef.value?.resetFields()
   } finally {
     loading.value = false

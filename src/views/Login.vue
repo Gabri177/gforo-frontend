@@ -163,7 +163,7 @@ const onLogin = async () => {
     router.push('/');
   } catch (err) {
     console.error('Login error:', err);
-    ElMessage.error(err.message || 'Login failed');
+    ElMessage.error(err?.message || 'Login failed');
     changeCaptcha();
     captchaInput.value = '';
     // clearForm();
