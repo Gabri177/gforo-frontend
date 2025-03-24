@@ -5,5 +5,9 @@ export function registerUser(userdata){
 }
 
 export function verifyEmail(userId,token){
-	return axio.get(`/register/${userId}/${token}`)
+	return axio.get(`/register/verify-email/${userId}/${token}`)
+}
+
+export function sendVerifyEmail(userinfo){
+	return axio.post('/register/send-verify-email', userinfo)
 }

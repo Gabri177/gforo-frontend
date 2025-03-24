@@ -6,8 +6,7 @@ import router from '~/router'
 import { ElMessage } from 'element-plus'
 
 const axio = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  timeout: 5000
+  baseURL: 'http://localhost:8080/api'
 })
 
 let isRefreshing = false

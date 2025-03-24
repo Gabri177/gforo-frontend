@@ -25,8 +25,8 @@
               <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">Basic Information</h3>
               <div class="space-y-4">
                 <div class="flex items-center">
-                  <span class="text-[#8B93B1] w-24">Username:</span>
-                  <span class="text-[#6B7C93]">{{ username }}</span>
+                  <span class="text-[#8B93B1] w-24">UserId:</span>
+                  <span class="text-[#6B7C93]">{{ userId }}</span>
                 </div>
                 <div class="flex items-center">
                   <span class="text-[#8B93B1] w-24">Email:</span>
@@ -35,6 +35,18 @@
                 <div class="flex items-center">
                   <span class="text-[#8B93B1] w-24">Join Date:</span>
                   <span class="text-[#6B7C93]">{{ joinDate }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-[#8B93B1] w-24">Status:</span>
+                  <span class="text-[#6B7C93]">{{ status }}</span>
+                  <el-button 
+                    class="morandi-button-green ml-4" 
+                    @click="handleSendVerifyEmail"
+                    v-show="status != 'Activated'"
+					:loading="sendVerifyEmailLoading"
+                  >
+                    Send Verify Email
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -71,28 +83,112 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '~/stores/user'
+import {
+	sendVerifyEmail
+} from '~/api/registerApi'
 
 const router = useRouter()
+const userStore = useUserStore()
 
-// 模拟数据，实际应该从API获取
-const username = ref('Username')
-const email = ref('user@example.com')
-const bio = ref('This is a bio')
-const userAvatar = ref(null)
-const joinDate = ref('2024-03-20')
+// 使用 store 中的数据
+const userId = ref(userStore.userInfo.id)
+const username = ref(userStore.userInfo.username)
+const email = ref(userStore.userInfo.email)
+const bio = ref(userStore.userInfo.bio || 'No bio yet')
+const userAvatar = ref(userStore.userInfo.headerUrl)
+const joinDate = ref(formatDateToYMD(userStore.userInfo.createdAt))
+const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : 'Inactive')
 const postsCount = ref(0)
 const commentsCount = ref(0)
+const sendVerifyEmailLoading = ref(false)
+window.addEventListener('storage', function (event) {
+	console.log ("storage", event)
+  if (event.key === 'emailVerified' && event.newValue === 'true') {
+	console.log("Email verified")
+	userStore.updateStatus('1')
+    status.value = 'Activated'
+  }
+});
+
+
+// console.log("createdAt", userStore.userInfo.createdAt)
+console.log("userInfo Profile", userStore.userInfo)
+// console.log("joinDate", formatDateToYMD(userStore.userInfo.createdAt))
+
+function formatDateToYMD(dateString) {
+  const parts = dateString.split(" "); // ["Sun", "Mar", "23", "22:48:09", "CET", "2025"]
+
+  const monthMap = {
+    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"
+  };
+
+  const day = parts[2];
+  const month = monthMap[parts[1]];
+  const year = parts[5];
+
+  if (!month) {
+    console.warn("月份无法解析:", parts[1]);
+    return null;
+  }
+
+  return `${year}-${month}-${day.padStart(2, '0')}`;
+}
+
+const handleSendVerifyEmail = () => {
+	console.log("userStore.userInfo", userStore.userInfo)
+	sendVerifyEmailLoading.value = true
+	sendVerifyEmail(userStore.userInfo)
+	.then(res => {
+		ElMessage.success('Verify email sent successfully, please check your email')
+	})
+	.catch(err => {
+		ElMessage.error(err.message)
+	})
+	.finally(() => {
+		sendVerifyEmailLoading.value = false
+	})
+}
+
 
 onMounted(async () => {
   try {
-    // TODO: 获取用户信息
-    // const userInfo = await getUserProfile()
-    // username.value = userInfo.username
-    // ...
+	localStorage.removeItem("emailVerified")
+    // TODO: 获取其他用户信息（如统计数据等）
+    // const stats = await getUserStats()
+    // postsCount.value = stats.posts
+    // commentsCount.value = stats.comments
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
   }
 })
-</script> 
+</script>
+
+<style scoped>
+/* 添加莫兰迪绿色按钮样式 */
+.morandi-button-green {
+  background-color: #83B59D !important;
+  border-color: #83B59D !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.morandi-button-green:hover {
+  background-color: #6FA189 !important;
+  border-color: #6FA189 !important;
+}
+
+.morandi-button-green:active {
+  background-color: #5C8C75 !important;
+  border-color: #5C8C75 !important;
+}
+
+.morandi-button-green:disabled {
+  background-color: #C5D6CE !important;
+  border-color: #C5D6CE !important;
+  cursor: not-allowed;
+}
+</style> 

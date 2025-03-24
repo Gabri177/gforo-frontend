@@ -157,10 +157,15 @@ const onLogin = async () => {
 
     const userInfoRes = await getUserInfo();
 	console.log('userInfoRes', userInfoRes);
+
     userStore.setUserInfo({
-      username: userInfoRes.username,
-      email: userInfoRes.email,
-      headerUrl: userInfoRes.headerUrl,
+		id: userInfoRes.id,
+      	username: userInfoRes.username,
+      	email: userInfoRes.email,
+      	headerUrl: userInfoRes.headerUrl,
+	  	bio: userInfoRes.bio,
+	  	createdAt: userInfoRes.createdAt,
+		status: userInfoRes.status,
     });
 
     ElMessage.success('Login successful');

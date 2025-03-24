@@ -13,6 +13,8 @@
                 :model="profileForm"
                 :rules="profileRules"
                 label-position="top"
+                hide-required-asterisk
+                class="w-full"
               >
                 <!-- 头像Url设置 -->
                 <div class="mb-6">
@@ -54,6 +56,7 @@
                   <el-input 
                     v-model="profileForm.email"
                     class="morandi-input"
+					disabled
                   />
                 </el-form-item>
 
@@ -63,9 +66,27 @@
                     type="textarea"
                     rows="4"
                     class="morandi-input"
+					placeholder="Write something about yourself"
                   />
                 </el-form-item>
               </el-form>
+              <!-- 个人资料的保存按钮 -->
+              <div class="mt-8 flex justify-end space-x-4">
+                <el-button 
+                  class="morandi-button-secondary"
+                  @click="router.back()"
+                >
+                  Cancel
+                </el-button>
+                <el-button 
+                  type="primary"
+                  class="morandi-button"
+                  :loading="loading"
+                  @click="handleProfileSave"
+                >
+                  Save Changes
+                </el-button>
+              </div>
             </el-tab-pane>
 
             <!-- 安全设置 -->
@@ -76,11 +97,12 @@
                 :rules="securityRules"
                 label-position="top"
               >
-                <el-form-item label="Current Password" prop="currentPassword">
+                <el-form-item label="Current Password" prop="oldPassword">
                   <el-input 
-                    v-model="securityForm.currentPassword"
+                    v-model="securityForm.oldPassword"
                     type="password"
                     class="morandi-input"
+					:show-password="true" clearable
                   />
                 </el-form-item>
 
@@ -89,6 +111,7 @@
                     v-model="securityForm.newPassword"
                     type="password"
                     class="morandi-input"
+					:show-password="true" clearable
                   />
                 </el-form-item>
 
@@ -97,29 +120,29 @@
                     v-model="securityForm.confirmPassword"
                     type="password"
                     class="morandi-input"
+					:show-password="true" clearable
                   />
                 </el-form-item>
               </el-form>
+              <!-- 安全设置的按钮 -->
+              <div class="mt-8 flex justify-end space-x-4">
+                <el-button 
+                  class="morandi-button-secondary"
+                  @click="router.back()"
+                >
+                  Cancel
+                </el-button>
+                <el-button 
+                  type="primary"
+                  class="morandi-button"
+                  :loading="securityLoading"
+                  @click="handlePasswordChange"
+                >
+                  Change Password
+                </el-button>
+              </div>
             </el-tab-pane>
           </el-tabs>
-
-          <!-- 保存按钮 -->
-          <div class="mt-8 flex justify-end space-x-4">
-            <el-button 
-              class="morandi-button-secondary"
-              @click="router.back()"
-            >
-              Cancel
-            </el-button>
-            <el-button 
-              type="primary"
-              class="morandi-button"
-              :loading="loading"
-              @click="handleSave"
-            >
-              Save Changes
-            </el-button>
-          </div>
         </div>
       </div>
     </div>
@@ -140,9 +163,15 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
 import AvatarChoose from '~/components/AvatarChoose.vue'
+import {
+	updateUserInfo,
+	changePassword,
+	getUserInfo
+} from '~/api/userApi'
 
 const router = useRouter()
 const loading = ref(false)
+const securityLoading = ref(false)
 const profileFormRef = ref(null)
 const securityFormRef = ref(null)
 const userStore = useUserStore()
@@ -150,12 +179,12 @@ const userStore = useUserStore()
 const profileForm = reactive({
   username: userStore.userInfo.username,
   email: userStore.userInfo.email,
-  bio: '',
+  bio: userStore.userInfo.bio,
   headerUrl: userStore.userInfo.headerUrl
 })
 
 const securityForm = reactive({
-  currentPassword: '',
+  oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
@@ -176,8 +205,9 @@ const profileRules = {
 }
 
 const securityRules = {
-  currentPassword: [
-    { required: true, message: 'Please enter current password', trigger: 'blur' }
+  oldPassword: [
+    { required: true, message: 'Please enter current password', trigger: 'blur' },
+	{ min: 6, message: 'Length should be at least 6 characters', trigger: 'blur' }
   ],
   newPassword: [
     { required: true, message: 'Please enter new password', trigger: 'blur' },
@@ -199,32 +229,59 @@ const securityRules = {
 }
 
 const handleAvatarSelect = async (url) => {
-  try {
     // TODO: 调用API更新头像
     // userStore.updateAvatar(url)
     profileForm.headerUrl = url
-    ElMessage.success('Avatar updated successfully')
-  } catch (error) {
-    ElMessage.error('Failed to update avatar')
-  }
+
 }
 
-const handleSave = async () => {
+// 处理个人资料保存
+const handleProfileSave = async () => {
   loading.value = true
   try {
-    // TODO: 保存设置
-    await Promise.all([
-      profileFormRef.value?.validate(),
-      securityFormRef.value?.validate()
-    ])
-    ElMessage.success('Settings saved successfully')
-    router.push('/profile')
+    await profileFormRef.value?.validate()
+    await updateUserInfo(profileForm)
+	const userInfoRes = await getUserInfo()
+	console.log("new user info: ", userInfoRes)
+	userStore.setUserInfo({
+		id: userInfoRes.id,
+      	username: userInfoRes.username,
+      	email: userInfoRes.email,
+      	headerUrl: userInfoRes.headerUrl,
+	  	bio: userInfoRes.bio,
+	  	createdAt: userInfoRes.createdAt,
+		status: userInfoRes.status,
+	})
+    ElMessage.success('Profile updated successfully')
+    // router.push('/profile')
   } catch (error) {
-    console.error('Failed to save settings:', error)
-    ElMessage.error('Failed to save settings')
+    console.error('Failed to save profile:', error)
+    ElMessage.error(error.message || 'Failed to save profile')
+	profileFormRef.value?.resetFields()
   } finally {
     loading.value = false
   }
+}
+
+// 处理密码更改
+const handlePasswordChange = async () => {
+  securityLoading.value = true
+  try {
+    await securityFormRef.value?.validate()
+	await changePassword(securityForm)
+	ElMessage.success('Password changed successfully')
+    resetSecurityForm()
+  } catch (error) {
+    console.error('Failed to change password:', error)
+    ElMessage.error(error.message || 'Failed to change password')
+  } finally {
+    securityLoading.value = false
+  }
+}
+
+// 重置安全设置表单
+const resetSecurityForm = () => {
+  securityFormRef.value?.resetFields()
 }
 
 const previewCustomUrl = () => {
@@ -306,5 +363,105 @@ const previewCustomUrl = () => {
 :deep(.el-input-group__append:hover) {
   background-color: #F1F5F9 !important;
   border-color: #8B93B1 !important;
+}
+
+/* 隐藏表单项的必填星号 */
+:deep(.el-form-item__label::before) {
+  display: none !important;
+}
+
+/* 修改 textarea 的莫兰迪风格 */
+.morandi-input :deep(.el-textarea__inner) {
+  background-color: #F8FAFC !important;
+  border: 1px solid #A1A8C1 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+  padding: 12px !important;
+  color: #6B7C93 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  resize: vertical !important;
+  min-height: 120px !important;
+}
+
+.morandi-input :deep(.el-textarea__inner:hover) {
+  border-color: #8B93B1 !important;
+  background-color: #F1F5F9 !important;
+}
+
+.morandi-input :deep(.el-textarea__inner:focus) {
+  border-color: #A1A8C1 !important;
+  box-shadow: 0 0 0 1px #A1A8C1 !important;
+  outline: none !important;
+}
+
+/* 修改 textarea 的占位符颜色 */
+.morandi-input :deep(.el-textarea__inner::placeholder) {
+  color: #B8C2CC !important;
+}
+
+/* 调整表单宽度和边距 */
+:deep(.el-form) {
+  max-width: 600px !important; /* 或者其他合适的宽度 */
+  margin: 0 auto !important;
+}
+
+/* 表单验证提示的莫兰迪风格 */
+:deep(.el-form-item__error) {
+  color: #C4A0A0 !important; /* 更柔和的莫兰迪红色 */
+  font-size: 12px !important;
+  padding-top: 4px !important;
+  font-weight: 500 !important;
+}
+
+/* 输入框错误状态的莫兰迪风格 */
+.morandi-input :deep(.el-input__wrapper.is-error) {
+  border-color: #C4A0A0 !important;
+  background-color: #FAF6F6 !important;
+}
+
+.morandi-input :deep(.el-input__wrapper.is-error:hover) {
+  border-color: #B39292 !important;
+}
+
+.morandi-input :deep(.el-input__wrapper.is-error.is-focus) {
+  border-color: #C4A0A0 !important;
+  box-shadow: 0 0 0 1px #C4A0A0 !important;
+}
+
+/* 密码输入框错误状态的特殊处理 */
+.morandi-input :deep(.el-input__wrapper.is-error .el-input__suffix) {
+  color: #C4A0A0 !important;
+}
+
+/* 表单项验证失败时的过渡效果 */
+:deep(.el-form-item.is-error) {
+  transition: all 0.3s ease !important;
+}
+
+/* 表单标签的莫兰迪风格 */
+:deep(.el-form-item__label) {
+  color: #8B93B1 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding-bottom: 8px !important;
+  line-height: 1.4 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* 表单项获得焦点时标签样式 */
+:deep(.el-form-item.is-required:focus-within .el-form-item__label) {
+  color: #6B7C93 !important;
+}
+
+/* 错误状态下的标签样式 */
+:deep(.el-form-item.is-error .el-form-item__label) {
+  color: #C4A0A0 !important;
+}
+
+/* 表单项的间距 */
+:deep(.el-form-item) {
+  margin-bottom: 24px !important;
 }
 </style> 

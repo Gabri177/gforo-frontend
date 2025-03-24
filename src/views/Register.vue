@@ -68,7 +68,7 @@
 
 				<div>
 					<el-button type="primary" class="morandi-button mx-10" @click="onCancel">Home</el-button>
-					<el-button type="success" class="morandi-button2 mx-10" @click="goLogin" v-if="isActivated">Login</el-button>
+					<!-- <el-button type="success" class="morandi-button2 mx-10" @click="goLogin" v-if="isActivated">Login</el-button> -->
 				</div>
 			</div>
 		</div>
@@ -87,7 +87,8 @@ import { reactive, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
 	registerUser,
-	verifyEmail
+	verifyEmail,
+	sendVerifyEmail
 } from '~/api/registerApi'
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
@@ -98,7 +99,9 @@ import {
 	verifyCaptcha
 } from '~/api/captchaApi';
 import AvatarChoose from '~/components/AvatarChoose.vue'
+import { useUserStore } from '~/stores/user'
 
+const userStore = useUserStore()
 const captchaImg = ref(null); // 图形验证码
 const captchaId = ref('');  // 图形验证码ID
 const captchaInput = ref(''); // 图形验证码输入
@@ -113,31 +116,6 @@ const verifyInfo = reactive({
 const token = route.params.token
 const userId = route.params.userId
 
-if (token && userId) {
-	isRegister.value = false;
-	console.log('收到 token:', token);
-	verifyEmail(userId, token)
-		.then(res => {
-			verifyInfo.title = 'Account Activated';
-			verifyInfo.content = 'Your account has been activated successfully, please login';
-			isActivated.value = true;
-			console.log('激活成功: ', res);
-		})
-		.catch(err => {
-			verifyInfo.title = 'Account Activation Failed';
-			verifyInfo.content = 'Verification failed: ' + err.message;
-			isActivated.value = false;
-			console.log('激活失败');
-		})
-		.finally(() => {
-			isVerifying.value = false;
-		});
-	// 这里可以调用接口校验 token
-} else {
-	isRegister.value = true;
-	console.log('没有 token');
-
-}
 
 const registerLoading = ref(false);
 const formRef = ref(null);
@@ -214,7 +192,7 @@ const onSubmit = () => {
 			.then(res => {
 				registerUser(form)
 				.then(res => {
-					ElMessage.success('Please check your email to activate your account');
+					ElMessage.success('Remember to activate your account in Profile');
 					registerLoading.value = false;
 
 					/*
@@ -222,7 +200,7 @@ const onSubmit = () => {
 						这里可以加上自动登录的逻辑
 					 */
 					setTimeout(() => {
-						router.push('/'); // 跳转到首页
+						router.push('/login'); // 跳转到首页
 					}, 2000);
 				})
 				.catch(err => {
@@ -259,6 +237,31 @@ const showAvatarDialog = ref(false);
 // 图形验证码 
 // 在组件挂载后初始化
 onMounted(() => {
+
+	if (token && userId) {
+	isRegister.value = false;
+	console.log('收到 token:', token);
+	verifyEmail(userId, token)
+		.then(res => {
+			verifyInfo.title = 'Account Activated';
+			verifyInfo.content = 'Your account has been activated successfully!';
+			isActivated.value = true;
+			localStorage.setItem('emailVerified', 'true');
+			console.log('激活成功: ', res);
+		})
+		.catch(err => {
+			verifyInfo.title = 'Account Activation Failed';
+			verifyInfo.content = 'Verification failed: ' + err.message;
+			isActivated.value = false;
+			console.log('激活失败');
+		})
+		.finally(() => {
+			isVerifying.value = false;
+		});
+	// 这里可以调用接口校验 token
+} else {
+	isRegister.value = true;
+	console.log('没有 token');
 	getCaptcha()
 		.then(res => {
 			captchaImg.value.src = res.captchaBase64;
@@ -267,6 +270,8 @@ onMounted(() => {
 		.catch(err => {
 			console.error(err);
 		});
+}
+	
 });
 
 const changeCaptcha = () => {
