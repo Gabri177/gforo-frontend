@@ -1,5 +1,5 @@
 <template>
-	<el-header class="bg-[#E3E0DB] border-b border-[#C1B8A8] fixed top-0 left-0 right-0 z-50">
+	<el-header class="backdrop-blur-md bg-[#E3E0DB]/50 border-b border-[#C1B8A8] fixed top-0 left-0 right-0 z-50">
 		<div class="container mx-auto px-4 h-full flex items-center justify-between">
 			<!-- 左侧导航 -->
 			<div class="flex items-center">

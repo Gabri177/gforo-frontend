@@ -1,5 +1,5 @@
 <template>
-	<el-main class="flex justify-center items-center bg-[#E3E0DB] min-h-[calc(100vh-60px)">
+	<el-main class="flex justify-center items-center bg-[#E3E0DB] min-h-[calc(100vh-120px) mt-[60px]">
 		<div class="w-full h-full flex justify-center items-center">
 			<div class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
 				<h2 class="mt-4 text-center text-4xl font-extrabold text-[#6B7C93] mb-6">
