@@ -235,6 +235,7 @@ const handleAvatarSelect = async (url) => {
     // TODO: 调用API更新头像
     // userStore.updateAvatar(url)
     profileForm.headerUrl = url
+	customUrl.value = url
 
 }
 

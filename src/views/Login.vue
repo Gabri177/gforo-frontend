@@ -156,17 +156,8 @@ const onLogin = async () => {
     if (loginRes.refresh_token) setRefreshToken(loginRes.refresh_token);
 
     const userInfoRes = await getUserInfo();
-	console.log('userInfoRes', userInfoRes);
 
-    userStore.setUserInfo({
-		id: userInfoRes.id,
-      	username: userInfoRes.username,
-      	email: userInfoRes.email,
-      	headerUrl: userInfoRes.headerUrl,
-	  	bio: userInfoRes.bio,
-	  	createdAt: userInfoRes.createdAt,
-		status: userInfoRes.status,
-    });
+    userStore.setUserInfo(userInfoRes);
 
     ElMessage.success('Login successful');
     router.push('/');

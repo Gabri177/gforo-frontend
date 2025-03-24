@@ -29,6 +29,7 @@ export const useUserStore = defineStore('user', () => {
             createdAt: info.createdAt || '',
             status: info.status || ''
         };
+        console.log("userInfo store", userInfo.value)
         isLoggedInState.value = true;
         // 保存到 localStorage
         localStorage.setItem('userInfo', JSON.stringify(userInfo.value));

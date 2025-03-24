@@ -43,10 +43,14 @@
                     class="morandi-button-green ml-4" 
                     @click="handleSendVerifyEmail"
                     v-show="status != 'Activated'"
-					:loading="sendVerifyEmailLoading"
+                    :loading="sendVerifyEmailLoading"
+                    :disabled="isButtonDisabled"
                   >
                     Send Verify Email
                   </el-button>
+                  <span v-if="countdown > 0 && status != 'Activated'" class="ml-2 text-[#8B93B1]">
+                    ({{ formatCountdown }})
+                  </span>
                 </div>
               </div>
             </div>
@@ -83,12 +87,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
 import {
 	sendVerifyEmail
 } from '~/api/registerApi'
+import {
+	getUserInfo
+} from '~/api/userApi'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -104,19 +111,25 @@ const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : '
 const postsCount = ref(0)
 const commentsCount = ref(0)
 const sendVerifyEmailLoading = ref(false)
+const countdown = ref(0)
+const isButtonDisabled = ref(false)
+let countdownTimer = null
+
 window.addEventListener('storage', function (event) {
 	console.log ("storage", event)
   if (event.key === 'emailVerified' && event.newValue === 'true') {
 	console.log("Email verified")
 	userStore.updateStatus('1')
     status.value = 'Activated'
+	localStorage.removeItem('verifyEmailDisabledUntil')
+	countdown.value = 0
+	if (countdownTimer) {
+		clearInterval(countdownTimer)
+	}
   }
 });
 
-
-// console.log("createdAt", userStore.userInfo.createdAt)
 console.log("userInfo Profile", userStore.userInfo)
-// console.log("joinDate", formatDateToYMD(userStore.userInfo.createdAt))
 
 function formatDateToYMD(dateString) {
   const parts = dateString.split(" "); // ["Sun", "Mar", "23", "22:48:09", "CET", "2025"]
@@ -138,32 +151,97 @@ function formatDateToYMD(dateString) {
   return `${year}-${month}-${day.padStart(2, '0')}`;
 }
 
-const handleSendVerifyEmail = () => {
-	console.log("userStore.userInfo", userStore.userInfo)
-	sendVerifyEmailLoading.value = true
-	sendVerifyEmail(userStore.userInfo)
-	.then(res => {
-		ElMessage.success('Verify email sent successfully, please check your email')
-	})
-	.catch(err => {
-		ElMessage.error(err.message)
-	})
-	.finally(() => {
-		sendVerifyEmailLoading.value = false
-	})
+// 格式化倒计时显示
+const formatCountdown = computed(() => {
+  const minutes = Math.floor(countdown.value / 60)
+  const seconds = countdown.value % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+})
+
+const startCountdown = (initialValue = 60) => {
+  countdown.value = initialValue
+  isButtonDisabled.value = true
+
+  // 保存禁用截止时间
+  const disabledUntil = Date.now() + initialValue * 1000
+  localStorage.setItem('verifyEmailDisabledUntil', disabledUntil.toString())
+
+  countdownTimer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(countdownTimer)
+      isButtonDisabled.value = false
+      localStorage.removeItem('verifyEmailDisabledUntil')
+    }
+  }, 1000)
 }
+
+// 检查是否应该继续倒计时
+const checkDisabledStatus = () => {
+  const disabledUntil = localStorage.getItem('verifyEmailDisabledUntil')
+  if (disabledUntil) {
+    const remainingTime = Math.floor((parseInt(disabledUntil) - Date.now()) / 1000)
+    if (remainingTime > 0) {
+      startCountdown(remainingTime)
+    } else {
+      localStorage.removeItem('verifyEmailDisabledUntil')
+    }
+  }
+}
+
+
+const handleSendVerifyEmail = () => {
+    console.log("userStore.userInfo", userStore.userInfo)
+    sendVerifyEmailLoading.value = true
+    sendVerifyEmail(userStore.userInfo)
+    .then(res => {
+        ElMessage.success('Verify email sent successfully, please check your email')
+		startCountdown()
+    })
+    .catch(err => {
+        ElMessage.error(err.message || 'Failed to send verification email')
+    })
+    .finally(() => {
+        sendVerifyEmailLoading.value = false
+    })
+}
+
 
 
 onMounted(async () => {
   try {
 	localStorage.removeItem("emailVerified")
+	const countdownValue = localStorage.getItem("countdownValue")
+	if(countdownValue) {
+		countdown.value = countdownValue
+	}
+
+	const userInfo = await getUserInfo()
+	userStore.setUserInfo({
+		id: userInfo.id,
+		username: userInfo.username,
+		email: userInfo.email,
+		bio: userInfo.bio,
+		headerUrl: userInfo.headerUrl,
+		createdAt: userInfo.createdAt,
+		status: userInfo.status
+	})
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
     // postsCount.value = stats.posts
     // commentsCount.value = stats.comments
+    checkDisabledStatus()
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
   }
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+	if (countdownTimer) {
+		console.log("countdownTimer", countdownTimer)
+		clearInterval(countdownTimer)
+	}
 })
 </script>
 
