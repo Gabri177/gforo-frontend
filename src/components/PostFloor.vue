@@ -1,11 +1,11 @@
 <template>
-    <div class="flex gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div class="flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
         <!-- 左侧用户信息 -->
-        <div class="w-40 flex-shrink-0 flex flex-col items-center justify-center user-info-card">
-            <div class="w-full p-4 rounded-lg backdrop-blur-sm bg-[#F8FAFC]/80 border border-[#E2E8F0] shadow-inner">
+        <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
+            <div class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center border border-[#E2E8F0] shadow">
                 <div class="flex flex-col items-center">
                     <el-avatar :size="50" :src="floor.author.avatar" />
-                    <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-full user-name" :title="floor.author.name">
+                    <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name" :title="floor.author.name">
                         {{ floor.author.name }}
                     </div>
                     <div class="mt-1">
@@ -16,7 +16,8 @@
         </div>
 
         <!-- 右侧内容 -->
-        <div class="flex-grow p-4 rounded-lg bg-[#F8FAFC]/60 backdrop-blur-sm border border-[#E2E8F0]">
+        <div class="flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
+
             <div class="text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
                 <div ref="contentRef" :class="{'content-wrapper': true, 'content-collapsed': !floor.isExpanded && enableContentExpand && shouldShowExpandButton}">
                     <v-md-editor :model-value="floor.content" mode="preview"></v-md-editor>
@@ -29,7 +30,7 @@
             </div>
 
             <!-- 回复列表 -->
-            <div v-if="floor.replies && floor.replies.length > 0" class="mt-4 reply-area">
+            <div v-if="floor.replies && floor.replies.length > 0" class="mt-4 reply-area backdrop-blur-md bg-white/30 border border-[#E2E8F0]">
                 <div class="max-h-[300px] overflow-y-auto">
                     <div v-for="reply in pagedReplies" :key="reply.id" 
                         class="mb-2 pb-2 border-b border-[#E5E7EB] last:border-b-0">
@@ -177,14 +178,15 @@ const shouldShowReplyExpandButton = (content) => {
 <style scoped>
 /* 楼层容器 */
 .floor {
-    background-color: #fff;
+    background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 12px rgba(193, 184, 168, 0.05);
     transition: all 0.3s ease;
 }
 
 .floor:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(193, 184, 168, 0.08);
+    border-color: #C1B8A8;
 }
 
 /* 用户信息区域 */
@@ -403,7 +405,7 @@ const shouldShowReplyExpandButton = (content) => {
 }
 
 :deep(.github-markdown-body) {
-    background-color: #F8FAFC;
+    background-color: #FDFDFD;
 }
 
 .content-wrapper.content-collapsed :deep(.github-markdown-body) {
@@ -435,11 +437,11 @@ const shouldShowReplyExpandButton = (content) => {
 
 /* 回复区域样式 */
 .reply-area {
-    @apply bg-[#F8FAFC]/80 rounded-md p-3 transition-all duration-200;
+    @apply bg-[#FAFAF9]/80 rounded-md p-3 transition-all duration-200;
 }
 
 .reply-area:hover {
-    @apply bg-[#F1F5F9];
+    @apply bg-[#fefffb98];
 }
 
 /* 滚动条样式 */

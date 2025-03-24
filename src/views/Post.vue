@@ -1,7 +1,7 @@
 <template>
-    <div class="mx-auto px-4 py-6 bg-[#E3E0DB]" style="margin-top: 60px;">
+    <div class="mx-auto px-4 py-6 bg-[#E3E0DB] " style="margin-top: 60px;">
         <!-- 标题部分 -->
-        <div class="mb-6 bg-white p-6 rounded-2xl shadow-lg">
+        <div class="mb-6 backdrop-blur-md bg-white/70 p-6 rounded-2xl shadow-lg">
             <h1 class="text-2xl font-bold text-[#4A4A4A]">{{ originalPost.title }}</h1>
             <div class="mt-2 flex items-center gap-4 text-sm text-[#6B7C93]">
                 <span>{{ originalPost.author.name }}</span>
