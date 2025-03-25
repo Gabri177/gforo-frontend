@@ -12,9 +12,26 @@
                 class="w-full h-full object-cover"
               >
             </div>
-            <div class="ml-6 user-info">
+            <div class="ml-6 user-info relative">
               <h2 class="text-2xl font-bold text-[#6B7C93]">{{ username }}</h2>
-              <p class="text-[#8B93B1] mt-2">{{ bio || 'No bio yet' }}</p>
+              <div class="relative group">
+                <p class="text-[#8B93B1] mt-2 truncate max-w-[400px] cursor-pointer">
+                  {{ bio || 'No bio yet' }}
+                </p>
+                <!-- 悬浮卡片 -->
+                <div v-if="bio" 
+                  class="bio-tooltip opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute left-0 top-full mt-2 p-4 rounded-xl backdrop-blur-md bg-white/90 border border-[#E3E0DB] shadow-lg transition-all duration-300 z-10 max-w-[500px] min-w-[300px]"
+                >
+                  <div class="relative">
+                    <!-- 小箭头 -->
+                    <div class="absolute -top-6 left-4 w-3 h-3 rotate-45 bg-white border-l border-t border-[#E3E0DB]"></div>
+                    <!-- bio内容 -->
+                    <p class="text-[#6B7C93] whitespace-pre-wrap break-words leading-relaxed">
+                      {{ bio }}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -467,5 +484,71 @@ onUnmounted(() => {
 
 .stat-item:hover div:nth-child(2) {
   color: #A1A8C1;
+}
+
+.user-info p {
+  @apply transition-all duration-200;
+  line-height: 1.5;
+}
+
+.user-info p:hover {
+  @apply text-[#6B7C93];
+}
+
+.bio-tooltip {
+  transform-origin: top left;
+  animation: tooltipFadeIn 0.3s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 悬浮卡片的阴影和边框效果 */
+.bio-tooltip {
+  box-shadow: 
+    0 4px 6px -1px rgba(193, 184, 168, 0.1),
+    0 2px 4px -1px rgba(193, 184, 168, 0.06);
+}
+
+.bio-tooltip:hover {
+  border-color: #C1B8A8;
+  box-shadow: 
+    0 10px 15px -3px rgba(193, 184, 168, 0.1),
+    0 4px 6px -2px rgba(193, 184, 168, 0.05);
+}
+
+/* 确保悬浮框内容样式 */
+.bio-tooltip p {
+  font-size: 0.95rem;
+  color: #6B7C93;
+}
+
+/* 添加滚动条样式，以防内容过长 */
+.bio-tooltip {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #A1A8C1 transparent;
+}
+
+.bio-tooltip::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bio-tooltip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bio-tooltip::-webkit-scrollbar-thumb {
+  background-color: #A1A8C1;
+  border-radius: 2px;
 }
 </style> 

@@ -49,18 +49,36 @@
 
                 <!-- 基本信息表单 -->
                 <el-form-item label="Username" prop="username">
-                  <el-input 
+                  <div class="w-full flex items-center">
+					<el-input 
                     v-model="profileForm.username"
                     class="morandi-input"
+					:disabled="usernameEditActive"
                   />
+				  <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" 
+				  @click="activeUsernameEdit"
+				  :disabled="!usernameEditActive"
+				  >
+					Modify Username
+					</el-button>
+				  </div>
                 </el-form-item>
 
-                <el-form-item label="Email" prop="email">
-                  <el-input 
+                <el-form-item label="Email ( If you reset the email, you need to verify it again... )" 
+					prop="email">
+                  <div class="w-full flex items-center">
+					<el-input 
                     v-model="profileForm.email"
                     class="morandi-input"
-					
+					:disabled="emailEditActive"
                   />
+				  <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" 
+				  @click="activeEmailEdit"
+				  :disabled="!emailEditActive"
+				  >
+					Modify Email
+				</el-button>
+				  </div>
                 </el-form-item>
 
                 <el-form-item label="Bio" prop="bio">
@@ -69,8 +87,14 @@
                     type="textarea"
                     rows="4"
                     class="morandi-input"
-					placeholder="Write something about yourself"
+                    placeholder="Write something about yourself"
+                    maxlength="500"
                   />
+                  <div class="flex justify-end w-full">
+					<div class="bio-counter pt-1">
+                    {{ profileForm.bio.length }}/500
+                  	</div>
+				  </div>
                 </el-form-item>
               </el-form>
               <!-- 个人资料的保存按钮 -->
@@ -182,6 +206,8 @@ const securityLoading = ref(false)
 const profileFormRef = ref(null)
 const securityFormRef = ref(null)
 const userStore = useUserStore()
+const usernameEditActive = ref(true)
+const emailEditActive = ref(true)
 
 const profileForm = reactive({
   username: userStore.userInfo.username,
@@ -196,6 +222,14 @@ const securityForm = reactive({
   confirmPassword: ''
 })
 
+const activeUsernameEdit = () => {
+	usernameEditActive.value = false
+}
+
+const activeEmailEdit = () => {
+	emailEditActive.value = false
+}
+
 const showAvatarDialog = ref(false)
 const avatarChooseRef = ref(null)
 const customUrl = ref(userStore.userInfo.headerUrl)
@@ -208,6 +242,9 @@ const profileRules = {
   email: [
     { required: true, message: 'Please enter email', trigger: 'blur' },
     { type: 'email', message: 'Please enter valid email', trigger: 'blur' }
+  ],
+  bio: [
+    { max: 500, message: 'Length should be less than 500 characters', trigger: 'blur' }
   ]
 }
 
@@ -260,6 +297,8 @@ const handleProfileSave = async () => {
 	  	createdAt: userInfoRes.createdAt,
 		status: userInfoRes.status,
 	})
+	usernameEditActive.value = true
+	emailEditActive.value = true
     ElMessage.success('Profile updated successfully')
     // router.push('/profile')
   } catch (error) {
@@ -324,17 +363,58 @@ const previewCustomUrl = () => {
   box-shadow: 0 0 0 1px #A1A8C1;
 }
 
+.morandi-green-button {
+  background-color: #7E998F !important;  /* 莫兰迪墨绿 */
+  border-color: #7E998F !important;
+  color: white !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.morandi-green-button:hover {
+  background-color: #6A847B !important;  /* 深一点的墨绿 */
+  border-color: #6A847B !important;
+}
+
+.morandi-green-button:active {
+  background-color: #5B756B !important;
+  border-color: #5B756B !important;
+}
+
+.morandi-green-button:disabled {
+  background-color: #C6D1CB !important;  /* 淡墨绿灰 */
+  border-color: #C6D1CB !important;
+  color: #F1F1F1 !important;
+  cursor: not-allowed;
+}
+
+
+/* 莫兰迪风格按钮样式 */
 /* 莫兰迪风格按钮样式 */
 .morandi-button {
-  background-color: #A1A8C1 !important;
+  background-color: #A1A8C1 !important;  /* 主色：莫兰迪紫蓝 */
   border-color: #A1A8C1 !important;
   color: white !important;
+  transition: all 0.3s ease-in-out;
 }
 
 .morandi-button:hover {
-  background-color: #8B93B1 !important;
+  background-color: #8B93B1 !important;  /* hover 色：稍深一点更有层次 */
   border-color: #8B93B1 !important;
 }
+
+.morandi-button:active {
+  background-color: #7A87A8 !important;  /* active 色：再深一级 */
+  border-color: #7A87A8 !important;
+}
+
+.morandi-button:disabled {
+  background-color: #D1D4DE !important;  /* disabled 色：淡灰紫 */
+  border-color: #D1D4DE !important;
+  color: #F1F1F1 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
 
 .morandi-button-secondary {
   background-color: #F8FAFC !important;
@@ -498,5 +578,13 @@ const previewCustomUrl = () => {
   border-radius: 50%;
   object-fit: cover;
   background: transparent !important;
+}
+
+/* Bio字符计数器样式 */
+.bio-counter {
+  text-align: right;
+  font-size: 0.875rem;
+  color: #8B93B1;
+  margin-top: -8px; /* 调整位置 */
 }
 </style> 
