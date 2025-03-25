@@ -90,11 +90,10 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
+
 import {
+	getUserInfo,
 	sendVerifyEmail
-} from '~/api/registerApi'
-import {
-	getUserInfo
 } from '~/api/userApi'
 
 const router = useRouter()

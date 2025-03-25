@@ -98,7 +98,7 @@ import {
 	forgetPassword,
 	forgetPasswordVerifyCode
 } from '~/api/authApi'
-
+import { SCENE } from '~/constants/scene'
 const router = useRouter()
 const loading = ref(false)
 const verifyCodeDialogRef = ref(null)
@@ -170,7 +170,7 @@ const handleSubmit = async () => {
 			}
 			loading.value = true
 			try {
-				await verifyCaptcha(captchaInput.value, captchaId.value, form.username)
+				await verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.FORGET_PASSWORD)
 				const forgetPasswordRes = await forgetPassword(form)
 				console.log("forgetPasswordRes: " + forgetPasswordRes)
 				

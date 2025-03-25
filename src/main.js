@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import store from './store'
 import 'tailwindcss/tailwind.css'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css' // 更新路径
@@ -31,7 +30,6 @@ app.use(VMdEditor);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 	app.component(key, component)
   }
-app.use(store)
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)

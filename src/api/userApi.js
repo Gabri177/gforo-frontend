@@ -29,5 +29,13 @@ export function updateUserInfo(data) {
 	return axio.put('/user/info', data)
 }
 
+export function verifyEmail(userId,token){
+	return axio.get(`/user/verify-email/${userId}/${token}`)
+}
+
+export function sendVerifyEmail(userinfo){
+	return axio.post('/user/send-verify-email', userinfo)
+}
+
 
 

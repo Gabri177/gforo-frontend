@@ -241,6 +241,7 @@ const initPosts = (originalOrderVal, pageChanged) => {
 	// console.log(page.value);
 	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
 		.then((res) => {
+			console.log('res', res);
 			page.value.current = res.current;
 			// console.log(res);
 			if (res.discussPosts)

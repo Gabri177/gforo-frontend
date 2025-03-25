@@ -73,6 +73,7 @@ import {
 import { useUserStore } from '~/stores/user';
 import { setToken, setRefreshToken } from '~/utils/auth';
 import { getUserInfo } from '~/api/userApi';
+import { SCENE } from '~/constants/scene';
 // import { loginUser } from '../api/loginApi';
 
 const router = useRouter();
@@ -149,7 +150,7 @@ const onLogin = async () => {
 
   loginLoading.value = true;
   try {
-    await verifyCaptcha(captchaInput.value, captchaId.value, form.username);
+    await verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.LOGIN);
 
     const loginRes = await loginUser(form);
     if (loginRes.access_token) setToken(loginRes.access_token);

@@ -59,7 +59,7 @@
                   <el-input 
                     v-model="profileForm.email"
                     class="morandi-input"
-					disabled
+					
                   />
                 </el-form-item>
 
@@ -86,8 +86,12 @@
                   class="morandi-button"
                   :loading="loading"
                   @click="handleProfileSave"
+				  :disabled="(profileForm.username == userStore.userInfo.username && 
+				  		profileForm.bio == userStore.userInfo.bio && 
+						profileForm.headerUrl == userStore.userInfo.headerUrl &&
+						profileForm.email == userStore.userInfo.email) ? true : false"
                 >
-                  Save Changes
+                  {{ profileForm.username == userStore.userInfo.username && profileForm.bio == userStore.userInfo.bio && profileForm.headerUrl == userStore.userInfo.headerUrl && profileForm.email == userStore.userInfo.email ? 'Nothing Changed' : 'Save Changes' }}
                 </el-button>
               </div>
             </el-tab-pane>
@@ -199,7 +203,7 @@ const customUrl = ref(userStore.userInfo.headerUrl)
 const profileRules = {
   username: [
     { required: true, message: 'Please enter username', trigger: 'blur' },
-    { min: 3, message: 'Length should be at least 3 characters', trigger: 'blur' }
+    { min: 6, message: 'Length should be at least 3 characters', trigger: 'blur' }
   ],
   email: [
     { required: true, message: 'Please enter email', trigger: 'blur' },

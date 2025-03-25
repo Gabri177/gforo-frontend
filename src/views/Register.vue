@@ -106,10 +106,12 @@
 import { reactive, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-	registerUser,
-	verifyEmail,
-	sendVerifyEmail
+	registerUser
 } from '~/api/registerApi'
+import {
+	verifyEmail
+} from '~/api/userApi'
+
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { getAvatarsByPage, getTotalPages } from '~/assets/avatars.js'
@@ -120,7 +122,7 @@ import {
 } from '~/api/captchaApi';
 import AvatarChoose from '~/components/AvatarChoose.vue'
 import { useUserStore } from '~/stores/user'
-
+import { SCENE } from '~/constants/scene';
 const userStore = useUserStore()
 const captchaImg = ref(null); // 图形验证码
 const captchaId = ref('');  // 图形验证码ID
@@ -208,7 +210,7 @@ const onSubmit = () => {
 				return;
 			}
 			registerLoading.value = true;
-			verifyCaptcha(captchaInput.value, captchaId.value, form.username)
+			verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.REGISTER)
 			.then(res => {
 				registerUser(form)
 				.then(res => {
@@ -259,38 +261,38 @@ const showAvatarDialog = ref(false);
 onMounted(() => {
 
 	if (token && userId) {
-	isRegister.value = false;
-	console.log('收到 token:', token);
-	verifyEmail(userId, token)
-		.then(res => {
-			verifyInfo.title = 'Account Activated';
-			verifyInfo.content = 'Your account has been activated successfully!';
-			isActivated.value = true;
-			localStorage.setItem('emailVerified', 'true');
-			console.log('激活成功: ', res);
-		})
-		.catch(err => {
-			verifyInfo.title = 'Account Activation Failed';
-			verifyInfo.content = 'Verification failed: ' + err.message;
-			isActivated.value = false;
-			console.log('激活失败');
-		})
-		.finally(() => {
-			isVerifying.value = false;
-		});
-	// 这里可以调用接口校验 token
-} else {
-	isRegister.value = true;
-	console.log('没有 token');
-	getCaptcha()
-		.then(res => {
-			captchaImg.value.src = res.captchaBase64;
-			captchaId.value = res.captchaId;
-		})
-		.catch(err => {
-			console.error(err);
-		});
-}
+		isRegister.value = false;
+		console.log('收到 token:', token);
+		verifyEmail(userId, token)
+			.then(res => {
+				verifyInfo.title = 'Account Activated';
+				verifyInfo.content = 'Your account has been activated successfully!';
+				isActivated.value = true;
+				localStorage.setItem('emailVerified', 'true');
+				console.log('激活成功: ', res);
+			})
+			.catch(err => {
+				verifyInfo.title = 'Account Activation Failed';
+				verifyInfo.content = 'Verification failed: ' + err.message;
+				isActivated.value = false;
+				console.log('激活失败');
+			})
+			.finally(() => {
+				isVerifying.value = false;
+			});
+		// 这里可以调用接口校验 token
+	} else {
+		isRegister.value = true;
+		console.log('没有 token');
+		getCaptcha()
+			.then(res => {
+				captchaImg.value.src = res.captchaBase64;
+				captchaId.value = res.captchaId;
+			})
+			.catch(err => {
+				console.error(err);
+			});
+	}
 	
 });
 
