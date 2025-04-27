@@ -8,7 +8,7 @@
 				</router-link>
 				<nav class="ml-8 flex space-x-6">
 					<router-link v-for="item in navItems" :key="item.path" 
-						:to="item.path"
+						:to="item.path || route.path"
 						class="nav-link">
 						{{ item.name }}
 					</router-link>
@@ -73,19 +73,23 @@ const searchQuery = ref('');
 
 // 根据登录状态显示不同的导航项
 const navItems = computed(() => {
-	if (userStore.isLoggedInState) {
-		return [
-			{ name: 'Home', path: '/' },
-			{ name: 'Message', path: '/message' },
-			{ name: 'Post', path: '/post' }
-		];
-	} else {
-		return [
-			{ name: 'Home', path: '/' },
-			{ name: 'Message', path: '/message' },
-			{ name: 'Post', path: '/post' }
-		];
-	}
+	const items = [
+		{ name: 'Home', path: '/' },
+		{ name: 'Message', path: '/message' },
+	];
+
+	if (route.path.startsWith('/post'))
+		items.push({ name: 'Post'});
+	if (route.path.startsWith('/profile'))
+		items.push({ name: 'Profile'});
+	if (route.path.startsWith('/settings'))
+		items.push({ name: 'Settings'});
+	if (route.path.startsWith('/register'))
+		items.push({ name: 'Register'});
+	if (route.path.startsWith('/forget-password'))
+		items.push({ name: 'Forget Password'});
+
+	return items;
 });
 
 const handleLogout = () => {

@@ -1,70 +1,42 @@
 <template>
-    <div class="mx-auto px-4 py-6 bg-[#E3E0DB] " style="margin-top: 60px;">
+    <div class="px-4 py-6 bg-[#E3E0DB] " style="margin-top: 60px;">
         <!-- 标题部分 -->
         <div class="mb-6 backdrop-blur-md bg-white/70 p-6 rounded-2xl shadow-lg">
-            <h1 class="text-2xl font-bold text-[#4A4A4A]">{{ originalPost.title }}</h1>
+            <h1 class="text-2xl font-bold text-[#4A4A4A]">{{ originalPost?.title }}</h1>
             <div class="mt-2 flex items-center gap-4 text-sm text-[#6B7C93]">
-                <span>{{ originalPost.author.name }}</span>
-                <span>{{ originalPost.createdAt }}</span>
-                <span>{{ originalPost.ipLocation }}</span>
+                <span>{{ originalPost?.author.name }}</span>
+                <span>{{ formatDate(originalPost?.createTime) }}</span>
             </div>
         </div>
 
         <!-- 楼主帖子 -->
-        <PostFloor 
-            :floor="originalPost"
-            :reply-page-size="replyPageSize"
-            :enable-content-expand="true"
-            :enable-replies-expand="true"
-            :enableContentExpand="false"
-            @reply="handleReply"
-        />
+        <PostFloor :id="'comment-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost" :floorNum="1"
+            :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
+            :enableContentExpand="false" @reply="handleReplyPost" />
 
         <!-- 评论列表 -->
         <div class="mt-6 space-y-4">
-            <PostFloor 
-                v-for="comment in pagedComments" 
-                :key="comment.id"
-                :floor="comment"
-                :reply-page-size="replyPageSize"
-                :enable-content-expand="true"
-                :enable-replies-expand="true"
-                @reply="handleReply"
-            />
+            <PostFloor v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
+                :floorNum="index + 2 + (currentPage - 1) * pageSize" :floor="comment" :reply-page-size="replyPageSize"
+                :enable-content-expand="true" :enable-replies-expand="true" @reply="handleReply" ref="floorRefs" />
         </div>
 
         <!-- 评论分页 -->
         <div class="mt-6 flex justify-center bg-white p-4 rounded-2xl shadow-lg">
-            <el-pagination
-                v-model:current-page="currentPage"
-                :page-size="pageSize"
-                :total="comments.length"
-                layout="prev, pager, next"
-                background
-            />
+            <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="totalRows"
+                layout="prev, pager, next" @current-change="handleChangePage" background />
         </div>
 
         <!-- 回复对话框 -->
-        <el-dialog
-            v-model="dialogVisible"
-            title="Reply"
-            width="500px"
-            :close-on-click-modal="false"
-            custom-class="morandi-dialog"
-        >
+        <el-dialog v-model="dialogVisible" title="Reply" width="500px" :close-on-click-modal="false"
+            custom-class="morandi-dialog">
             <div class="reply-dialog-content">
                 <div class="reply-info mb-4">
                     <span class="text-[#6B7C93]">Reply to: &nbsp;</span>
                     <span class="text-[#4A4A4A] font-medium">{{ currentReplyTo }}</span>
                 </div>
-                <el-input
-                    v-model="newComment"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="Please input your reply..."
-                    resize="none"
-                    class="reply-textarea"
-                />
+                <el-input v-model="newComment" type="textarea" :rows="4" placeholder="Please input your reply..."
+                    resize="none" class="reply-textarea" />
             </div>
             <template #footer>
                 <span class="dialog-footer">
@@ -76,32 +48,40 @@
     </div>
 
     <!-- 固定 Post -->
-	<div class="fixed bottom-10 right-10 z-50">
+    <div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
         <div class="flex flex-col gap-4">
             <div>
                 <LikePost @like="likePostClicked" />
             </div>
             <div>
-                <AddPost  @add="addReplyPostClicked" :isFilled="isLikePostFilled" />
+                <AddPost @add="addReplyPostClicked" :isFilled="isLikePostFilled" />
+            </div>
+            <div>
+                <ReturnHome @return="handleReturn"/>
             </div>
         </div>
-	</div>
+    </div>
 
-	<NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" 
-    :confirmButton="false" @publish="publishReplyPost" title="Reply Post" 
-    :needReplyTitle="false" />
+    <NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" :confirmButton="false" @publish="publishReplyPost"
+        title="Reply Post" :needReplyTitle="false" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, reactive, nextTick } from 'vue'
 import PostFloor from '~/components/PostFloor.vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
 import AddPost from '~/components/AddPost.vue';
 import NewPost from '~/tools/NewPost.vue';
+import ReturnHome from '~/components/ReturnHome.vue';
 import LikePost from '~/components/LikePost.vue';
+import { getPostByPage } from '../api/postAPI';
+import { addCommentToPost, addCommentToComment } from '../api/commentAPI';
+import { useRoute, useRouter } from 'vue-router';
 
-
+// 滚动相关
+const scrollTargetCommentId = ref(null)
+const originalPostRef = ref(null)
 
 // 分页相关
 const currentPage = ref(1)
@@ -112,142 +92,150 @@ const replyPageSize = ref(10)
 const expandedComments = ref(new Set())
 
 // 回复相关的状态
+const floorRefs = ref([])
 const dialogVisible = ref(false)
 const newComment = ref('')
 const currentReplyTo = ref(null)
 const replyToReply = ref(null)
 const isReplyPostVisible = ref(false)
+const originalPost = ref(null)
+const comments = ref([])
+const totalRows = ref(0)
+const newPostRef = ref(null)
+const entityType = ref(1)
+const isOperationPost = ref(false)
+const commentToPost = reactive({
+    entityId: 0,
+    content: ''
+})
+// route
+const route = useRoute()
+const router = useRouter()
+const postId = ref(route.params.postId)
+console.log("postId", route.params.postId)
 
-// 原始推文数据
-const originalPost = ref({
-    id: 1,
-    title: '比赛结束 我宣布lz获胜',
-    author: {
-        name: '巫戈水',
-        avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-    },
-    content: '比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜',
-    createdAt: '2024-03-20 10:00:00',
-    ipLocation: '北京',
-    device: 'Android',
-    floor: 1,
-    isExpanded: false,
-	createTime: '2024-03-20 10:00:00',
-    replies: [
-        {
-            id: 101,
-            author: {
-                name: '螺旋式大王二世',
-                avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-            },
-            content: '宇宙',
-            createTime: '2024-03-20 10:01:00',
-            ipLocation: '上海',
-            isExpanded: false
-        },
-        {
-            id: 102,
-            author: {
-                name: '左介优林',
-                avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-            },
-            content: '智齿梗',
-            createTime: '2024-03-20 10:02:00',
-            ipLocation: '浙江',
-            isExpanded: false
-        }
-    ]
+const handleReturn = () => {
+    router.back()
+}
+
+// store
+const userStore = useUserStore()
+
+const preCommentToComment = reactive({
+    entityType: 1,
+    entityId: 0,
+    targetUserId: 0,
+    content: ''
 })
 
-// 评论数据
-const comments = ref([
-    {
-        id: 2,
-        author: {
-            name: '螺旋式大王二世',
-            avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-        },
-        content: '宇宙比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜',
-        createdAt: '2024-03-20 10:01:00',
-        ipLocation: '上海',
-        device: 'Windows',
-        floor: 2,
-        isExpanded: false,
-		createTime: '2024-03-20 10:01:00',
-        replies: [
-            {
-                id: 201,
-                author: {
-                    name: '巫戈水',
-                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-                },
-                content: '宇宙比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜',
-                createTime: '2024-03-20 10:02:00',
-                ipLocation: '北京',
-                isExpanded: false
-            },
-            {
-                id: 202,
-                author: {
-                    name: '左介优林',
-                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-                },
-                content: '智齿梗',
-                createTime: '2024-03-20 10:03:00',
-                ipLocation: '浙江',
-                isExpanded: false
-            }
-        ]
-    },
-	{
-        id: 2,
-        author: {
-            name: '螺旋式大王二世',
-            avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-        },
-        content: '# title\n宇宙比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜',
-        createdAt: '2024-03-20 10:01:00',
-        ipLocation: '上海',
-        device: 'Windows',
-        floor: 2,
-        isExpanded: false,
-		createTime: '2024-03-20 10:01:00',
-        replies: [
-            {
-                id: 201,
-                author: {
-                    name: '巫戈水',
-                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-                },
-                content: '宇宙比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜比赛结束 我宣布lz获胜',
-                createTime: '2024-03-20 10:02:00',
-                ipLocation: '北京',
-                isExpanded: false
-            },
-            {
-                id: 202,
-                author: {
-                    name: '左介优林',
-                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-                },
-                content: '智齿梗',
-                createTime: '2024-03-20 10:03:00',
-                ipLocation: '浙江',
-                isExpanded: false
-            }
-        ]
-    }
-])
+const commentToComment = reactive({
+    entityType: 2,
+    entityId: 0,
+    targetUserId: 0,
+    content: ''
+})
+
+const clearCommentToComment = () => {
+    commentToComment.entityId = 0
+    commentToComment.targetUserId = 0
+    commentToComment.content = ''
+    preCommentToComment.entityId = 0
+    preCommentToComment.targetUserId = 0
+    preCommentToComment.content = ''
+}
+
+
+const handleChangePage = (newPage) => {
+    // console.log('newPage', newPage);
+    initPosts(newPage);
+    window.scrollTo(0, 0);
+};
+
+const initPosts = (page) => {
+    console.log("initPosts", postId.value, page)
+    getPostByPage(postId.value, page)
+        .then(res => {
+            console.log(res)
+            console.log(res.originalPost)
+            originalPost.value = res.originalPost
+            comments.value = res.replies || []
+            currentPage.value = res.currentPage
+            pageSize.value = 10
+            totalRows.value = res.totalRows
+
+        })
+        .catch(err => {
+            console.log("post not found")
+        })
+}
+
+onMounted(() => {
+    console.log("onMounted post page")
+    initPosts(1)
+})
 
 // 是否点赞
 const isLikePostFilled = ref(false)
 
 
 const addReplyPostClicked = () => {
+    console.log("addReplyPostClicked")
     isReplyPostVisible.value = true
 }
 
+const formatDate = (isoString) => {
+    if (!isoString) return ''
+    const date = new Date(isoString)
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+
 const publishReplyPost = () => {
+    console.log("publishReplyPost")
+    console.log(newPostRef.value.getContent())
+    const content = newPostRef.value.getContent().content
+    if (content == "") {
+        ElMessage.warning('请输入回复内容')
+        return
+    }
+    commentToPost.content = content
+    commentToPost.entityId = postId
+    addCommentToPost(commentToPost.entityId,
+        commentToPost.content
+    )
+        .then(res => {
+            console.log(res)
+            ElMessage.success('回复成功')
+
+            const newTotalRows = totalRows.value + 1
+            const newPage = Math.ceil(newTotalRows / pageSize.value)
+            initPosts(newPage)
+
+            nextTick(() => {
+                setTimeout(() => {
+                    const commentElements = document.querySelectorAll('[id^="comment-"]')
+                    if (commentElements.length > 0) {
+                        const lastComment = commentElements[commentElements.length - 1]
+                        lastComment.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                }, 300) // 稍微等一会，保证列表渲染出来
+            })
+
+        })
+        .catch(err => {
+            console.log(err)
+            ElMessage.error('回复失败')
+        })
+        .finally(() => {
+            newPostRef.value.clearForm()
+        })
+
     isReplyPostVisible.value = false
 }
 
@@ -259,18 +247,49 @@ const likePostClicked = () => {
 
 // 计算当前页的评论
 const pagedComments = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value
-    return comments.value.slice(start, start + pageSize.value)
+    return comments.value;
 })
 
-// 处理回复
-const handleReply = (floor, reply) => {
-    if (reply == undefined){
+
+const handleReplyPost = (floor, reply) => {
+
+    console.log ("postId", postId.value)
+    console.log("floorId", floor.id)
+    console.log("handleReplyPost")
+    isOperationPost.value = true
+    if (reply == undefined) {
+        console.log("具体楼层 帖子的楼层的评论")
+        console.log("floor", floor)
         currentReplyTo.value = floor.author.name
     }
     else {
+        console.log("具体评论 帖子评论的评论")
+        console.log("reply", reply)
         currentReplyTo.value = reply.author.name
+        preCommentToComment.targetUserId = reply.author.id
     }
+    preCommentToComment.entityId = floor.id
+    dialogVisible.value = true
+}
+
+// 处理回复
+const handleReply = (floor, reply) => {
+
+    scrollTargetCommentId.value = floor.id
+    isOperationPost.value = false
+    if (reply == undefined) {
+        console.log("具体楼层 帖子的楼层的评论")
+        console.log("floor", floor)
+        currentReplyTo.value = floor.author.name
+    }
+    else {
+        console.log("具体评论 帖子评论的评论")
+        console.log("reply", reply)
+        currentReplyTo.value = reply.author.name
+        commentToComment.targetUserId = reply.author.id
+    }
+    commentToComment.entityId = floor.id
+
     dialogVisible.value = true
 }
 
@@ -280,33 +299,73 @@ const submitReply = () => {
         ElMessage.warning('请输入回复内容')
         return
     }
+    commentToComment.content = newComment.value
+    preCommentToComment.content = newComment.value
 
-    const newReply = {
-        id: Date.now(),
-        author: {
-            name: '当前用户',
-            avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-        },
-        content: newComment.value,
-        createTime: new Date().toLocaleString(),
-        ipLocation: '未知',
-        isExpanded: false
-    }
+    const action = isOperationPost.value
+        ? addCommentToComment(preCommentToComment.entityType,
+            preCommentToComment.entityId,
+            preCommentToComment.targetUserId,
+            preCommentToComment.content)
+        : addCommentToComment(commentToComment.entityType,
+            commentToComment.entityId,
+            commentToComment.targetUserId,
+            commentToComment.content)
 
-    if (replyToReply.value) {
-        // 回复评论的回复
-        // currentReplyTo.value.replies.push(newReply)
-        console.log("currentReplyTo", currentReplyTo.value)
-    } else {
-        // 回复楼层
-        // currentReplyTo.value.replies.push(newReply)
-        console.log("currentReplyTo", currentReplyTo.value)
-    }
+    action.then(res => {
+        console.log(res)
+        ElMessage.success('回复成功')
+        dialogVisible.value = false
 
-    newComment.value = ''
-    dialogVisible.value = false
-    ElMessage.success('回复成功')
+        // 👇刷新当前页，不跳页
+        initPosts(currentPage.value)
+
+
+        nextTick(() => {
+            setTimeout(() => {
+                if (scrollTargetCommentId.value) {
+                    const el = document.getElementById('comment-' + scrollTargetCommentId.value)
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                }
+            }, 300)
+        })
+        if (isOperationPost.value) {
+            scrollTargetCommentId.value = postId.value
+            nextTick(() => {
+                setTimeout(() => {
+                    originalPostRef.value.scrollToLastReply()
+                }, 300)
+            })
+        }
+        if (!isOperationPost.value) {
+            console.log("comment to comment")
+            nextTick(() => {
+                setTimeout(() => {
+                    let targetRef = floorRefs.value.find(refEl => refEl?.floorId === scrollTargetCommentId.value)
+                    if (targetRef) {
+                        targetRef.scrollToLastReply()
+                    } else {
+                        console.warn('找不到对应楼层')
+                    }
+
+                }, 300)
+            })
+
+        }
+
+
+    }).catch(err => {
+        console.log(err)
+        ElMessage.error('回复失败')
+    }).finally(() => {
+        newComment.value = ''
+        dialogVisible.value = false
+        clearCommentToComment()
+    })
 }
+
 </script>
 
 <style scoped>
@@ -449,4 +508,4 @@ const submitReply = () => {
     border-color: #5A6788;
     transform: translateY(0);
 }
-</style> 
+</style>

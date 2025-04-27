@@ -56,15 +56,15 @@
 			<!-- 帖子列表 -->
 			<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-else>
 				<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="map in discussPosts"
-					:key="map.post.id">
+					:key="map.discussPosts.id">
 
 					<!-- 置顶标签 -->
-					<div v-if="map.post.type == 1"
+					<div v-if="map.discussPosts.type == 1"
 						class="absolute top-8 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform -rotate-12 cursor-default">
 						<span class="font-bold">TOP</span>
 					</div>
 					<!-- 精华标签 -->
-					<div v-if="map.post.status == 1"
+					<div v-if="map.discussPosts.status == 1"
 						class="absolute top-2 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
 						<span class="font-bold">Essence</span>
 					</div>
@@ -82,9 +82,9 @@
 
 						<!-- 标题动效 -->
 						<div>
-							<a @click="detailPostClicked(map.post.id)"
+							<a @click="detailPostClicked(map.discussPosts.id)"
 								class="text-xl font-medium text-[#4A4A4A] hover:text-[#A1A8C1] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
-								{{ map.post.title }}
+								{{ map.discussPosts.title }}
 							</a>
 						</div>
 					</div>
@@ -99,7 +99,7 @@
 									</div>
 									<div>
 										<span class="font-bold cursor-default">Posted on &nbsp</span>
-										<b class="text-[#A1A8C1] cursor-default">{{ formatDate(map.post.createTime)
+										<b class="text-[#A1A8C1] cursor-default">{{ formatDate(map.discussPosts.createTime)
 											}}</b>
 									</div>
 								</div>
@@ -113,7 +113,7 @@
 										<li class="inline ml-2 text-[#C1B8A8]">|</li>
 										<li class="inline ml-2">
 											<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">📝 &nbsp;
-												<span>{{ map.post.commentCount }}</span></el-button>
+												<span>{{ map.discussPosts.commentCount }}</span></el-button>
 										</li>
 									</ul>
 								</div>
@@ -136,7 +136,7 @@
 
 	</el-main>
 	<!-- 固定 Post -->
-	<div class="fixed bottom-10 right-10 z-50">
+	<div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
 		<AddPost @add="addPostClicked" />
 	</div>
 
@@ -144,7 +144,7 @@
 	<Hint v-model:visible="isHintVisible" :confirmButton="false" title="this is the title"
 		message="this is is the message" @confirm="console.log('confirm clicked')" />
 
-	<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false" @publish="publishPost" />
+	<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false" @publish="handlePublishPost" />
 </template>
 
 <script setup>
@@ -156,8 +156,12 @@ import NewPost from '~/tools/NewPost.vue';
 import {
 	getPostsByPage
 } from '~/api/homeApi'
-import { getUserInfo } from '~/api/userApi'
-import { getToken } from '~/utils/auth'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '~/stores/user';
+import { publishPost } from '~/api/postAPI';
+
+const userStore = useUserStore();
+const router = useRouter();
 const isHintVisible = ref(false);
 const isPostVisible = ref(false);
 const newPostRef = ref(null);
@@ -194,13 +198,23 @@ const setOrderMode = (mode) => {
 	orderMode.value = mode;
 };
 
-const publishPost = (content) => {
+const handlePublishPost = (content) => {
 
-	console.log('publish post', content);
+	const post = newPostRef.value.getContent()
+	publishPost(post.title, post.content)
+		.then((res) => {
+			ElMessage.success('Publish successfully');
+			//isHintVisible.value = true;
+			initPosts(orderMode.value, page.value.current);
+		})
+		.catch((err) => {
+			ElMessage.error(err.message);
+		})
+	
 	// 发布帖子功能实现
 	isPostVisible.value = false;
-	const html = newPostRef.value.getHtml(content.content);
-	console.log('html', html);
+	//const html = newPostRef.value.getHtml(content.content);
+	//console.log('html', html);
 };
 const handleChangePage = (newPage) => {
 	// console.log('newPage', newPage);
@@ -228,6 +242,10 @@ const seeUserPrifile = (id) => {
 
 const detailPostClicked = (id) => {
 	console.log('detail post clicked', id);
+	router.push({
+		path: '/post/' + id,
+	})
+	
 }
 
 
@@ -242,7 +260,7 @@ const initPosts = (originalOrderVal, pageChanged) => {
 	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
 		.then((res) => {
 			console.log('res', res);
-			page.value.current = res.current;
+			page.value.current = res.currentPage;
 			// console.log(res);
 			if (res.discussPosts)
 				discussPosts.value = res.discussPosts;

@@ -1,8 +1,10 @@
 <template>
 	<el-button @click="like" size="large" circle class="morandi-red-btn">
 		<el-icon size="20px">
-			<StarFilled v-if="internalIsFilled" />
-			<Star v-else />
+			<!-- <StarFilled v-if="internalIsFilled" />
+			<Star v-else /> -->
+			<i v-if="!internalIsFilled" class="pi pi-thumbs-up" style="font-size: 1rem"></i>
+			<i v-else class="pi pi-thumbs-up-fill" style="font-size: 1rem"></i>
 		</el-icon>
 	</el-button>
 </template>

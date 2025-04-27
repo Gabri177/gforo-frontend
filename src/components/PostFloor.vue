@@ -1,12 +1,12 @@
 <template>
-    <div class="flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
+    <div :id="floor?.id ? `floor-${floor.id}` : undefined" class="min-h-[400px] flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
         <!-- 左侧用户信息 -->
         <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
             <div class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center border border-[#E2E8F0] shadow">
                 <div class="flex flex-col items-center">
-                    <el-avatar :size="50" :src="floor.author.avatar" />
-                    <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name" :title="floor.author.name">
-                        {{ floor.author.name }}
+                    <el-avatar :size="50" :src="floor?.author.avatar" />
+                    <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name" :title="floor?.author.name">
+                        {{ floor?.author.name }}
                     </div>
                     <div class="mt-1">
                         <el-tag size="small" class="bg-[#E8EBF0] text-[#6B7C93] border-[#D3D7DE]">知名人士</el-tag>
@@ -16,42 +16,47 @@
         </div>
 
         <!-- 右侧内容 -->
-        <div class="flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
+        <div class="flex flex-col justify-between flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
 
-            <div class="text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
-                <div ref="contentRef" :class="{'content-wrapper': true, 'content-collapsed': !floor.isExpanded && enableContentExpand && shouldShowExpandButton}">
-                    <v-md-editor :model-value="floor.content" mode="preview"></v-md-editor>
+            <div class="flex-grow overflow-auto max-h-[500px] text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
+                <div ref="contentRef" :class="{'content-wrapper': true, 'content-collapsed': !floor?.isExpanded && enableContentExpand && shouldShowExpandButton}">
+                    <v-md-editor :model-value="floor?.content" mode="preview"></v-md-editor>
                 </div>
                 <div v-if="shouldShowExpandButton && enableContentExpand" class="text-center mt-2">
                     <el-button type="success" link size="small" @click="toggleExpand">
-                        {{ floor.isExpanded ? 'Collapse' : 'Expand' }}
+                        {{ floor?.isExpanded ? 'Collapse' : 'Expand' }}
                     </el-button>
                 </div>
             </div>
 
             <!-- 回复列表 -->
-            <div v-if="floor.replies && floor.replies.length > 0" class="mt-4 reply-area backdrop-blur-md bg-white/30 border border-[#E2E8F0]">
-                <div class="max-h-[300px] overflow-y-auto">
+            <div v-if="floor?.replies && floor?.replies.length > 0" class="mt-4 reply-area backdrop-blur-md bg-white/30 border border-[#E2E8F0]">
+                <div class="max-h-[300px] overflow-y-auto replies-container">
                     <div v-for="reply in pagedReplies" :key="reply.id" 
                         class="mb-2 pb-2 border-b border-[#E5E7EB] last:border-b-0">
                         <div class="flex items-start justify-between">
                             <div class="flex-grow">
                                 <div class="flex items-start space-x-2">
-                                    <span class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[120px] min-w-[50px]" :title="reply.author.name">{{ reply.author.name }}</span>
+                                    <span class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[120px] min-w-[50px]" :title="reply.author.name">
+                                        {{ reply?.author.name }} :
+                                    </span>
+                                    <span v-if="reply.targetUserInfo != null" class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[120px] min-w-[50px]" :title="reply.author.name">
+                                        @{{ reply?.targetUserInfo?.name }}
+                                    </span>
                                     <div class="text-[#4A5568] flex-grow">
-                                        <div :class="{'line-clamp-2': !reply.isExpanded && enableContentExpand}" class="whitespace-pre-wrap">{{ reply.content }}</div>
-                                        <div v-if="shouldShowReplyExpandButton(reply.content) && enableContentExpand" class="text-center mt-1">
+                                        <div :class="{'line-clamp-2': !reply?.isExpanded && enableContentExpand}" class="whitespace-pre-wrap break-words break-all">{{ reply?.content }}</div>
+                                        <div v-if="shouldShowReplyExpandButton(reply?.content) && enableContentExpand" class="text-center mt-1">
                                             <el-button type="success" link size="small" @click="toggleReplyExpand(reply)">
-                                                {{ reply.isExpanded ? 'Collapse' : 'Expand' }}
+                                                {{ reply?.isExpanded ? 'Collapse' : 'Expand' }}
                                             </el-button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="text-xs text-[#718096] mt-1">
-                                    <span>{{ reply.createTime }}</span>
+                                    <span>{{ formatDate(reply?.createTime) }}</span>
                                 </div>
                             </div>
-                            <el-button type="success" link size="small" class="ml-4 self-start" @click="$emit('reply', floor, reply)">Reply</el-button>
+                            <el-button v-if="userStore.isLoggedInState" type="success" link size="small" class="ml-4 self-start" @click="$emit('reply', floor, reply)">Reply</el-button>
                         </div>
                     </div>
                 </div>
@@ -59,16 +64,16 @@
                 <!-- 展开/收起按钮 -->
                 <div v-if="floor.replies.length > 3 && enableRepliesExpand" class="flex justify-center mt-2 border-t border-[#E5E7EB] pt-2">
                     <el-button type="success" link size="small" @click="toggleReplies">
-                        {{ isExpanded ? 'Collapse' : `Expand(${floor.replies.length})` }}
+                        {{ isExpanded ? 'Collapse' : `Expand(${floor?.replies.length})` }}
                     </el-button>
                 </div>
 
                 <!-- 分页器 -->
-                <div v-if="isExpanded && floor.replies.length > replyPageSize && enableRepliesExpand" class="flex justify-center mt-2 border-t border-[#E5E7EB] pt-2">
+                <div v-if="isExpanded && floor?.replies.length > replyPageSize && enableRepliesExpand" class="flex justify-center mt-2 border-t border-[#E5E7EB] pt-2">
                     <el-pagination
                         v-model:current-page="currentPage"
                         :page-size="replyPageSize"
-                        :total="floor.replies.length"
+                        :total="floor?.replies.length"
                         layout="prev, pager, next"
                         small
                         background
@@ -79,13 +84,13 @@
             <!-- 楼层信息 -->
             <div class="mt-2 text-sm text-[#718096] border-t pt-2 flex justify-between">
                 <div class="flex items-center space-x-4">
-                    <span>{{ floor.floor }} Floor</span>
-                    <span>{{ floor.createTime }}</span>
+                    <span>{{ floorNum }} Floor</span>
+                    <span>{{ formatDate(floor?.createTime) }}</span>
                 </div>
 
                 <div>
-                    <el-button type="danger" link>Report</el-button>
-                    <el-button type="success" link @click="$emit('reply', floor)">Reply</el-button>
+                    <el-button v-if="userStore.isLoggedInState" type="danger" link>Report</el-button>
+                    <el-button v-if="userStore.isLoggedInState" type="success" link @click="$emit('reply', floor)">Reply</el-button>
                 </div>
             </div>
         </div>
@@ -96,8 +101,15 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import VMdEditor from '@kangc/v-md-editor';
+import { useUserStore } from '~/stores/user';
+
+const userStore = useUserStore();
 
 const props = defineProps({
+    floorNum: {
+        type: Number,
+        required: true
+    },
     floor: {
         type: Object,
         required: true
@@ -122,6 +134,19 @@ const isExpanded = ref(false)
 const currentPage = ref(1)
 const contentRef = ref(null)
 const shouldShowExpandButton = ref(false)
+
+const formatDate = (isoString) => {
+    if (!isoString) return ''
+    const date = new Date(isoString)
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
 
 // 计算当前页的回复
 const pagedReplies = computed(() => {
@@ -173,6 +198,53 @@ const shouldShowReplyExpandButton = (content) => {
     // 假设每行大约50个字符，2行就是100个字符
     return content.length > 100
 }
+
+const scrollToLastReply = async () => {
+    if (!isExpanded.value) {
+        isExpanded.value = true // 展开楼层
+    }
+    await nextTick()
+
+    if (props.floor.replies.length > props.replyPageSize) {
+        const lastPage = Math.ceil(props.floor.replies.length / props.replyPageSize)
+        if (currentPage.value !== lastPage) {
+            currentPage.value = lastPage
+            await nextTick()
+        }
+    }
+
+    await nextTick()
+
+    const repliesContainer = document.querySelector(`#floor-${props.floor.id} .replies-container`)
+    console.log("Is there a replies container",repliesContainer)
+    if (repliesContainer) {
+        const needScroll = repliesContainer.scrollHeight > repliesContainer.clientHeight
+
+        if (needScroll) {
+            console.log('need scroll')
+            // 有滚动条，滚到底
+            repliesContainer.scrollTo({
+                top: repliesContainer.scrollHeight,
+                behavior: 'smooth'
+            })
+        } else {
+            console.log('no need scroll')
+            // 没滚动条，直接找到最后一个reply元素，滚动到它
+            const lastReply = repliesContainer.querySelector('.mb-2:last-child')
+            if (lastReply) {
+                lastReply.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+        }
+    }
+}
+
+
+const floorId = computed(() => props.floor?.id ?? null)
+
+defineExpose({
+    floorId,
+    scrollToLastReply,
+})
 </script>
 
 <style scoped>

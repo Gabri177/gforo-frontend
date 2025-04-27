@@ -101,9 +101,17 @@ const clearForm = () => {
   };
 };
 
+const getContent = () => {
+  return {
+    title: postForm.value.title,
+    content: postForm.value.content
+  };
+};
+
 defineExpose({
   clearForm,
-  getHtml
+  getHtml,
+  getContent
 });
 
 </script>

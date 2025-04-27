@@ -14,7 +14,9 @@ export const useUserStore = defineStore('user', () => {
         headerUrl: savedUserInfo.headerUrl || '',
         bio: savedUserInfo.bio || '',
         createdAt: savedUserInfo.createdAt || '',
-        status: savedUserInfo.status || ''
+        status: savedUserInfo.status || '',
+        postsCount: savedUserInfo.postCount || 0,
+        commentsCount: savedUserInfo.commentsCount || 0
     });
 
     // 设置用户信息
@@ -27,7 +29,9 @@ export const useUserStore = defineStore('user', () => {
             headerUrl: info.headerUrl || '',
             bio: info.bio || '',
             createdAt: info.createdAt || '',
-            status: info.status || ''
+            status: info.status || '',
+            postsCount: info.postCount || 0,
+            commentsCount: info.commentsCount || 0,
         };
         console.log("userInfo store", userInfo.value)
         isLoggedInState.value = true;
@@ -44,7 +48,9 @@ export const useUserStore = defineStore('user', () => {
             headerUrl: '',
             bio: '',
             createdAt: '',
-            status: ''
+            status: '',
+            postsCount: 0,
+            commentsCount: 0
         };
         isLoggedInState.value = false;
         // 清除 localStorage

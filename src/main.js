@@ -6,6 +6,8 @@ import 'tailwindcss/tailwind.css'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css' // 更新路径
 import './index.css'
+import 'primeicons/primeicons.css'
+
 
 import VMdEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';

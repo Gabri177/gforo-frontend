@@ -95,6 +95,11 @@ const routes = [
     component: Post,
   },
   {
+    path: '/post/:postId',
+    name: 'PostOfId',
+    component: Post,
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound

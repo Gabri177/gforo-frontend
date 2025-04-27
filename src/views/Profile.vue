@@ -124,8 +124,8 @@ const bio = ref(userStore.userInfo.bio || 'No bio yet')
 const userAvatar = ref(userStore.userInfo.headerUrl)
 const joinDate = ref(formatDateToYMD(userStore.userInfo.createdAt))
 const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : 'Inactive')
-const postsCount = ref(0)
-const commentsCount = ref(0)
+const postsCount = ref(userStore.userInfo.postsCount)
+const commentsCount = ref(userStore.userInfo.commentsCount)
 const sendVerifyEmailLoading = ref(false)
 const countdown = ref(0)
 const isButtonDisabled = ref(false)
@@ -240,7 +240,9 @@ onMounted(async () => {
 		bio: userInfo.bio,
 		headerUrl: userInfo.headerUrl,
 		createdAt: userInfo.createdAt,
-		status: userInfo.status
+		status: userInfo.status,
+    postsCount: userInfo.postsCount,
+    commentsCount: userInfo.commentsCount
 	})
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
