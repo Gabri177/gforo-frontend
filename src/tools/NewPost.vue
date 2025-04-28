@@ -26,11 +26,11 @@
     </div>
     <template #footer>
       <div class="mr-2">
-        <el-button class="cancel-button" @click="$emit('update:visible', false)" 
+        <el-button class="cancel-button" @click="handleCancel" 
       size="large" style="margin-top: -16px;">
         <span class="text-white font-bold">cancel</span>
       </el-button>
-      <el-button class="confirm-button" type="primary" @click="handleConfirm" 
+      <el-button class="confirm-button" type="primary" @click="handleConfirm" :loading="postLoading" 
       size="large" style="margin-top: -16px;">
         <span class="text-white font-bold">post</span>
       </el-button>
@@ -49,6 +49,7 @@ import VueMarkdownEditor, { xss } from '@kangc/v-md-editor';
 
 VMdEditor.use(githubTheme);
 
+const postLoading = ref(false); 
 // 这里的save方法暴露给父组件，用于保存编辑器中的内容 
 const handleSave = (text, html) => {
 
@@ -76,12 +77,25 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:visible', 'publish']);
+const setPostLoading = (loading) => {
+  postLoading.value = loading;
+};
+
+const endPostLoading = () => {
+  postLoading.value = false;
+}
+
+const emit = defineEmits(['update:visible', 'publish', 'cancel']);
 
 const visible = computed({
   get: () => props.visible,
   set: (value) => emit('update:visible', value)
 });
+
+const handleCancel = () => {
+  emit('cancel');
+  emit('update:visible', false);
+};
 
 
 const postForm = ref({
@@ -108,10 +122,20 @@ const getContent = () => {
   };
 };
 
+const setPostContent = (title, content) => {
+  postForm.value = {
+    title: title,
+    content: content
+  }
+};
+
 defineExpose({
   clearForm,
   getHtml,
-  getContent
+  getContent,
+  setPostContent,
+  setPostLoading,
+  endPostLoading
 });
 
 </script>

@@ -19,6 +19,15 @@ export const useUserStore = defineStore('user', () => {
         commentsCount: savedUserInfo.commentsCount || 0
     });
 
+    function getBasicUserInfo() {
+        return {
+            id: userInfo.value.id,
+            username: userInfo.value.username,
+            headerUrl: userInfo.value.headerUrl,
+            status: userInfo.value.status
+        };
+    }
+
     // 设置用户信息
     function setUserInfo(info) {
         console.log(info)
@@ -77,6 +86,7 @@ export const useUserStore = defineStore('user', () => {
         setUserInfo,
         clearUserInfo,
         updateAvatar,
-        updateStatus
+        updateStatus,
+        getBasicUserInfo
     };
 }); 

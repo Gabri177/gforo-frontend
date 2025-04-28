@@ -10,15 +10,17 @@
         </div>
 
         <!-- 楼主帖子 -->
-        <PostFloor :id="'comment-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost" :floorNum="1"
-            :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
-            :enableContentExpand="false" @reply="handleReplyPost" />
+        <PostFloor :id="'comment-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
+            :floorNum="1" :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
+            :enableContentExpand="false" @reply="handleReplyPost" @delete="handlePostFloorDeletePost"
+            @report="handlePostFloorReportPost" @edit="handlePostFloorEditPost" />
 
         <!-- 评论列表 -->
         <div class="mt-6 space-y-4">
             <PostFloor v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
                 :floorNum="index + 2 + (currentPage - 1) * pageSize" :floor="comment" :reply-page-size="replyPageSize"
-                :enable-content-expand="true" :enable-replies-expand="true" @reply="handleReply" ref="floorRefs" />
+                :enable-content-expand="true" :enable-replies-expand="true" @reply="handleReply" ref="floorRefs"
+                @delete="handlePostFloorDelete" @report="handlePostFloorReport" @edit="handlePostFloorEdit" />
         </div>
 
         <!-- 评论分页 -->
@@ -28,10 +30,10 @@
         </div>
 
         <!-- 回复对话框 -->
-        <el-dialog v-model="dialogVisible" title="Reply" width="500px" :close-on-click-modal="false"
+        <el-dialog v-model="dialogVisible" :title="!isEditting ? 'Reply' : 'Edit Reply'" width="500px" :close-on-click-modal="false"
             custom-class="morandi-dialog">
             <div class="reply-dialog-content">
-                <div class="reply-info mb-4">
+                <div class="reply-info mb-4" v-if="!isEditting">
                     <span class="text-[#6B7C93]">Reply to: &nbsp;</span>
                     <span class="text-[#4A4A4A] font-medium">{{ currentReplyTo }}</span>
                 </div>
@@ -40,7 +42,7 @@
             </div>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button type="default" @click="dialogVisible = false">Cancel</el-button>
+                    <el-button type="default" @click="dialogVisible = false; isEditting = false; newComment = ''">Cancel</el-button>
                     <el-button type="primary" @click="submitReply">Submit</el-button>
                 </span>
             </template>
@@ -57,13 +59,13 @@
                 <AddPost @add="addReplyPostClicked" :isFilled="isLikePostFilled" />
             </div>
             <div>
-                <ReturnHome @return="handleReturn"/>
+                <ReturnHome @return="handleReturn" />
             </div>
         </div>
     </div>
 
     <NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" :confirmButton="false" @publish="publishReplyPost"
-        title="Reply Post" :needReplyTitle="false" />
+        :title="!isEditting ? 'Reply Post' : 'Edit'" :needReplyTitle="isNeedTitle" @cancel="isEditting = false" />
 </template>
 
 <script setup>
@@ -75,16 +77,17 @@ import AddPost from '~/components/AddPost.vue';
 import NewPost from '~/tools/NewPost.vue';
 import ReturnHome from '~/components/ReturnHome.vue';
 import LikePost from '~/components/LikePost.vue';
-import { getPostByPage } from '../api/postAPI';
-import { addCommentToPost, addCommentToComment } from '../api/commentAPI';
+import { getPostByPage, deletePost, updatePost } from '~/api/postAPI';
+import { addCommentToPost, addCommentToComment, deleteComment, updateComment } from '~/api/commentAPI';
 import { useRoute, useRouter } from 'vue-router';
+
+
 
 // 滚动相关
 const scrollTargetCommentId = ref(null)
 const originalPostRef = ref(null)
 
 // 分页相关
-const currentPage = ref(1)
 const pageSize = ref(10)
 const replyPageSize = ref(10)
 
@@ -92,6 +95,7 @@ const replyPageSize = ref(10)
 const expandedComments = ref(new Set())
 
 // 回复相关的状态
+const isNeedTitle = ref(false)
 const floorRefs = ref([])
 const dialogVisible = ref(false)
 const newComment = ref('')
@@ -102,7 +106,6 @@ const originalPost = ref(null)
 const comments = ref([])
 const totalRows = ref(0)
 const newPostRef = ref(null)
-const entityType = ref(1)
 const isOperationPost = ref(false)
 const commentToPost = reactive({
     entityId: 0,
@@ -112,6 +115,16 @@ const commentToPost = reactive({
 const route = useRoute()
 const router = useRouter()
 const postId = ref(route.params.postId)
+const currentPage = ref(route.params.currentPage || 1)
+
+
+// 编辑相关
+const editEntityType = ref(0) // 0 帖子 1 不是帖子
+const editFloorType = ref(0) // 0 楼层 1 楼层评论
+const editTargetId = ref(0)
+const isEditting = ref(false)
+
+
 console.log("postId", route.params.postId)
 
 const handleReturn = () => {
@@ -135,6 +148,139 @@ const commentToComment = reactive({
     content: ''
 })
 
+// 删除应该添加提示信息
+const handlePostFloorDelete = (comment) => {
+    console.log('handlePostFloorDelete', comment?.id)
+
+    deleteComment(comment?.id || 0)
+      .then(res => {
+            ElMessage.success('Delete success')
+            initPosts(currentPage.value)
+        })
+      .catch(err => {
+            ElMessage.error(err.message || 'Delete failed')
+        })
+}
+
+const handlePostFloorDeletePost = (postOrComment, isFloor) => {
+    console.log('handlePostFloorDeletePost', postOrComment.id, isFloor)
+
+    if (isFloor == 0){ // 帖子的删除
+        deletePost(postOrComment.id)
+          .then(res => {
+                ElMessage.success('删除成功')
+                router.push('/')
+            })
+          .catch(err => {
+                ElMessage.error(err.message || '删除失败')
+            })
+    }
+    
+    if (isFloor == 1) // 帖子的评论删除
+        handlePostFloorDelete(postOrComment)
+    
+}
+const handlePostFloorReportPost = (post, isFloor) => {
+    console.log('handlePostFloorReportPost', post?.id, isFloor)
+    ElMessage.warning('举报功能暂未实现 post' + isFloor)
+}
+
+const handlePostFloorReport = (comment) => {
+    console.log('handlePostFloorReport', comment?.id)
+    ElMessage.warning('举报功能暂未实现')
+}
+
+const handlePostFloorEdit = (floor, isFloor, reply) => { // 不是帖子
+    editEntityType.value = 1
+    editFloorType.value = isFloor
+    isEditting.value = true
+    
+    editTargetId.value = floor?.id
+    if (isFloor == 0) { // 不是帖子的楼层 1 0
+        newPostRef.value.setPostContent("", floor?.content)
+        isNeedTitle.value = false
+        isReplyPostVisible.value = true;
+    } else { // 1 1 不是帖子的楼层评论
+        if (!reply){
+            newComment.value = floor?.content
+        } else {
+            editTargetId.value = reply?.id
+            newComment.value = reply?.content
+        }  
+        dialogVisible.value = true
+    }
+    console.log ("editEntityType: ", editEntityType.value + 
+                " floor: " + editFloorType.value +
+                " targetId: ", editTargetId.value)
+
+    
+}
+
+const handlePostFloorEditPost = (floor, isFloor, reply) => {
+    editEntityType.value = 0
+    editFloorType.value = isFloor
+    isEditting.value = true
+    editTargetId.value = floor.id
+    if (isFloor == 0) { // 帖子的楼层 0 0
+        newPostRef.value.setPostContent(floor?.title, floor?.content)
+        isNeedTitle.value = true
+        isReplyPostVisible.value = true;
+    } else { // 帖子的评论 0 1
+        if (!reply){
+            newComment.value = floor?.content
+        } else {
+            editTargetId.value = reply?.id
+            newComment.value = reply?.content
+        }
+        dialogVisible.value = true
+    }
+    console.log ("editEntityType: ", editEntityType.value + 
+                " floor: " + editFloorType.value +
+                " targetId: ", editTargetId.value)
+    
+}
+
+const updateCommentChange = (commentId) => {
+    console.log("updateCommentChange")
+    let content = ''
+    if (editFloorType.value == 0)
+        content = newPostRef.value.getContent().content
+    else
+        content = newComment.value
+
+    updateComment(commentId, content)
+    .then(res => {
+        ElMessage.success('Update success')
+        initPosts(currentPage.value)
+    })
+    .catch(err => {
+        ElMessage.error(err.message || 'Update failed')
+    })  
+    .finally(() => {
+        isEditting.value = false
+        dialogVisible.value = false
+        newComment.value = ''
+     })
+}
+
+const updatePostChange = (postId) => {
+    console.log("updatePostChange")
+    const content = newPostRef.value.getContent()
+    updatePost(postId, content.title, content.content)
+    .then(res => {
+            ElMessage.success('Update success')
+            initPosts(currentPage.value)
+        })
+    .catch(err => {
+            ElMessage.error(err.message || 'Update failed')
+        })
+    .finally(() => {
+        isEditting.value = false
+        dialogVisible.value = false
+        newComment.value = ''
+     })
+}
+
 const clearCommentToComment = () => {
     commentToComment.entityId = 0
     commentToComment.targetUserId = 0
@@ -149,6 +295,13 @@ const handleChangePage = (newPage) => {
     // console.log('newPage', newPage);
     initPosts(newPage);
     window.scrollTo(0, 0);
+    router.replace({ 
+        name: 'PostOfId', 
+        params: { 
+          postId: postId.value, 
+          currentPage: newPage 
+        }
+    })
 };
 
 const initPosts = (page) => {
@@ -171,7 +324,11 @@ const initPosts = (page) => {
 
 onMounted(() => {
     console.log("onMounted post page")
-    initPosts(1)
+    initPosts(currentPage.value)
+    // 注意 滚动到指定位置只需要 先跳转到指定的页面 然后在运行这个函数
+    // 而且注意  第一个参数是 是否为Post楼层的  第二个参数是楼层的id 第三个是楼层评论的ID（如果有的话）
+    // scrollToFloorComment(false, 351, 372) 
+    // scrollToFloorComment(true, 30451, 514) 
 })
 
 // 是否点赞
@@ -180,7 +337,10 @@ const isLikePostFilled = ref(false)
 
 const addReplyPostClicked = () => {
     console.log("addReplyPostClicked")
+    isNeedTitle.value = false
     isReplyPostVisible.value = true
+    isEditting.value = false
+    newPostRef.value.clearForm()
 }
 
 const formatDate = (isoString) => {
@@ -195,13 +355,20 @@ const formatDate = (isoString) => {
     return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-
 const publishReplyPost = () => {
+
+    if (isEditting.value){
+        if (editFloorType.value == 0 && editEntityType.value == 0)
+            updatePostChange(editTargetId.value)
+        else 
+            updateCommentChange(editTargetId.value)
+        return 
+    }
     console.log("publishReplyPost")
     console.log(newPostRef.value.getContent())
     const content = newPostRef.value.getContent().content
     if (content == "") {
-        ElMessage.warning('请输入回复内容')
+        ElMessage.warning('Please input your reply')
         return
     }
     commentToPost.content = content
@@ -211,7 +378,7 @@ const publishReplyPost = () => {
     )
         .then(res => {
             console.log(res)
-            ElMessage.success('回复成功')
+            ElMessage.success('reply success')
 
             const newTotalRows = totalRows.value + 1
             const newPage = Math.ceil(newTotalRows / pageSize.value)
@@ -230,7 +397,7 @@ const publishReplyPost = () => {
         })
         .catch(err => {
             console.log(err)
-            ElMessage.error('回复失败')
+            ElMessage.error(err.message || 'reply failed')
         })
         .finally(() => {
             newPostRef.value.clearForm()
@@ -253,7 +420,7 @@ const pagedComments = computed(() => {
 
 const handleReplyPost = (floor, reply) => {
 
-    console.log ("postId", postId.value)
+    console.log("postId", postId.value)
     console.log("floorId", floor.id)
     console.log("handleReplyPost")
     isOperationPost.value = true
@@ -295,8 +462,17 @@ const handleReply = (floor, reply) => {
 
 // 提交回复
 const submitReply = () => {
+
+    if (isEditting.value){
+        if (editFloorType.value == 0 && editEntityType.value == 0)
+            updatePostChange(editTargetId.value)
+        else 
+            updateCommentChange(editTargetId.value)
+        return 
+    }
+
     if (!newComment.value.trim()) {
-        ElMessage.warning('请输入回复内容')
+        ElMessage.warning('Please input your reply')
         return
     }
     commentToComment.content = newComment.value
@@ -314,7 +490,7 @@ const submitReply = () => {
 
     action.then(res => {
         console.log(res)
-        ElMessage.success('回复成功')
+        ElMessage.success('Reply success')
         dialogVisible.value = false
 
         // 👇刷新当前页，不跳页
@@ -336,6 +512,8 @@ const submitReply = () => {
             nextTick(() => {
                 setTimeout(() => {
                     originalPostRef.value.scrollToLastReply()
+                    // console.log("评论跳转post")
+                    // originalPostRef.value.scrollToReplyWithPage(342)
                 }, 300)
             })
         }
@@ -345,7 +523,9 @@ const submitReply = () => {
                 setTimeout(() => {
                     let targetRef = floorRefs.value.find(refEl => refEl?.floorId === scrollTargetCommentId.value)
                     if (targetRef) {
+                        console.log("评论跳转comment")
                         targetRef.scrollToLastReply()
+                        //targetRef.scrollToReplyWithPage(404)
                     } else {
                         console.warn('找不到对应楼层')
                     }
@@ -358,12 +538,60 @@ const submitReply = () => {
 
     }).catch(err => {
         console.log(err)
-        ElMessage.error('回复失败')
+        ElMessage.error(err.message || 'Reply failed')
     }).finally(() => {
         newComment.value = ''
         dialogVisible.value = false
         clearCommentToComment()
     })
+}
+
+const scrollToFloor = (floorId) => { // 帖子楼层或者评论楼层
+    console.log("scrollToFloor", floorId)
+    scrollTargetCommentId.value = floorId
+    nextTick(() => {
+            setTimeout(() => {
+                if (scrollTargetCommentId.value) {
+                    const el = document.getElementById('comment-' + scrollTargetCommentId.value)
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                }
+            }, 300)
+        })
+}
+
+const scrollToFloorComment = (isForPost, floorId, replyId) => {
+    scrollToFloor(floorId)
+    if (replyId){
+        if (isForPost) {
+            scrollTargetCommentId.value = postId.value
+            nextTick(() => {
+                setTimeout(() => {
+                    //originalPostRef.value.scrollToLastReply()
+                    console.log("评论跳转post")
+                    originalPostRef.value.scrollToReplyWithPage(replyId)
+                }, 300)
+            })
+        }
+        if (!isForPost) {
+            console.log("comment to comment")
+            nextTick(() => {
+                setTimeout(() => {
+                    let targetRef = floorRefs.value.find(refEl => refEl?.floorId === scrollTargetCommentId.value)
+                    if (targetRef) {
+                        console.log("评论跳转comment")
+                        // targetRef.scrollToLastReply()
+                        targetRef.scrollToReplyWithPage(replyId)
+                    } else {
+                        console.warn('找不到对应楼层')
+                    }
+
+                }, 300)
+            })
+
+        }
+    }
 }
 
 </script>

@@ -243,7 +243,7 @@ const seeUserPrifile = (id) => {
 const detailPostClicked = (id) => {
 	console.log('detail post clicked', id);
 	router.push({
-		path: '/post/' + id,
+		path: '/post/' + id + '/1',
 	})
 	
 }

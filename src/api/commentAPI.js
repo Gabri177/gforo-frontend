@@ -15,3 +15,14 @@ export function addCommentToComment(entityType, entityId, targetId, content) {
 		content: content
 	})
 }
+
+export function deleteComment(commentId) {
+	return axio.delete(`/comment/${commentId}`)
+}
+
+export function updateComment(commentId, content) {
+	return axio.put(`/comment/update`, {
+		id:commentId,
+		content:content
+	})
+}

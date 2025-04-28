@@ -1,5 +1,5 @@
 <template>
-    <div :id="floor?.id ? `floor-${floor.id}` : undefined" class="min-h-[400px] flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
+    <div class="min-h-[400px] flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
         <!-- 左侧用户信息 -->
         <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
             <div class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center border border-[#E2E8F0] shadow">
@@ -31,8 +31,8 @@
 
             <!-- 回复列表 -->
             <div v-if="floor?.replies && floor?.replies.length > 0" class="mt-4 reply-area backdrop-blur-md bg-white/30 border border-[#E2E8F0]">
-                <div class="max-h-[300px] overflow-y-auto replies-container">
-                    <div v-for="reply in pagedReplies" :key="reply.id" 
+                <div ref="repliesContainerRef" class="max-h-[300px] overflow-y-auto replies-container">
+                    <div :id="`reply-${reply.id}`" v-for="reply in pagedReplies" :key="reply.id" 
                         class="mb-2 pb-2 border-b border-[#E5E7EB] last:border-b-0">
                         <div class="flex items-start justify-between">
                             <div class="flex-grow">
@@ -44,7 +44,8 @@
                                         @{{ reply?.targetUserInfo?.name }}
                                     </span>
                                     <div class="text-[#4A5568] flex-grow">
-                                        <div :class="{'line-clamp-2': !reply?.isExpanded && enableContentExpand}" class="whitespace-pre-wrap break-words break-all">{{ reply?.content }}</div>
+                                        <div :class="{'line-clamp-2': !reply?.isExpanded && enableContentExpand}" class="whitespace-pre-wrap break-words break-all">
+                                            {{ reply.id }} == {{ reply?.content }}</div>
                                         <div v-if="shouldShowReplyExpandButton(reply?.content) && enableContentExpand" class="text-center mt-1">
                                             <el-button type="success" link size="small" @click="toggleReplyExpand(reply)">
                                                 {{ reply?.isExpanded ? 'Collapse' : 'Expand' }}
@@ -56,7 +57,10 @@
                                     <span>{{ formatDate(reply?.createTime) }}</span>
                                 </div>
                             </div>
+                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id" type="danger" link size="small" class="ml-4 self-start" @click="$emit('delete', reply, 1)">Delete</el-button>
+                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id" type="primary" link size="small" class="ml-4 self-start" @click="$emit('edit', floor, 1, reply)">Edit</el-button>
                             <el-button v-if="userStore.isLoggedInState" type="success" link size="small" class="ml-4 self-start" @click="$emit('reply', floor, reply)">Reply</el-button>
+                            
                         </div>
                     </div>
                 </div>
@@ -89,8 +93,15 @@
                 </div>
 
                 <div>
-                    <el-button v-if="userStore.isLoggedInState" type="danger" link>Report</el-button>
+                    <!-- 自己不是主人 -->
+                    <el-button v-if="userStore.isLoggedInState && currentUserID != props.floor?.author.id" type="danger" link @click="$emit('report', floor, 0)">Report</el-button>
+                    <!-- 自己是主人 -->
+                    <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id" type="danger" link @click="$emit('delete', floor, 0)">Delete</el-button>
+                    <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id" type="primary" link @click="$emit('edit', floor, 0)">Edit</el-button>
+
+                    <!-- 通用 -->
                     <el-button v-if="userStore.isLoggedInState" type="success" link @click="$emit('reply', floor)">Reply</el-button>
+
                 </div>
             </div>
         </div>
@@ -102,8 +113,11 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import VMdEditor from '@kangc/v-md-editor';
 import { useUserStore } from '~/stores/user';
+import { componentToSlot } from 'element-plus/es/components/table-v2/src/utils.mjs';
 
 const userStore = useUserStore();
+const currentUserID = userStore.getBasicUserInfo().id
+const repliesContainerRef = ref(null)
 
 const props = defineProps({
     floorNum: {
@@ -128,7 +142,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['reply'])
+const emit = defineEmits(['reply', 'delete', 'edit', 'report'])
 
 const isExpanded = ref(false)
 const currentPage = ref(1)
@@ -199,6 +213,47 @@ const shouldShowReplyExpandButton = (content) => {
     return content.length > 100
 }
 
+// 滚动到指定回复
+const scrollToReplyWithPage = async (replyId) => {
+    if (!props.floor.replies || props.floor.replies.length === 0) return;
+
+    // 找到 replyId 在第几条
+    const index = props.floor.replies.findIndex(reply => reply.id === replyId);
+    if (index === -1) {
+        console.warn(`Reply with id ${replyId} not found in current floor`);
+        return;
+    }
+
+    // 计算它所在页数
+    const targetPage = Math.floor(index / props.replyPageSize) + 1;
+    if (currentPage.value !== targetPage) {
+        currentPage.value = targetPage;
+        await nextTick();
+    }
+
+    if (!isExpanded.value) {
+        isExpanded.value = true // 展开楼层
+    }
+
+    await nextTick();
+
+    // 等待页面渲染
+    setTimeout(() => {
+        const target = document.getElementById(`reply-${replyId}`);
+        console.log("是否存在 postfloor 评论跳转 target: ", target)
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            highlightReply(replyId)
+        } else {
+            console.warn(`After page change, still cannot find reply-${replyId}`);
+        }
+    }, 200); // 给一点小延迟，确保渲染完成
+}
+
+// 滚动到最后一条回复
 const scrollToLastReply = async () => {
     if (!isExpanded.value) {
         isExpanded.value = true // 展开楼层
@@ -215,39 +270,83 @@ const scrollToLastReply = async () => {
 
     await nextTick()
 
-    const repliesContainer = document.querySelector(`#floor-${props.floor.id} .replies-container`)
-    console.log("Is there a replies container",repliesContainer)
+    const repliesContainer = repliesContainerRef.value;
+    console.log("是否有当前楼层: ",repliesContainer)
     if (repliesContainer) {
-        const needScroll = repliesContainer.scrollHeight > repliesContainer.clientHeight
-
-        if (needScroll) {
-            console.log('need scroll')
-            // 有滚动条，滚到底
-            repliesContainer.scrollTo({
-                top: repliesContainer.scrollHeight,
-                behavior: 'smooth'
-            })
-        } else {
-            console.log('no need scroll')
-            // 没滚动条，直接找到最后一个reply元素，滚动到它
-            const lastReply = repliesContainer.querySelector('.mb-2:last-child')
-            if (lastReply) {
-                lastReply.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }
-        }
+        repliesContainer.scrollTo({
+        top: repliesContainer.scrollHeight,
+        behavior: 'smooth'
+        });
+        highlightReply(props.floor.replies[props.floor.replies.length - 1]?.id);
+    } else {
+        console.warn('repliesContainer not found');
     }
 }
 
-
 const floorId = computed(() => props.floor?.id ?? null)
+
+const highlightReply = async (replyId) => {
+    await nextTick();
+    const target = document.getElementById(`reply-${replyId}`);
+    if (target) {
+        target.classList.add('highlight-reply');
+        
+        // 3秒后开始淡出
+        setTimeout(() => {
+            target.classList.add('highlight-fadeout');
+        }, 3000);
+
+        // 5秒后彻底移除高亮相关class
+        setTimeout(() => {
+            target.classList.remove('highlight-reply', 'highlight-fadeout');
+        }, 5000);
+    }
+};
+
+
 
 defineExpose({
     floorId,
     scrollToLastReply,
+    scrollToReplyWithPage
 })
 </script>
 
 <style scoped>
+
+:deep(.el-button.is-link) {
+  transition: all 0.3s ease;
+}
+
+/* 默认字体颜色 */
+:deep(.el-button--primary.is-link) {
+  color: #A1A8C1;
+}
+
+/* 悬停时字体颜色 */
+:deep(.el-button--primary.is-link:hover) {
+  color: #7A87A8;
+}
+
+/* 按下时字体颜色 */
+:deep(.el-button--primary.is-link:active) {
+  color: #5A6788;
+}
+
+
+/* 评论高亮动画 */
+.highlight-reply {
+    background-color: #D8D3CD; /* 柔和莫兰迪浅灰紫色 */
+    transition: background-color 0.5s ease;
+    border-radius: 8px;
+}
+
+/* 高亮渐隐 */
+.highlight-fadeout {
+    background-color: transparent;
+    transition: background-color 2s ease;
+}
+
 /* 楼层容器 */
 .floor {
     background: linear-gradient(135deg, #F8FAFC, #F1F5F9);

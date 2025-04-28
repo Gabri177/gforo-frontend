@@ -15,3 +15,15 @@ export function publishPost(title, content){
 		content
 	});
 }
+
+export function deletePost(postId){
+	return axio.delete(`/post/${postId}`);
+}
+
+export function updatePost(postId, title, content){
+	return axio.put(`/post/update`, {
+		id: postId,
+		title,
+		content
+	});
+}

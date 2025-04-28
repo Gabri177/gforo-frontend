@@ -95,7 +95,7 @@ const routes = [
     component: Post,
   },
   {
-    path: '/post/:postId',
+    path: '/post/:postId/:currentPage',
     name: 'PostOfId',
     component: Post,
   },
