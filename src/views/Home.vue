@@ -113,7 +113,7 @@
 										<li class="inline ml-2 text-[#C1B8A8]">|</li>
 										<li class="inline ml-2">
 											<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">📝 &nbsp;
-												<span>{{ map.discussPosts.commentCount }}</span></el-button>
+												<span>{{ map.commentCount }}</span></el-button>
 										</li>
 									</ul>
 								</div>

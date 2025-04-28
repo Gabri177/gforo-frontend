@@ -77,11 +77,11 @@
               <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">Statistics</h3>
               <div class="grid grid-cols-2 gap-4">
                 <div class="stat-item">
-                  <div class="text-2xl font-bold text-[#6B7C93]">{{ postsCount }}</div>
+                  <div class="text-2xl font-bold text-[#6B7C93]">{{ postCount }}</div>
                   <div class="text-[#8B93B1] mt-1">Posts</div>
                 </div>
                 <div class="stat-item">
-                  <div class="text-2xl font-bold text-[#6B7C93]">{{ commentsCount }}</div>
+                  <div class="text-2xl font-bold text-[#6B7C93]">{{ commentCount }}</div>
                   <div class="text-[#8B93B1] mt-1">Comments</div>
                 </div>
               </div>
@@ -124,8 +124,8 @@ const bio = ref(userStore.userInfo.bio || 'No bio yet')
 const userAvatar = ref(userStore.userInfo.headerUrl)
 const joinDate = ref(formatDateToYMD(userStore.userInfo.createdAt))
 const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : 'Inactive')
-const postsCount = ref(userStore.userInfo.postsCount)
-const commentsCount = ref(userStore.userInfo.commentsCount)
+const postCount = ref(userStore.userInfo.postCount)
+const commentCount = ref(userStore.userInfo.commentCount)
 const sendVerifyEmailLoading = ref(false)
 const countdown = ref(0)
 const isButtonDisabled = ref(false)
@@ -241,13 +241,13 @@ onMounted(async () => {
 		headerUrl: userInfo.headerUrl,
 		createdAt: userInfo.createdAt,
 		status: userInfo.status,
-    postsCount: userInfo.postsCount,
-    commentsCount: userInfo.commentsCount
+    postCount: userInfo.postCount,
+    commentCount: userInfo.commentCount
 	})
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
-    // postsCount.value = stats.posts
-    // commentsCount.value = stats.comments
+    // postCount.value = stats.posts
+    // commentCount.value = stats.comments
     checkDisabledStatus()
   } catch (error) {
     console.error('Failed to fetch user profile:', error)

@@ -4,12 +4,13 @@
         <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
             <div class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center border border-[#E2E8F0] shadow">
                 <div class="flex flex-col items-center">
-                    <el-avatar :size="50" :src="floor?.author.avatar" />
+                    <el-avatar :size="50" :src="floor?.author?.headerUrl" />
                     <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name" :title="floor?.author.name">
-                        {{ floor?.author.name }}
+                        {{ floor?.author.username }}
                     </div>
-                    <div class="mt-1">
-                        <el-tag size="small" class="bg-[#E8EBF0] text-[#6B7C93] border-[#D3D7DE]">知名人士</el-tag>
+                    <div class="mt-1 flex flex-col">
+                        <!-- 这里可以展示用户的成就以及其他信息 -->
+                        <el-tag size="small" class="bg-[#E8EBF0] text-[#6B7C93] border-[#D3D7DE]">Greenhorn</el-tag>
                     </div>
                 </div>
             </div>
@@ -38,10 +39,10 @@
                             <div class="flex-grow">
                                 <div class="flex items-start space-x-2">
                                     <span class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[120px] min-w-[50px]" :title="reply.author.name">
-                                        {{ reply?.author.name }} :
+                                        {{ reply?.author.username }} :
                                     </span>
                                     <span v-if="reply.targetUserInfo != null" class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[120px] min-w-[50px]" :title="reply.author.name">
-                                        @{{ reply?.targetUserInfo?.name }}
+                                        @{{ reply?.targetUserInfo?.username }}
                                     </span>
                                     <div class="text-[#4A5568] flex-grow">
                                         <div :class="{'line-clamp-2': !reply?.isExpanded && enableContentExpand}" class="whitespace-pre-wrap break-words break-all">

@@ -72,6 +72,7 @@ axio.interceptors.response.use(
       try {
         const res = await getNewToken(refreshToken)
         const newAccessToken = res.data.data.newAccessToken 
+        console.log("refresh token ====================================")
         setToken(newAccessToken)
         onTokenRefreshed(newAccessToken)
 
