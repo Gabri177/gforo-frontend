@@ -288,15 +288,7 @@ const handleProfileSave = async () => {
     await updateUserInfo(profileForm)
 	const userInfoRes = await getUserInfo()
 	console.log("new user info: ", userInfoRes)
-	userStore.setUserInfo({
-		id: userInfoRes.id,
-      	username: userInfoRes.username,
-      	email: userInfoRes.email,
-      	headerUrl: userInfoRes.headerUrl,
-	  	bio: userInfoRes.bio,
-	  	createdAt: userInfoRes.createdAt,
-		status: userInfoRes.status,
-	})
+	userStore.setUserInfo(userInfoRes)
 	usernameEditActive.value = true
 	emailEditActive.value = true
     ElMessage.success('Profile updated successfully')

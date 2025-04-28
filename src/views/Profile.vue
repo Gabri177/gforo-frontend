@@ -13,7 +13,7 @@
               >
             </div>
             <div class="ml-6 user-info relative">
-              <h2 class="text-2xl font-bold text-[#6B7C93]">{{ username }}</h2>
+              <h2 class="text-2xl font-bold text-[#6B7C93]">{{ nickname }}</h2>
               <div class="relative group">
                 <p class="text-[#8B93B1] mt-2 truncate max-w-[400px] cursor-pointer">
                   {{ bio || 'No bio yet' }}
@@ -42,8 +42,10 @@
               <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">Basic Information</h3>
               <div class="space-y-4">
                 <div class="flex items-center">
-                  <span class="text-[#8B93B1] w-24">UserId:</span>
-                  <span class="text-[#6B7C93]">{{ userId }}</span>
+                  <!-- <span class="text-[#8B93B1] w-24">UserId:</span>
+                  <span class="text-[#6B7C93]">{{ userId }}</span> -->
+                  <span class="text-[#8B93B1] w-24">User Name:</span>
+                  <span class="text-[#6B7C93]">{{ username }}</span>
                 </div>
                 <div class="flex items-center">
                   <span class="text-[#8B93B1] w-24">Email:</span>
@@ -119,6 +121,7 @@ const userStore = useUserStore()
 // 使用 store 中的数据
 const userId = ref(userStore.userInfo.id)
 const username = ref(userStore.userInfo.username)
+const nickname = ref(userStore.userInfo.nickname)
 const email = ref(userStore.userInfo.email)
 const bio = ref(userStore.userInfo.bio || 'No bio yet')
 const userAvatar = ref(userStore.userInfo.headerUrl)
@@ -233,17 +236,8 @@ onMounted(async () => {
 	}
 
 	const userInfo = await getUserInfo()
-	userStore.setUserInfo({
-		id: userInfo.id,
-		username: userInfo.username,
-		email: userInfo.email,
-		bio: userInfo.bio,
-		headerUrl: userInfo.headerUrl,
-		createdAt: userInfo.createdAt,
-		status: userInfo.status,
-    postCount: userInfo.postCount,
-    commentCount: userInfo.commentCount
-	})
+	userStore.setUserInfo(userInfo)
+  console.log("userInfo", userInfo)
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
     // postCount.value = stats.posts

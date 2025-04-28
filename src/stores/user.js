@@ -16,7 +16,8 @@ export const useUserStore = defineStore('user', () => {
         createdAt: savedUserInfo.createdAt || '',
         status: savedUserInfo.status || '',
         postCount: savedUserInfo.postCount || 0,
-        commentCount: savedUserInfo.commentCount || 0
+        commentCount: savedUserInfo.commentCount || 0,
+        nickname: savedUserInfo.nickname || '',
     });
 
     function getBasicUserInfo() {
@@ -24,7 +25,8 @@ export const useUserStore = defineStore('user', () => {
             id: userInfo.value.id,
             username: userInfo.value.username,
             headerUrl: userInfo.value.headerUrl,
-            status: userInfo.value.status
+            status: userInfo.value.status,
+            nickname: userInfo.value.nickname
         };
     }
 
@@ -41,6 +43,7 @@ export const useUserStore = defineStore('user', () => {
             status: info.status || '',
             postCount: info.postCount || 0,
             commentCount: info.commentCount || 0,
+            nickname: info.nickname || ''
         };
         console.log("userInfo store", userInfo.value)
         isLoggedInState.value = true;
@@ -59,7 +62,8 @@ export const useUserStore = defineStore('user', () => {
             createdAt: '',
             status: '',
             postCount: 0,
-            commentCount: 0
+            commentCount: 0,
+            nickname: ''
         };
         isLoggedInState.value = false;
         // 清除 localStorage

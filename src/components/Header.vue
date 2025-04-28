@@ -39,7 +39,7 @@
 								:src="userStore.userInfo.headerUrl || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
 								@error="() => true"
 							/>
-							<span class="text-[#4A4A4A]">{{ userStore.userInfo.username }}</span>
+							<span class="text-[#4A4A4A]">{{ userStore.userInfo?.nickname }}</span>
 						</div>
 						<template #dropdown>
 							<el-dropdown-menu>

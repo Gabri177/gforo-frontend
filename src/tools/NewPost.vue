@@ -47,6 +47,7 @@ import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
 import VueMarkdownEditor, { xss } from '@kangc/v-md-editor';
 
+
 VMdEditor.use(githubTheme);
 
 const postLoading = ref(false); 

@@ -66,6 +66,10 @@
 
     <NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" :confirmButton="false" @publish="publishReplyPost"
         :title="!isEditting ? 'Reply Post' : 'Edit'" :needReplyTitle="isNeedTitle" @cancel="isEditting = false" />
+
+    <Hint v-model:visible="isHintVisible" :confirmButton="true" title="Confirm Operation"
+        message="Are you sure you wanna delete this ?" @confirm="handleHintConfirm"
+        :confirmLoading="isHintLoading" />
 </template>
 
 <script setup>
@@ -80,8 +84,12 @@ import LikePost from '~/components/LikePost.vue';
 import { getPostByPage, deletePost, updatePost } from '~/api/postAPI';
 import { addCommentToPost, addCommentToComment, deleteComment, updateComment } from '~/api/commentAPI';
 import { useRoute, useRouter } from 'vue-router';
+import Hint from '~/tools/Hint.vue';
 
-
+// 确认删除
+const isHintLoading = ref(false)
+const isHintVisible = ref(false)
+const hintConfirmAction = ref(() => {})
 
 // 滚动相关
 const scrollTargetCommentId = ref(null)
@@ -93,6 +101,7 @@ const replyPageSize = ref(10)
 
 // 展开状态管理
 const expandedComments = ref(new Set())
+
 
 // 回复相关的状态
 const isNeedTitle = ref(false)
@@ -127,6 +136,19 @@ const isEditting = ref(false)
 
 console.log("postId", route.params.postId)
 
+const showDeleteConfirm = (action) => {
+  hintConfirmAction.value = action
+  isHintVisible.value = true
+}
+
+const handleHintConfirm = () => {
+  if (!hintConfirmAction.value) return
+  
+  isHintLoading.value = true
+  hintConfirmAction.value()
+}
+
+
 const handleReturn = () => {
     router.back()
 }
@@ -152,7 +174,8 @@ const commentToComment = reactive({
 const handlePostFloorDelete = (comment) => {
     console.log('handlePostFloorDelete', comment?.id)
 
-    deleteComment(comment?.id || 0)
+    showDeleteConfirm(() => {
+        deleteComment(comment?.id || 0)
       .then(res => {
             ElMessage.success('Delete success')
             initPosts(currentPage.value)
@@ -160,26 +183,41 @@ const handlePostFloorDelete = (comment) => {
       .catch(err => {
             ElMessage.error(err.message || 'Delete failed')
         })
+      .finally(() => {
+        isHintLoading.value = false
+        isHintVisible.value = false
+      })
+  })
+
+    
 }
 
 const handlePostFloorDeletePost = (postOrComment, isFloor) => {
     console.log('handlePostFloorDeletePost', postOrComment.id, isFloor)
 
     if (isFloor == 0){ // 帖子的删除
-        deletePost(postOrComment.id)
-          .then(res => {
-                ElMessage.success('删除成功')
-                router.push('/')
-            })
-          .catch(err => {
-                ElMessage.error(err.message || '删除失败')
-            })
+        showDeleteConfirm(() => {
+            deletePost(postOrComment.id)
+            .then(res => {
+                    ElMessage.success('删除成功')
+                    router.push('/')
+                })
+            .catch(err => {
+                    ElMessage.error(err.message || '删除失败')
+                })
+            .finally(() => {
+                isHintLoading.value = false
+                isHintVisible.value = false
+                })
+        })
+        
     }
     
     if (isFloor == 1) // 帖子的评论删除
         handlePostFloorDelete(postOrComment)
     
 }
+
 const handlePostFloorReportPost = (post, isFloor) => {
     console.log('handlePostFloorReportPost', post?.id, isFloor)
     ElMessage.warning('举报功能暂未实现 post' + isFloor)

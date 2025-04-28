@@ -95,10 +95,10 @@
 							<div class="flex justify-between items-center">
 								<div class="flex justify-between items-center">
 									<div class="w-[5rem] flex items-center justify-center">
-										<u class="text-center cursor-default">{{ map.user.username }}</u>
+										<u class="text-center cursor-default truncate w-24">{{ map.user?.nickname }}</u>
 									</div>
 									<div>
-										<span class="font-bold cursor-default">Posted on &nbsp</span>
+										<span class="font-bold cursor-default">&nbsp Posted on &nbsp</span>
 										<b class="text-[#A1A8C1] cursor-default">{{ formatDate(map.discussPosts.createTime)
 											}}</b>
 									</div>
