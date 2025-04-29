@@ -27,7 +27,7 @@ const routes = [
     //meta: { transition: 'fade-scale' }
   },
   {
-    path: '/register/:userId/:token',
+    path: '/register/:email/:code',
     name: 'RegisterWithVars',
     component: Register,
     //meta: { transition: 'fade-scale' }

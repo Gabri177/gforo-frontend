@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8" style="margin-top: 60px;">
+  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8"
+    style="margin-top: 60px;">
     <div class="w-full h-full flex justify-center items-center">
       <div class="w-3/4 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl">
         <div class="max-w-3xl mx-auto">
@@ -8,37 +9,21 @@
           <el-tabs class="morandi-tabs">
             <!-- 个人资料设置 -->
             <el-tab-pane label="Profile">
-              <el-form 
-                ref="profileFormRef"
-                :model="profileForm"
-                :rules="profileRules"
-                label-position="top"
-                hide-required-asterisk
-                class="w-full"
-              >
+              <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-position="top"
+                hide-required-asterisk class="w-full">
                 <!-- 头像Url设置 -->
                 <div class="mb-6">
                   <label class="block text-[#6B7C93] mb-2">Avatar</label>
                   <div class="flex flex-col items-center">
-                    <div 
-                      class="selected-avatar-wrapper cursor-pointer" 
-                      @click="showAvatarDialog = true"
-                    >
-                      <img 
-                        :src="profileForm.headerUrl || '/default-avatar.png'" 
-                        alt="avatar"
-                        class="w-20 h-20 rounded-full object-cover"
-                      >
+                    <div class="selected-avatar-wrapper cursor-pointer" @click="showAvatarDialog = true">
+                      <img :src="profileForm.headerUrl || '/default-avatar.png'" alt="avatar"
+                        class="w-20 h-20 rounded-full object-cover">
                     </div>
                     <div class="flex flex-col mt-2 justify-center items-center">
                       <div class="text-[#6B7C93] text-sm font-medium mb-2">
                         Set your own avatar
                       </div>
-                      <el-input
-                        v-model="customUrl"
-                        placeholder="Input image URL"
-                        class="ml-2 mt-2 w-64"
-                      >
+                      <el-input v-model="customUrl" placeholder="Input image URL" class="ml-2 mt-2 w-64">
                         <template #append>
                           <el-button @click="previewCustomUrl">Preview</el-button>
                         </template>
@@ -50,125 +35,77 @@
                 <!-- 基本信息表单 -->
                 <el-form-item label="Username" prop="username">
                   <div class="w-full flex items-center">
-					<el-input 
-                    v-model="profileForm.username"
-                    class="morandi-input"
-					:disabled="usernameEditActive"
-                  />
-				  <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" 
-				  @click="activeUsernameEdit"
-				  :disabled="!usernameEditActive"
-				  >
-					Modify Username
-					</el-button>
-				  </div>
+                    <el-input v-model="profileForm.username" class="morandi-input" :disabled="usernameEditActive" />
+                    <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]"
+                      @click="activeUsernameEdit" :disabled="!usernameEditActive">
+                      Modify Username
+                    </el-button>
+                  </div>
                 </el-form-item>
 
-                <el-form-item label="Email ( If you reset the email, you need to verify it again... )" 
-					prop="email">
+                <el-form-item label="Email ( If you reset the email, you need to verify it again... )" prop="email">
                   <div class="w-full flex items-center">
-					<el-input 
-                    v-model="profileForm.email"
-                    class="morandi-input"
-					:disabled="emailEditActive"
-                  />
-				  <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" 
-				  @click="activeEmailEdit"
-				  :disabled="!emailEditActive"
-				  >
-					Modify Email
-				</el-button>
-				  </div>
+                    <el-input v-model="profileForm.email" class="morandi-input" 
+                    :disabled="profileForm.email == userStore.userInfo.email && emailEditActive" />
+                    <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" @click="activeEmailEdit"
+                      :disabled="!emailEditActive && profileForm.email == userStore.userInfo.email">
+                      {{ emailEditActive ? 'Modify Email' : 'Save Email'  }}
+                    </el-button>
+                  </div>
                 </el-form-item>
 
                 <el-form-item label="Bio" prop="bio">
-                  <el-input 
-                    v-model="profileForm.bio"
-                    type="textarea"
-                    rows="4"
-                    class="morandi-input"
-                    placeholder="Write something about yourself"
-                    maxlength="500"
-                  />
+                  <el-input v-model="profileForm.bio" type="textarea" rows="4" class="morandi-input"
+                    placeholder="Write something about yourself" maxlength="500" />
                   <div class="flex justify-end w-full">
-					<div class="bio-counter pt-1">
-                    {{ profileForm.bio.length }}/500
-                  	</div>
-				  </div>
+                    <div class="bio-counter pt-1">
+                      {{ profileForm.bio.length }}/500
+                    </div>
+                  </div>
                 </el-form-item>
               </el-form>
               <!-- 个人资料的保存按钮 -->
               <div class="mt-8 flex justify-end space-x-4">
-                <el-button 
-                  class="morandi-button-secondary"
-                  @click="router.back()"
-                >
+                <el-button class="morandi-button-secondary" @click="router.back()">
                   Cancel
                 </el-button>
-                <el-button 
-                  type="primary"
-                  class="morandi-button"
-                  :loading="loading"
-                  @click="handleProfileSave"
-				  :disabled="(profileForm.username == userStore.userInfo.username && 
-				  		profileForm.bio == userStore.userInfo.bio && 
-						profileForm.headerUrl == userStore.userInfo.headerUrl &&
-						profileForm.email == userStore.userInfo.email) ? true : false"
-                >
-                  {{ profileForm.username == userStore.userInfo.username && profileForm.bio == userStore.userInfo.bio && profileForm.headerUrl == userStore.userInfo.headerUrl && profileForm.email == userStore.userInfo.email ? 'Nothing Changed' : 'Save Changes' }}
+                <el-button type="primary" class="morandi-button" :loading="loading" @click="handleProfileSave"
+                  :disabled="(profileForm.username == userStore.userInfo.username &&
+                    profileForm.bio == userStore.userInfo.bio &&
+                    profileForm.headerUrl == userStore.userInfo.headerUrl &&
+                    profileForm.email == userStore.userInfo.email) ? true : false">
+                  {{ profileForm.username == userStore.userInfo.username && profileForm.bio == userStore.userInfo.bio &&
+                    profileForm.headerUrl == userStore.userInfo.headerUrl && profileForm.email == userStore.userInfo.email
+                    ? 'Nothing Changed' : 'Save Changes' }}
                 </el-button>
               </div>
             </el-tab-pane>
 
             <!-- 安全设置 -->
             <el-tab-pane label="Security">
-              <el-form 
-                ref="securityFormRef"
-                :model="securityForm"
-                :rules="securityRules"
-                label-position="top"
-              >
+              <el-form ref="securityFormRef" :model="securityForm" :rules="securityRules" label-position="top">
                 <el-form-item label="Current Password" prop="oldPassword">
-                  <el-input 
-                    v-model="securityForm.oldPassword"
-                    type="password"
-                    class="morandi-input"
-					:show-password="true" clearable
-                  />
+                  <el-input v-model="securityForm.oldPassword" type="password" class="morandi-input"
+                    :show-password="true" clearable />
                 </el-form-item>
 
                 <el-form-item label="New Password" prop="newPassword">
-                  <el-input 
-                    v-model="securityForm.newPassword"
-                    type="password"
-                    class="morandi-input"
-					:show-password="true" clearable
-                  />
+                  <el-input v-model="securityForm.newPassword" type="password" class="morandi-input"
+                    :show-password="true" clearable />
                 </el-form-item>
 
                 <el-form-item label="Confirm Password" prop="confirmPassword">
-                  <el-input 
-                    v-model="securityForm.confirmPassword"
-                    type="password"
-                    class="morandi-input"
-					:show-password="true" clearable
-                  />
+                  <el-input v-model="securityForm.confirmPassword" type="password" class="morandi-input"
+                    :show-password="true" clearable />
                 </el-form-item>
               </el-form>
               <!-- 安全设置的按钮 -->
               <div class="mt-8 flex justify-end space-x-4">
-                <el-button 
-                  class="morandi-button-secondary"
-                  @click="router.back()"
-                >
+                <el-button class="morandi-button-secondary" @click="router.back()">
                   Cancel
                 </el-button>
-                <el-button 
-                  type="primary"
-                  class="morandi-button"
-                  :loading="securityLoading"
-                  @click="handlePasswordChange"
-                >
+                <el-button type="primary" class="morandi-button" :loading="securityLoading"
+                  @click="handlePasswordChange">
                   Change Password
                 </el-button>
               </div>
@@ -180,12 +117,14 @@
   </div>
 
   <!-- 将 AvatarChoose 组件移到这里 -->
-  <AvatarChoose
-    ref="avatarChooseRef"
-    v-model="showAvatarDialog"
-    :selected-url="profileForm.headerUrl"
-    @select="handleAvatarSelect"
-  />
+  <AvatarChoose ref="avatarChooseRef" v-model="showAvatarDialog" :selected-url="profileForm.headerUrl"
+    @select="handleAvatarSelect" />
+
+  <VerifyCodeDialog
+		ref="verifyCodeDialogRef"
+		@verify="handleVerifyCode"
+		@cancel="handleCancelVerification"
+	/>
 </template>
 
 <script setup>
@@ -195,11 +134,15 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
 import AvatarChoose from '~/components/AvatarChoose.vue'
 import {
-	updateUserInfo,
-	changePassword,
-	getUserInfo
+  updateUserInfo,
+  changePassword,
+  getUserInfo,
+  sendVerifyEmail,
+  verifyEmail
 } from '~/api/userApi'
+import VerifyCodeDialog from '~/components/VerifyCodeDialog.vue'
 
+const verifyCodeDialogRef = ref(null)
 const router = useRouter()
 const loading = ref(false)
 const securityLoading = ref(false)
@@ -222,12 +165,56 @@ const securityForm = reactive({
   confirmPassword: ''
 })
 
+const handleVerifyCode = (code) => {
+  
+  verifyEmail(code, profileForm.email)
+  .then(() => {
+      ElMessage.success('Email verified successfully')
+      getUserInfo()
+      .then((res) => {
+      	console.log("email verified new user info: ", res)
+        userStore.setUserInfo(res)
+      })
+  })
+  .catch((error) => {
+      ElMessage.error(error.message)
+      profileForm.email = userStore.userInfo.email
+  })
+  .finally(() => {
+      emailEditActive.value = true
+  })
+}
+
+const handleCancelVerification = () => {
+	verifyCodeDialogRef.value?.hideVerifyCode()
+}
+
 const activeUsernameEdit = () => {
-	usernameEditActive.value = false
+  usernameEditActive.value = false
 }
 
 const activeEmailEdit = () => {
-	emailEditActive.value = false
+  
+
+  if (emailEditActive.value && profileForm.email == userStore.userInfo.email){
+    // 开启编辑模式
+    emailEditActive.value = false
+  } else {
+    console.log('email changed')
+    
+    // 发送验证邮件
+    sendVerifyEmail(profileForm.email)
+    .then(() => {
+      verifyCodeDialogRef.value?.showVerifyCode()
+      ElMessage.success('Verification email sent, Please check your email')
+    })
+    .catch((error) => {
+      emailEditActive.value = true
+      ElMessage.error(error.message)
+      profileForm.email = userStore.userInfo.email
+    })
+    
+  }
 }
 
 const showAvatarDialog = ref(false)
@@ -251,7 +238,7 @@ const profileRules = {
 const securityRules = {
   oldPassword: [
     { required: true, message: 'Please enter current password', trigger: 'blur' },
-	{ min: 6, message: 'Length should be at least 6 characters', trigger: 'blur' }
+    { min: 6, message: 'Length should be at least 6 characters', trigger: 'blur' }
   ],
   newPassword: [
     { required: true, message: 'Please enter new password', trigger: 'blur' },
@@ -273,10 +260,10 @@ const securityRules = {
 }
 
 const handleAvatarSelect = async (url) => {
-    // TODO: 调用API更新头像
-    // userStore.updateAvatar(url)
-    profileForm.headerUrl = url
-	customUrl.value = url
+  // TODO: 调用API更新头像
+  // userStore.updateAvatar(url)
+  profileForm.headerUrl = url
+  customUrl.value = url
 
 }
 
@@ -286,17 +273,17 @@ const handleProfileSave = async () => {
   try {
     await profileFormRef.value?.validate()
     await updateUserInfo(profileForm)
-	const userInfoRes = await getUserInfo()
-	console.log("new user info: ", userInfoRes)
-	userStore.setUserInfo(userInfoRes)
-	usernameEditActive.value = true
-	emailEditActive.value = true
+    const userInfoRes = await getUserInfo()
+    console.log("new user info: ", userInfoRes)
+    userStore.setUserInfo(userInfoRes)
+    usernameEditActive.value = true
+    emailEditActive.value = true
     ElMessage.success('Profile updated successfully')
     // router.push('/profile')
   } catch (error) {
     console.error('Failed to save profile:', error)
     ElMessage.error(error?.message || 'Failed to save profile')
-	profileFormRef.value?.resetFields()
+    profileFormRef.value?.resetFields()
   } finally {
     loading.value = false
   }
@@ -307,8 +294,8 @@ const handlePasswordChange = async () => {
   securityLoading.value = true
   try {
     await securityFormRef.value?.validate()
-	await changePassword(securityForm)
-	ElMessage.success('Password changed successfully')
+    await changePassword(securityForm)
+    ElMessage.success('Password changed successfully')
     resetSecurityForm()
   } catch (error) {
     console.error('Failed to change password:', error)
@@ -331,7 +318,7 @@ const previewCustomUrl = () => {
   // 直接设置图片，不打开对话框
   avatarChooseRef.value?.setImgUrl(customUrl.value)
   profileForm.headerUrl = customUrl.value
-  
+
 }
 </script>
 
@@ -356,14 +343,16 @@ const previewCustomUrl = () => {
 }
 
 .morandi-green-button {
-  background-color: #7E998F !important;  /* 莫兰迪墨绿 */
+  background-color: #7E998F !important;
+  /* 莫兰迪墨绿 */
   border-color: #7E998F !important;
   color: white !important;
   transition: all 0.3s ease-in-out;
 }
 
 .morandi-green-button:hover {
-  background-color: #6A847B !important;  /* 深一点的墨绿 */
+  background-color: #6A847B !important;
+  /* 深一点的墨绿 */
   border-color: #6A847B !important;
 }
 
@@ -373,7 +362,8 @@ const previewCustomUrl = () => {
 }
 
 .morandi-green-button:disabled {
-  background-color: #C6D1CB !important;  /* 淡墨绿灰 */
+  background-color: #C6D1CB !important;
+  /* 淡墨绿灰 */
   border-color: #C6D1CB !important;
   color: #F1F1F1 !important;
   cursor: not-allowed;
@@ -383,24 +373,28 @@ const previewCustomUrl = () => {
 /* 莫兰迪风格按钮样式 */
 /* 莫兰迪风格按钮样式 */
 .morandi-button {
-  background-color: #A1A8C1 !important;  /* 主色：莫兰迪紫蓝 */
+  background-color: #A1A8C1 !important;
+  /* 主色：莫兰迪紫蓝 */
   border-color: #A1A8C1 !important;
   color: white !important;
   transition: all 0.3s ease-in-out;
 }
 
 .morandi-button:hover {
-  background-color: #8B93B1 !important;  /* hover 色：稍深一点更有层次 */
+  background-color: #8B93B1 !important;
+  /* hover 色：稍深一点更有层次 */
   border-color: #8B93B1 !important;
 }
 
 .morandi-button:active {
-  background-color: #7A87A8 !important;  /* active 色：再深一级 */
+  background-color: #7A87A8 !important;
+  /* active 色：再深一级 */
   border-color: #7A87A8 !important;
 }
 
 .morandi-button:disabled {
-  background-color: #D1D4DE !important;  /* disabled 色：淡灰紫 */
+  background-color: #D1D4DE !important;
+  /* disabled 色：淡灰紫 */
   border-color: #D1D4DE !important;
   color: #F1F1F1 !important;
   cursor: not-allowed !important;
@@ -483,13 +477,15 @@ const previewCustomUrl = () => {
 
 /* 调整表单宽度和边距 */
 :deep(.el-form) {
-  max-width: 600px !important; /* 或者其他合适的宽度 */
+  max-width: 600px !important;
+  /* 或者其他合适的宽度 */
   margin: 0 auto !important;
 }
 
 /* 表单验证提示的莫兰迪风格 */
 :deep(.el-form-item__error) {
-  color: #C4A0A0 !important; /* 更柔和的莫兰迪红色 */
+  color: #C4A0A0 !important;
+  /* 更柔和的莫兰迪红色 */
   font-size: 12px !important;
   padding-top: 4px !important;
   font-weight: 500 !important;
@@ -551,7 +547,8 @@ const previewCustomUrl = () => {
   border-radius: 50%;
   padding: 3px;
   transition: all 0.3s ease;
-  width: 86px;  /* 80px + 2 * (padding + border) */
+  width: 86px;
+  /* 80px + 2 * (padding + border) */
   height: 86px;
   display: flex;
   justify-content: center;
@@ -577,6 +574,7 @@ const previewCustomUrl = () => {
   text-align: right;
   font-size: 0.875rem;
   color: #8B93B1;
-  margin-top: -8px; /* 调整位置 */
+  margin-top: -8px;
+  /* 调整位置 */
 }
-</style> 
+</style>

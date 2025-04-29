@@ -89,6 +89,13 @@
 					>
 						Home
 					</el-button>
+					<el-button 
+						type="success" 
+						class="morandi-button2 mx-10" 
+						@click="onActivated"
+					>
+						Login
+					</el-button>
 				</div>
 			</div>
 		</div>
@@ -100,17 +107,21 @@
 		:selected-url="form.headerUrl"
 		@select="handleAvatarSelect"
 	/>
+
+	<VerifyCodeDialog
+		ref="verifyCodeDialogRef"
+		@verify="handleVerifyCode"
+		@cancel="handleCancelVerification"
+	/>
 </template>
 
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-	registerUser
+	registerUser,
+	activateAccount
 } from '~/api/registerApi'
-import {
-	verifyEmail
-} from '~/api/userApi'
 
 import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
@@ -121,9 +132,10 @@ import {
 	verifyCaptcha
 } from '~/api/captchaApi';
 import AvatarChoose from '~/components/AvatarChoose.vue'
-import { useUserStore } from '~/stores/user'
 import { SCENE } from '~/constants/scene';
-const userStore = useUserStore()
+import VerifyCodeDialog from '~/components/VerifyCodeDialog.vue'
+
+const verifyCodeDialogRef = ref(null)
 const captchaImg = ref(null); // 图形验证码
 const captchaId = ref('');  // 图形验证码ID
 const captchaInput = ref(''); // 图形验证码输入
@@ -135,15 +147,15 @@ const verifyInfo = reactive({
 	title: 'Activating Account ...',
 	content: 'this is a test',
 })
-const token = route.params.token
-const userId = route.params.userId
-
+const email = route.params.email
+const sixDigitCode = route.params.code
 
 const registerLoading = ref(false);
 const formRef = ref(null);
-const currentPage = ref(1)
-const pageSize = 16
-const totalPages = getTotalPages(pageSize)
+
+const onActivated = () => {
+	router.push('/login');
+}
 
 const form = reactive({
 	username: '',
@@ -152,6 +164,27 @@ const form = reactive({
 	email: '',
 	headerUrl: getAvatarsByPage(1, 16)[0].url // 默认使用第一个头像的 URL
 });
+
+const handleVerifyCode = (code) => {
+	
+	activateAccount(code, form.email)
+		.then(res => {
+			isRegister.value = false;
+			verifyInfo.title = 'Account Activated';
+			verifyInfo.content = 'Your account has been activated successfully!';
+			isActivated.value = true;
+			isVerifying.value = false;
+			ElMessage.success('Verification successful')
+		})
+		.catch(err => {
+			ElMessage.error('Verification failed: ' + err.message)
+		})
+
+}
+
+const handleCancelVerification = () => {
+	verifyCodeDialogRef.value?.hideVerifyCode()
+}
 
 const currentAvatarUrl = computed(() => {
 	return form.headerUrl
@@ -216,17 +249,12 @@ const onSubmit = () => {
 				.then(res => {
 					ElMessage.success('Remember to activate your account in Profile');
 					registerLoading.value = false;
-
-					/*
-
-						这里可以加上自动登录的逻辑
-					 */
-					setTimeout(() => {
-						router.push('/login'); // 跳转到首页
-					}, 2000);
+					verifyCodeDialogRef.value.showVerifyCode();
+					// setTimeout(() => {
+					// 	router.push('/login'); // 跳转到首页
+					// }, 2000);
 				})
 				.catch(err => {
-					
 					// console.log('Error: ' , err.response.data.message);
 					ElMessage.error("register failed: " + err.message);
 					registerLoading.value = false;
@@ -260,15 +288,14 @@ const showAvatarDialog = ref(false);
 // 在组件挂载后初始化
 onMounted(() => {
 
-	if (token && userId) {
+	if (email && sixDigitCode) {
 		isRegister.value = false;
-		console.log('收到 token:', token);
-		verifyEmail(userId, token)
+		console.log('收到 email:', email);
+		activateAccount(sixDigitCode, email)
 			.then(res => {
 				verifyInfo.title = 'Account Activated';
 				verifyInfo.content = 'Your account has been activated successfully!';
 				isActivated.value = true;
-				localStorage.setItem('emailVerified', 'true');
 				console.log('激活成功: ', res);
 			})
 			.catch(err => {
@@ -280,7 +307,6 @@ onMounted(() => {
 			.finally(() => {
 				isVerifying.value = false;
 			});
-		// 这里可以调用接口校验 token
 	} else {
 		isRegister.value = true;
 		console.log('没有 token');
@@ -292,7 +318,7 @@ onMounted(() => {
 			.catch(err => {
 				console.error(err);
 			});
-	}
+	} 
 	
 });
 
