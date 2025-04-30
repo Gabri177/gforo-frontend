@@ -1,6 +1,6 @@
 <template>
-	<div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8" style="margin-top: 60px;">
-		<div class="w-full h-full flex justify-center items-center">
+	<div class="flex-1 w-full h-full flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8">
+		<div class="w-full h-full flex justify-center items-center my-3">
 			<div class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
 			<div class="max-w-md w-full space-y-8">
 				<div>

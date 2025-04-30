@@ -1,6 +1,5 @@
 <template>
-  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8"
-    style="margin-top: 60px;">
+  <div class="w-full h-full flex-1 flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8">
     <div class="w-full h-full flex justify-center items-center">
       <div class="w-3/4 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl">
         <div class="max-w-3xl mx-auto">
@@ -23,7 +22,7 @@
                       <div class="text-[#6B7C93] text-sm font-medium mb-2">
                         Set your own avatar
                       </div>
-                      <el-input v-model="customUrl" placeholder="Input image URL" class="ml-2 mt-2 w-64">
+                      <el-input v-model="customUrl" placeholder="Input image URL" class="ml-2 mt-2 w-64 morandi-input">
                         <template #append>
                           <el-button @click="previewCustomUrl">Preview</el-button>
                         </template>
@@ -33,24 +32,34 @@
                 </div>
 
                 <!-- 基本信息表单 -->
-                <el-form-item label="Username" prop="username">
+                <el-form-item label="Username (Every 30 days can only modify once)" prop="username">
                   <div class="w-full flex items-center">
-                    <el-input v-model="profileForm.username" class="morandi-input" :disabled="usernameEditActive" />
+                    <el-input v-model="profileForm.username" class="morandi-input" :disabled="!hasUsernameInputFocus"
+                      ref="usernameInputRef" @blur="handleUsernameBlur" @focus="hasUsernameInputFocus = true" />
                     <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]"
-                      @click="activeUsernameEdit" :disabled="!usernameEditActive">
-                      Modify Username
+                      @click="activeUsernameEdit" :loading="usernameLoading"
+                      :disabled="!usernameEditInactive && profileForm.username == userStore.userInfo.username">
+                      {{ usernameEditInactive && profileForm.username == userStore.userInfo.username ? 'Modify Username'
+                        : 'Verify Username' }}
                     </el-button>
                   </div>
                 </el-form-item>
 
                 <el-form-item label="Email ( If you reset the email, you need to verify it again... )" prop="email">
                   <div class="w-full flex items-center">
-                    <el-input v-model="profileForm.email" class="morandi-input" 
-                    :disabled="profileForm.email == userStore.userInfo.email && emailEditActive" />
+                    <el-input v-model="profileForm.email" class="morandi-input" @blur="handleEmailBlur"
+                      @focus="hasEmailIputFocus = true" :disabled="!hasEmailIputFocus" ref="emailInputRef" />
                     <el-button type="primary" class="morandi-green-button mx-1 min-w-[150px]" @click="activeEmailEdit"
-                      :disabled="!emailEditActive && profileForm.email == userStore.userInfo.email">
-                      {{ emailEditActive ? 'Modify Email' : 'Save Email'  }}
+                      :loading="emailLoading"
+                      :disabled="!emailEditInactive && profileForm.email == userStore.userInfo.email">
+                      {{ emailEditInactive && profileForm.email == userStore.userInfo.email ? 'Modify Email' : 'Verify Email' }}
                     </el-button>
+                  </div>
+                </el-form-item>
+
+                <el-form-item label="Nick Name" prop="nickname">
+                  <div class="w-full flex items-center">
+                  <el-input v-model="profileForm.nickname" class="morandi-input" />
                   </div>
                 </el-form-item>
 
@@ -70,12 +79,14 @@
                   Cancel
                 </el-button>
                 <el-button type="primary" class="morandi-button" :loading="loading" @click="handleProfileSave"
-                  :disabled="(profileForm.username == userStore.userInfo.username &&
+                  :disabled="(
                     profileForm.bio == userStore.userInfo.bio &&
                     profileForm.headerUrl == userStore.userInfo.headerUrl &&
-                    profileForm.email == userStore.userInfo.email) ? true : false">
-                  {{ profileForm.username == userStore.userInfo.username && profileForm.bio == userStore.userInfo.bio &&
-                    profileForm.headerUrl == userStore.userInfo.headerUrl && profileForm.email == userStore.userInfo.email
+                    profileForm.nickname == userStore.userInfo.nickname
+                    ) ? true : false">
+                  {{ profileForm.bio == userStore.userInfo.bio &&
+                    profileForm.headerUrl == userStore.userInfo.headerUrl &&
+                    profileForm.nickname == userStore.userInfo.nickname
                     ? 'Nothing Changed' : 'Save Changes' }}
                 </el-button>
               </div>
@@ -120,15 +131,11 @@
   <AvatarChoose ref="avatarChooseRef" v-model="showAvatarDialog" :selected-url="profileForm.headerUrl"
     @select="handleAvatarSelect" />
 
-  <VerifyCodeDialog
-		ref="verifyCodeDialogRef"
-		@verify="handleVerifyCode"
-		@cancel="handleCancelVerification"
-	/>
+  <VerifyCodeDialog ref="verifyCodeDialogRef" @verify="handleVerifyCode" @cancel="handleCancelVerification" />
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
@@ -138,7 +145,8 @@ import {
   changePassword,
   getUserInfo,
   sendVerifyEmail,
-  verifyEmail
+  verifyEmail,
+  changeUsername
 } from '~/api/userApi'
 import VerifyCodeDialog from '~/components/VerifyCodeDialog.vue'
 
@@ -149,10 +157,19 @@ const securityLoading = ref(false)
 const profileFormRef = ref(null)
 const securityFormRef = ref(null)
 const userStore = useUserStore()
-const usernameEditActive = ref(true)
-const emailEditActive = ref(true)
+const usernameEditInactive = ref(true)
+const emailEditInactive = ref(true)
+const hasEmailIputFocus = ref(false)
+const hasUsernameInputFocus = ref(false)
+const emailInputRef = ref(null)
+const startChangeEmail = ref(false)
+const startChangeUsername = ref(false)
+const usernameInputRef = ref(null)
+const usernameLoading = ref(false)
+const emailLoading = ref(false)
 
 const profileForm = reactive({
+  nickname: userStore.userInfo.nickname,
   username: userStore.userInfo.username,
   email: userStore.userInfo.email,
   bio: userStore.userInfo.bio,
@@ -165,55 +182,149 @@ const securityForm = reactive({
   confirmPassword: ''
 })
 
+const handleUsernameBlur = () => {
+  if (hasUsernameInputFocus.value) {
+    console.log('username input blur')
+    usernameEditInactive.value = true
+    hasUsernameInputFocus.value = false
+    setTimeout(() => {
+      if (!startChangeUsername.value) {
+        profileForm.username = userStore.userInfo.username
+      }
+    }, 500)
+  }
+}
+
+const handleEmailBlur = () => {
+  if (hasEmailIputFocus.value) {
+    console.log('email input blur')
+    emailEditInactive.value = true
+    hasEmailIputFocus.value = false
+    setTimeout(() => {
+      if (!startChangeEmail.value) {
+        profileForm.email = userStore.userInfo.email
+      }
+    }, 500)
+
+  }
+}
+
 const handleVerifyCode = (code) => {
-  
+
   verifyEmail(code, profileForm.email)
-  .then(() => {
+    .then(() => {
       ElMessage.success('Email verified successfully')
+      handleCancelVerification()
       getUserInfo()
-      .then((res) => {
-      	console.log("email verified new user info: ", res)
-        userStore.setUserInfo(res)
-      })
-  })
-  .catch((error) => {
+        .then((res) => {
+          console.log("email verified new user info: ", res)
+          userStore.setUserInfo(res)
+        })
+    })
+    .catch((error) => {
       ElMessage.error(error.message)
       profileForm.email = userStore.userInfo.email
-  })
-  .finally(() => {
-      emailEditActive.value = true
-  })
+    })
+    .finally(() => {
+      emailEditInactive.value = true
+      startChangeEmail.value = false
+    })
 }
 
 const handleCancelVerification = () => {
-	verifyCodeDialogRef.value?.hideVerifyCode()
+  verifyCodeDialogRef.value?.hideVerifyCode()
 }
 
-const activeUsernameEdit = () => {
-  usernameEditActive.value = false
-}
-
-const activeEmailEdit = () => {
-  
-
-  if (emailEditActive.value && profileForm.email == userStore.userInfo.email){
+const activeUsernameEdit = async () => {
+  startChangeUsername.value = true
+  if (usernameEditInactive.value && profileForm.username == userStore.userInfo.username) {
     // 开启编辑模式
-    emailEditActive.value = false
+    usernameEditInactive.value = false
+    hasUsernameInputFocus.value = true
+    nextTick(() => {
+      usernameInputRef.value?.focus()
+    })
+  } else {
+    console.log('username changed')
+
+    const isValid = await profileFormRef.value.validateField('username')
+      .then(() => true)
+      .catch(() => false)
+    console.log('isValid: ', isValid)
+
+    if (!isValid) {
+      startChangeUsername.value = false
+      usernameEditInactive.value = true
+      hasUsernameInputFocus.value = true
+      return
+    }
+
+    usernameLoading.value = true
+    changeUsername(profileForm.username)
+      .then(() => {
+        ElMessage.success('Username changed successfully')
+        getUserInfo()
+          .then((res) => {
+            console.log("email verified new user info: ", res)
+            userStore.setUserInfo(res)
+            startChangeUsername.value = false
+          })
+      })
+      .catch((error) => {
+        usernameEditInactive.value = true
+        ElMessage.error(error?.message || 'Failed to change username')
+        profileForm.username = userStore.userInfo.username
+        startChangeUsername.value = false
+      })
+      .finally(() => {
+        usernameLoading.value = false
+      })
+
+  }
+}
+
+const activeEmailEdit = async () => {
+  startChangeEmail.value = true
+  if (emailEditInactive.value && profileForm.email == userStore.userInfo.email) {
+    // 开启编辑模式
+    console.log('email edit inactive================')
+    emailEditInactive.value = false
+    hasEmailIputFocus.value = true
+    nextTick(() => {
+      emailInputRef.value?.focus()
+    })
   } else {
     console.log('email changed')
-    
+
+    const isValid = await profileFormRef.value.validateField('email')
+      .then(() => true)
+      .catch(() => false)
+    console.log('isValid: ', isValid)
+
+    if (!isValid) {
+      startChangeEmail.value = false
+      emailEditInactive.value = true
+      hasEmailIputFocus.value = true
+      return
+    }
+
     // 发送验证邮件
+    emailLoading.value = true
     sendVerifyEmail(profileForm.email)
-    .then(() => {
-      verifyCodeDialogRef.value?.showVerifyCode()
-      ElMessage.success('Verification email sent, Please check your email')
-    })
-    .catch((error) => {
-      emailEditActive.value = true
-      ElMessage.error(error.message)
-      profileForm.email = userStore.userInfo.email
-    })
-    
+      .then(() => {
+        verifyCodeDialogRef.value?.showVerifyCode()
+        ElMessage.success('Verification email sent, Please check your email')
+      })
+      .catch((error) => {
+        emailEditInactive.value = true
+        ElMessage.error(error?.message || 'Failed to send verification email')
+        profileForm.email = userStore.userInfo.email
+        startChangeEmail.value = false
+      })
+      .finally(() => {
+        emailLoading.value = false
+      })
+
   }
 }
 
@@ -224,7 +335,7 @@ const customUrl = ref(userStore.userInfo.headerUrl)
 const profileRules = {
   username: [
     { required: true, message: 'Please enter username', trigger: 'blur' },
-    { min: 6, message: 'Length should be at least 3 characters', trigger: 'blur' }
+    { min: 6, max:20, message: 'Length should be at least 6 characters', trigger: 'blur' }
   ],
   email: [
     { required: true, message: 'Please enter email', trigger: 'blur' },
@@ -232,6 +343,10 @@ const profileRules = {
   ],
   bio: [
     { max: 500, message: 'Length should be less than 500 characters', trigger: 'blur' }
+  ],
+  nickname: [
+    { required: true, message: 'Please enter nickname', trigger: 'blur' },
+    { min: 1, max:10, message: 'Length should be at least 6 characters', trigger: 'blur' }
   ]
 }
 
@@ -272,12 +387,16 @@ const handleProfileSave = async () => {
   loading.value = true
   try {
     await profileFormRef.value?.validate()
-    await updateUserInfo(profileForm)
+    await updateUserInfo({
+      nickname: profileForm.nickname,
+      bio: profileForm.bio,
+      headerUrl: profileForm.headerUrl
+    })
     const userInfoRes = await getUserInfo()
     console.log("new user info: ", userInfoRes)
     userStore.setUserInfo(userInfoRes)
-    usernameEditActive.value = true
-    emailEditActive.value = true
+    usernameEditInactive.value = true
+    emailEditInactive.value = true
     ElMessage.success('Profile updated successfully')
     // router.push('/profile')
   } catch (error) {

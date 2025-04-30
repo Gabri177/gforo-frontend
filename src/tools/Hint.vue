@@ -1,5 +1,5 @@
 <template>
-	<el-dialog v-model="localVisible" custom-class="morandi-dialog" width="40%" @close="handleClose">
+	<el-dialog v-model="localVisible" custom-class="morandi-dialog" width="40%" @close="handleClose" center>
 		<template #header>
 			<div class="custom-header animate-fadein">
 				{{ props.title }}
@@ -52,6 +52,8 @@ const handleConfirm = () => {
 </script>
 
 <style scoped>
+
+
 .el-button.cancel-button {
 	background-color: #C1A1A1;
 	/* 莫兰迪红色 */

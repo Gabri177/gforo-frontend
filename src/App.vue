@@ -1,17 +1,21 @@
 <template>
   <el-container class="nk-container">
     <Header />
-    <template v-if="isHome">
-      <router-view />
-    </template>
-    <template v-else>
-      <transition :name="$route.meta.transition" mode="out-in">
+    <el-main class="content-wrapper">
+      <template v-if="isHome">
         <router-view />
-      </transition>
-    </template>
+      </template>
+      <template v-else>
+        <transition :name="$route.meta.transition" mode="out-in">
+          <router-view />
+        </transition>
+      </template>
+    </el-main>
     <Footer />
   </el-container>
+
 </template>
+
 
 <script setup>
 import { computed } from 'vue'
@@ -31,6 +35,19 @@ const isHome = computed(() => route.path === '/')
   flex-direction: column;
   min-height: 100vh;
 }
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* 可选，居中所有页面内容 */
+  align-items: center;
+  /* 可选，居中所有页面内容 */
+  overflow-y: auto;
+  padding: 60px 0 0 0;
+}
+
 
 /* 淡入淡出滑动效果 */
 .fade-slide-enter-active,

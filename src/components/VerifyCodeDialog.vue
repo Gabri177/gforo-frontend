@@ -65,6 +65,10 @@ const verificationForm = reactive({
 	code: ''
 })
 
+const clearForm = () => {
+	verificationForm.digits = ['', '', '', '', '', '']
+}
+
 // 监听 digits 数组变化，更新 code 字段
 watch(() => verificationForm.digits, (newDigits) => {
 	verificationForm.code = newDigits.join('')
@@ -170,7 +174,8 @@ const handleVerify = async () => {
 			verifying.value = true
 			try {
 				emit('verify', code)
-				hideVerifyCode()
+				clearForm()
+				//hideVerifyCode()
 			} catch (error) {
 				ElMessage.error(error.message || 'Verification failed')
 			} finally {

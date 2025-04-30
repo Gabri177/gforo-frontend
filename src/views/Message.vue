@@ -1,5 +1,5 @@
 <template>
-	<div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8" style="margin-top: 60px;">
+	<div class="w-full h-full flex-1 flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8">
 		<div class="w-full h-full flex justify-center items-center">
 			<div class="w-3/4 p-8 border border-[#B5A8B5] backdrop-blur-md bg-white shadow-lg rounded-2xl">
 				<div class="flex flex-col h-[600px]">

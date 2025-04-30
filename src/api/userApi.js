@@ -4,6 +4,12 @@ export function getUserInfo(){
 	return axio.get('/user/info')
 }
 
+export function changeUsername(username){
+	return axio.put('/user/change-username', {
+		username: username
+	})
+}
+
 // 修改密码
 // 这里的data格式是{oldPassword: string, newPassword: string}
 export function changePassword(data) {

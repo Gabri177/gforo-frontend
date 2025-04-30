@@ -17,6 +17,6 @@
 }
 
 :deep(.el-footer) {
-	height: auto;
+	height: 60px;
 }
 </style>

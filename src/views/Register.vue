@@ -1,6 +1,6 @@
 <template>
-	<el-main class="flex justify-center items-center bg-[#E3E0DB] min-h-[calc(100vh-60px)" style="margin-top: 60px;">
-		<div class="w-full h-full flex justify-center items-center">
+	<div class="flex-1 w-full h-full flex justify-center items-center bg-[#E3E0DB]">
+		<div class="w-full h-full flex justify-center items-center my-3">
 			<div v-if="isRegister"
 				class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
 				<h2 class="mt-1 text-center text-3xl font-extrabold text-[#6B7C93] mb-3">Register New Account</h2>
@@ -99,7 +99,7 @@
 				</div>
 			</div>
 		</div>
-	</el-main>
+	</div>
 
 	<!-- 使用头像选择组件 -->
 	<AvatarChoose
@@ -175,6 +175,7 @@ const handleVerifyCode = (code) => {
 			isActivated.value = true;
 			isVerifying.value = false;
 			ElMessage.success('Verification successful')
+			handleCancelVerification()
 		})
 		.catch(err => {
 			ElMessage.error('Verification failed: ' + err.message)

@@ -1,16 +1,13 @@
 <template>
-  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8" style="margin-top: 60px;">
+  <div class="w-full h-full flex-1 flex items-center justify-center bg-[#E3E0DB] sm:px-6 lg:px-8">
     <div class="w-full h-full flex justify-center items-center">
       <div class="w-3/4 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl profile-container">
         <div class="flex flex-col">
           <!-- 个人资料头部 -->
           <div class="flex items-center mb-8 profile-header">
-            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-[#A1A8C1] avatar-container">
-              <img 
-                :src="userAvatar || '/default-avatar.png'" 
-                alt="avatar"
-                class="w-full h-full object-cover"
-              >
+            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-[#A1A8C1] avatar-container"
+              @click="showAvatarPreview = true">
+              <img :src="userAvatar || '/default-avatar.png'" alt="avatar" class="w-full h-full object-cover">
             </div>
             <div class="ml-6 user-info relative">
               <h2 class="text-2xl font-bold text-[#6B7C93]">{{ nickname }}</h2>
@@ -19,12 +16,12 @@
                   {{ bio || 'No bio yet' }}
                 </p>
                 <!-- 悬浮卡片 -->
-                <div v-if="bio" 
-                  class="bio-tooltip opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute left-0 top-full mt-2 p-4 rounded-xl backdrop-blur-md bg-white/90 border border-[#E3E0DB] shadow-lg transition-all duration-300 z-10 max-w-[500px] min-w-[300px]"
-                >
+                <div v-if="bio"
+                  class="bio-tooltip opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute left-0 top-full mt-2 p-4 rounded-xl backdrop-blur-md bg-white/90 border border-[#E3E0DB] shadow-lg transition-all duration-300 z-10 max-w-[500px] min-w-[300px]">
                   <div class="relative">
                     <!-- 小箭头 -->
-                    <div class="absolute -top-6 left-4 w-3 h-3 rotate-45 bg-white border-l border-t border-[#E3E0DB]"></div>
+                    <div class="absolute -top-6 left-4 w-3 h-3 rotate-45 bg-white border-l border-t border-[#E3E0DB]">
+                    </div>
                     <!-- bio内容 -->
                     <p class="text-[#6B7C93] whitespace-pre-wrap break-words leading-relaxed">
                       {{ bio }}
@@ -58,7 +55,7 @@
                 <div class="flex items-center">
                   <span class="text-[#8B93B1] w-24">Status:</span>
                   <span class="text-[#6B7C93]">{{ status }}</span>
-                
+
                 </div>
               </div>
             </div>
@@ -81,10 +78,8 @@
 
           <!-- 操作按钮 -->
           <div class="mt-8 flex justify-end action-button">
-            <router-link 
-              to="/settings" 
-              class="px-6 py-2 bg-[#A1A8C1] text-white rounded-lg hover:bg-[#8B93B1] transition-colors duration-300"
-            >
+            <router-link to="/settings"
+              class="px-6 py-2 bg-[#A1A8C1] text-white rounded-lg hover:bg-[#8B93B1] transition-colors duration-300">
               Edit Profile
             </router-link>
           </div>
@@ -92,6 +87,12 @@
       </div>
     </div>
   </div>
+
+  <div class="w-full h-full"><el-dialog v-model="showAvatarPreview" width="auto" center :show-close="true"
+    class="avatar-preview-dialog max-w-[360px]">
+    <img :src="userAvatar || '/default-avatar.png'" alt="avatar preview"
+      class="max-w-full max-h-[80vh] mx-auto rounded-xl object-contain" />
+  </el-dialog></div>
 </template>
 
 <script setup>
@@ -100,7 +101,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
 
 import {
-	getUserInfo
+  getUserInfo
 } from '~/api/userApi'
 
 const router = useRouter()
@@ -117,6 +118,7 @@ const joinDate = computed(() => formatDateToYMD(userStore.userInfo.createdAt));
 const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : 'Inactive');
 const postCount = computed(() => userStore.userInfo.postCount);
 const commentCount = computed(() => userStore.userInfo.commentCount);
+const showAvatarPreview = ref(false) // 控制是否显示大图预览
 
 console.log("userInfo Profile", userStore.userInfo)
 
@@ -145,14 +147,14 @@ function formatDateToYMD(dateString) {
 
 onMounted(async () => {
   try {
-	const userInfo = await getUserInfo()
-	userStore.setUserInfo(userInfo)
-  console.log("userInfo", userInfo)
+    const userInfo = await getUserInfo()
+    userStore.setUserInfo(userInfo)
+    console.log("userInfo", userInfo)
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
     // postCount.value = stats.posts
     // commentCount.value = stats.comments
-  
+
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
   }
@@ -161,6 +163,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+:deep(.el-dialog) {
+  margin: 0 !important;
+  top: 50% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 /* 添加莫兰迪绿色按钮样式 */
 .morandi-button-green {
   background-color: #83B59D !important;
@@ -225,7 +235,7 @@ onMounted(async () => {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(120deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
   border-radius: inherit;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -278,11 +288,25 @@ onMounted(async () => {
   animation: fadeInUp 0.6s ease-out 0.6s both;
 }
 
+.avatar-preview-dialog>>>.el-dialog__body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.el-overlay-dialog {
+  display: flex !important;
+  align-items: center;       /* 垂直居中 */
+  justify-content: center;   /* 水平居中 */
+}
+
 /* 定义动画关键帧 */
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -293,6 +317,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateX(-50px) rotate(-180deg);
   }
+
   to {
     opacity: 1;
     transform: translateX(0) rotate(0);
@@ -304,6 +329,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -315,6 +341,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -326,6 +353,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -404,6 +432,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -412,14 +441,14 @@ onMounted(async () => {
 
 /* 悬浮卡片的阴影和边框效果 */
 .bio-tooltip {
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(193, 184, 168, 0.1),
     0 2px 4px -1px rgba(193, 184, 168, 0.06);
 }
 
 .bio-tooltip:hover {
   border-color: #C1B8A8;
-  box-shadow: 
+  box-shadow:
     0 10px 15px -3px rgba(193, 184, 168, 0.1),
     0 4px 6px -2px rgba(193, 184, 168, 0.05);
 }
@@ -450,4 +479,4 @@ onMounted(async () => {
   background-color: #A1A8C1;
   border-radius: 2px;
 }
-</style> 
+</style>
