@@ -7,7 +7,7 @@ export function registerUser(userdata){
 export function activateAccount(sixDigitCode, email){
 	return axio.post('/register/activate', {
 		email: email,
-		sixDigitCode: sixDigitCode
+		sixDigitCaptcha: sixDigitCode
 	})
 }
 

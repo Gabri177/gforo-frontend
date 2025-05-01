@@ -5,7 +5,7 @@
     custom-class="morandi-dialog"
     width="50%"
     @close="$emit('update:visible', false)"
-    center
+  
   >
     <div class="p-6 mt-0 py-0">
       <el-form :model="postForm">

@@ -39,6 +39,10 @@
               <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">Basic Information</h3>
               <div class="space-y-4">
                 <div class="flex items-center">
+                  <span class="text-[#8B93B1] w-24">User Id:</span>
+                  <span class="text-[#6B7C93]">{{ userId }}</span>
+                </div>
+                <div class="flex items-center">
                   <!-- <span class="text-[#8B93B1] w-24">UserId:</span>
                   <span class="text-[#6B7C93]">{{ userId }}</span> -->
                   <span class="text-[#8B93B1] w-24">User Name:</span>
@@ -52,11 +56,7 @@
                   <span class="text-[#8B93B1] w-24">Join Date:</span>
                   <span class="text-[#6B7C93]">{{ joinDate }}</span>
                 </div>
-                <div class="flex items-center">
-                  <span class="text-[#8B93B1] w-24">Status:</span>
-                  <span class="text-[#6B7C93]">{{ status }}</span>
-
-                </div>
+                
               </div>
             </div>
 

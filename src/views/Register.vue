@@ -162,7 +162,8 @@ const form = reactive({
 	password: '',
 	confirmPassword: '',
 	email: '',
-	headerUrl: getAvatarsByPage(1, 16)[0].url // 默认使用第一个头像的 URL
+	headerUrl: getAvatarsByPage(1, 16)[0].url, // 默认使用第一个头像的 URL,
+	symbol: localStorage.getItem('deviceId') || 'unknown device'
 });
 
 const handleVerifyCode = (code) => {
@@ -244,7 +245,7 @@ const onSubmit = () => {
 				return;
 			}
 			registerLoading.value = true;
-			verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.REGISTER)
+			verifyCaptcha(captchaInput.value, captchaId.value, SCENE.REGISTER)
 			.then(res => {
 				registerUser(form)
 				.then(res => {

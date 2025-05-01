@@ -197,6 +197,12 @@ const messages = ref([
 		content: 'Hello! How are you?',
 		time: '10:31',
 		isSelf: true
+	},
+	{
+		id: 2,
+		content: 'Hello! How are you?',
+		time: '10:31',
+		isSelf: true
 	}
 ])
 

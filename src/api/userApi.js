@@ -24,7 +24,7 @@ export function updateUserInfo(data) {
 
 export function verifyEmail(sixDigitCode, email){
 	return axio.post(`/user/verify-email`, {
-		sixDigitCode: sixDigitCode,
+		sixDigitCaptcha: sixDigitCode,
 		email: email
 	})
 }

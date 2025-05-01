@@ -19,14 +19,6 @@
 					@submit.prevent="handleSubmit"
 				>
 					<div class="rounded-md shadow-sm -space-y-px">
-						<el-form-item prop="username">
-							<el-input
-								v-model="form.username"
-								type="text"
-								placeholder="Username"
-								class="morandi-input h-[2.80rem]"
-							/>
-						</el-form-item>
 						<el-form-item prop="email"  >
 							<el-input
 								v-model="form.email"
@@ -110,15 +102,11 @@ const captchaId = ref('')
 
 
 const form = reactive({
-	username: '',
-	email: ''
+	email: '',
+	symbol: localStorage.getItem('deviceId') || 'unknown device'
 })
 
 const rules = {
-	username: [
-		{ required: true, message: 'Please enter your username', trigger: 'blur' },
-		{ min: 6, max: 20, message: 'Length should be 6 to 20 characters', trigger: 'blur' }
-	],
 	email: [
 		{ required: true, message: 'Please enter your email address', trigger: 'blur' },
 		{ type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
@@ -170,7 +158,7 @@ const handleSubmit = async () => {
 			}
 			loading.value = true
 			try {
-				await verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.FORGET_PASSWORD)
+				await verifyCaptcha(captchaInput.value, captchaId.value, SCENE.FORGET_PASSWORD)
 				const forgetPasswordRes = await forgetPassword(form)
 				console.log("forgetPasswordRes: " + forgetPasswordRes)
 				
@@ -196,7 +184,7 @@ const handleVerifyCode = async (code) => {
 
 		await forgetPasswordVerifyCode(form, code)
 		ElMessage.success('Verification successful')
-		router.push(`/forget-reset-password/${form.username}`)
+		router.push(`/forget-reset-password/${form.email}`)
 	} catch (error) {
 		ElMessage.error(error.message || 'Verification failed')
 	}

@@ -13,12 +13,19 @@ import VMdEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 // highlightjs
 import hljs from 'highlight.js';
-
-
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // main.ts
+
+(function getDeviceId() {
+	let deviceId = localStorage.getItem('deviceId');
+	if (!deviceId) {
+	  deviceId = crypto.randomUUID(); // 或使用自定义生成方法
+	  localStorage.setItem('deviceId', deviceId);
+	}
+})()
 
 const app = createApp(App)
 const pinia = createPinia()

@@ -98,16 +98,16 @@ const verify = async () => {
     return false
   }
   
-  try {
-	console.log(captchaInput.value, captchaId.value, props.username)
-    const res = await verifyCaptcha(captchaInput.value, captchaId.value, props.username)
-    return true
-  } catch (err) {
-	console.log(err)
-    console.error(err)
-    ElMessage.error('Captcha verification failed')
-    return false
-  }
+  // try {
+	// console.log(captchaInput.value, captchaId.value, props.username)
+  //   const res = await verifyCaptcha(captchaInput.value, captchaId.value, props.username)
+  //   return true
+  // } catch (err) {
+	// console.log(err)
+  //   console.error(err)
+  //   ElMessage.error('Captcha verification failed')
+  //   return false
+  // }
 }
 
 // 向父组件暴露必要的值和方法

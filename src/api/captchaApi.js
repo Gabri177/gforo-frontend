@@ -8,6 +8,12 @@ export function deleteCaptcha(captchaId){
 	return axio.delete(`/captcha/${captchaId}`)
 }
 
-export function verifyCaptcha(code, id, username, scene){
-	return axio.post(`/captcha?code=${code}&id=${id}&username=${username}&scene=${scene}`)
+export function verifyCaptcha(code, id, scene){
+	const deviceId = localStorage.getItem('deviceId')
+	return axio.post(`/captcha`, {
+		verCode: code,
+		captchaId: id,
+		scene: scene,
+		symbol: deviceId
+	})
 }

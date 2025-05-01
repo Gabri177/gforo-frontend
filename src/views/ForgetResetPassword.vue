@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8" style="margin-top: 60px;">
+  <div class="w-full h-full flex-1 flex items-center justify-center bg-[#E3E0DB] py-12 px-4 sm:px-6 lg:px-8">
     <div class="w-full h-full flex justify-center items-center">
       <div class="w-1/2 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl flex flex-col justify-center items-center">
         <div class="max-w-md w-full space-y-8">
@@ -74,23 +74,24 @@ const route = useRoute()
 const loading = ref(false)
 const formRef = ref(null)
 
-const username = route.params.username
+const email = route.params.email
 
 onMounted(() => {
-	if (username) {
-		console.log("username: " + username)
-		form.username = username
+	if (email) {
+		console.log("email: " + email)
+		form.email = email
 	} else {
-		console.log("username is null")
-		form.username = ''
+		console.log("email is null")
+		form.email = ''
 	}
 })
 
 
 const form = reactive({
-  username: username,
+  email: email,
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  symbol: localStorage.getItem('deviceId') || 'unknown device',
 })
 
 const rules = {

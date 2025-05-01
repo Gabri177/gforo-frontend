@@ -106,6 +106,9 @@ const changeCaptcha = () => {
 
 // 在组件挂载后初始化
 onMounted(() => {
+
+	const deviceId = localStorage.getItem('deviceId');
+	console.log('deviceId:', deviceId);
 	getCaptcha()
 		.then(res => {
 			captchaImg.value.src = res.captchaBase64;
@@ -118,7 +121,8 @@ onMounted(() => {
 
 const form = reactive({
 	username: '',
-	password: ''
+	password: '',
+	symbol: localStorage.getItem('deviceId') || 'unknown device'
 });
 
 const rules = {
@@ -150,7 +154,7 @@ const onLogin = async () => {
 
   loginLoading.value = true;
   try {
-    await verifyCaptcha(captchaInput.value, captchaId.value, form.username, SCENE.LOGIN);
+    await verifyCaptcha(captchaInput.value, captchaId.value, SCENE.LOGIN);
 
     const loginRes = await loginUser(form);
     if (loginRes.access_token) setToken(loginRes.access_token);

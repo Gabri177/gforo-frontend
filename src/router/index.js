@@ -63,8 +63,8 @@ const routes = [
     //meta: { transition: 'fade-slide' }
   },
   {
-    path: '/forget-reset-password/:username',
-    name: 'ForgetResetPasswordWithUsername',
+    path: '/forget-reset-password/:email',
+    name: 'ForgetResetPasswordWithEmail',
     component: ForgetResetPassword,
     //meta: { transition: 'fade-slide' }
   },
