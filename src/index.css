@@ -13,38 +13,38 @@
 
 .el-message--success {
   background-color: #F0F4F8 !important;
-  border-color: #7A87A8 !important;
+  border-color: #A1B5A1 !important;
 }
 
 .el-message--success .el-message__icon {
-  color: #7A87A8 !important;
+  color: #A1B5A1 !important;
 }
 
 .el-message--warning {
   background-color: #F0F4F8 !important;
-  border-color: #A1A8C1 !important;
+  border-color: #C1B8A8 !important;
 }
 
 .el-message--warning .el-message__icon {
-  color: #A1A8C1 !important;
+  color: #C1B8A8 !important;
 }
 
 .el-message--error {
   background-color: #F0F4F8 !important;
-  border-color: #A87A7A !important;
+  border-color: #C1A1A1 !important;
 }
 
 .el-message--error .el-message__icon {
-  color: #A87A7A !important;
+  color: #C1A1A1 !important;
 }
 
 .el-message--info {
   background-color: #F0F4F8 !important;
-  border-color: #6B7C93 !important;
+  border-color: #A1A8C1 !important;
 }
 
 .el-message--info .el-message__icon {
-  color: #6B7C93 !important;
+  color: #A1A8C1 !important;
 }
 
 .el-message__content {

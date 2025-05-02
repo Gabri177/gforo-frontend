@@ -1,315 +1,240 @@
 <template>
-	<!-- 内容 -->
-	<div class="bg-[#E3E0DB] flex flex-col flex-1 w-full flex-grow min-h-full">
+  <div class="w-full h-full flex-1 bg-[#E3E0DB] min-h-screen p-6 font-sans text-[#4A4A4A]">
+    <!-- 轮播图部分 -->
+    <div class="mb-10">
+      <el-carousel height="320px" class="rounded-2xl overflow-hidden shadow-xl border border-[#DAD7D2]">
+        <el-carousel-item v-for="item in carouselItems" :key="item.id">
+          <div class="relative w-full h-full">
+            <img :src="item.imageUrl" class="w-full h-full object-cover" :alt="item.title">
+            <div class="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-4 backdrop-blur-sm">
+              <h3 class="text-xl font-semibold">{{ item.title }}</h3>
+              <p class="text-sm mt-1">{{ item.description }}</p>
+            </div>
+          </div>
+        </el-carousel-item>
+      </el-carousel>
+    </div>
 
-		<div class="flex flex-col flex-1 justify-between mx-7 my-5">
-			<div class="flex flex-col justify-between h-full">
+    <!-- 统计概览卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+      <div v-for="stat in statistics" :key="stat.title"
+           class="bg-white/60 backdrop-blur-md border border-[#DAD7D2] rounded-xl p-4 shadow-lg hover:shadow-xl transition-shadow">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center ring-1 ring-white/20"
+               :class="stat.bgColor">
+            <span class="text-xl text-white">{{ stat.icon }}</span>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-[#6B7C93]">{{ stat.title }}</p>
+            <p class="text-xl font-bold">{{ stat.value }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-				<div class="flex justify-between">
-					<!-- 筛选条件 -->
-					<ul class="mb-3 flex">
-						<li class="mr-3">
-							<el-tag size="large" @click="setOrderMode(0)" :class="[
-								'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
-								orderMode === 0
-									? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
-									: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
-							]">
-								Newest
-							</el-tag>
-						</li>
-						<li>
-							<el-tag size="large" @click="setOrderMode(1)" :class="[
-								'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
-								orderMode === 1
-									? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
-									: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
-							]">
-								Hottest
-							</el-tag>
-						</li>
-					</ul>
-				</div>
-				<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-if="discussPosts.length === 0">
-					<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="i in 5" :key="i">
-						<el-skeleton :rows="3" animated />
-					</li>
-				</ul>
-				<!-- 帖子列表 -->
-				<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-else>
-					<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="map in discussPosts"
-						:key="map.discussPosts.id">
+    <!-- 板块列表 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="board in boards" :key="board.id"
+           class="bg-white/60 backdrop-blur-md border border-[#DAD7D2] rounded-2xl shadow-lg p-6 transform transition duration-300 hover:scale-105 hover:ring-2 hover:ring-[#A1A8C1]/40">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded flex items-center justify-center">
+            <el-avatar shape="square" :size="50" :src="board.iconUrl" />
+          </div>
+          <div class="ml-4">
+            <h3 class="text-xl font-semibold mb-1">{{ board.name }}</h3>
+            <p class="text-sm text-[#6B7C93]">{{ board.description }}</p>
+          </div>
+        </div>
 
-						<!-- 置顶标签 -->
-						<div v-if="map.discussPosts.type == 1"
-							class="absolute top-8 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform -rotate-12 cursor-default">
-							<span class="font-bold">TOP</span>
-						</div>
-						<!-- 精华标签 -->
-						<div v-if="map.discussPosts.status == 1"
-							class="absolute top-2 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
-							<span class="font-bold">Essence</span>
-						</div>
-						<!-- 帖子内容 -->
-						<div class="flex justify-start items-center mb-3">
-							<!-- Avatar 动效 -->
-							<div class="w-[5rem] flex items-center justify-center ml-2">
-								<a @click="seeUserPrifile(map.user.id)">
-									<el-avatar :src="map.user.headerUrl" size="large"
-										class="mr-4 transform transition duration-300 ease-in-out hover:scale-110 hover:shadow-md hover:cursor-pointer">
-										avatar
-									</el-avatar>
-								</a>
-							</div>
+        <!-- 板块统计信息 -->
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-[#E3E0DB]">
+          <div class="flex space-x-4">
+            <div class="text-center">
+              <p class="text-sm text-[#6B7C93]">帖子数</p>
+              <p class="text-lg font-semibold text-[#A1A8C1]">{{ board.postCount }}</p>
+            </div>
+            <div class="text-center">
+              <p class="text-sm text-[#6B7C93]">评论数</p>
+              <p class="text-lg font-semibold text-[#A1A8C1]">{{ board.commentCount }}</p>
+            </div>
+          </div>
+          <el-button
+            class="custom-button"
+            @click="enterBoard(board.id)">
+            进入板块
+          </el-button>
+        </div>
 
-							<!-- 标题动效 -->
-							<div>
-								<a @click="detailPostClicked(map.discussPosts.id)"
-									class="text-xl font-medium text-[#4A4A4A] hover:text-[#A1A8C1] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
-									{{ map.discussPosts.title }}
-								</a>
-							</div>
-						</div>
-
-
-						<div>
-							<div class="text-[#6B7C93] text-sm">
-								<div class="flex justify-between items-center">
-									<div class="flex justify-between items-center">
-										<div class="w-[5rem] flex items-center justify-center">
-											<u class="text-center cursor-default truncate w-24">{{
-												map.user?.nickname
-											}}</u>
-										</div>
-										<div>
-											<span class="font-bold cursor-default">&nbsp Posted on &nbsp</span>
-											<b class="text-[#A1A8C1] cursor-default">{{
-												formatDate(map.discussPosts.createTime)
-											}}</b>
-										</div>
-									</div>
-
-									<div>
-										<ul class="inline float-right">
-											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">👍🏻
-													&nbsp; <span>{{ map.likeCount }}</span></el-button>
-											</li>
-											<li class="inline ml-2 text-[#C1B8A8]">|</li>
-											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">📝
-													&nbsp;
-													<span>{{ map.commentCount }}</span></el-button>
-											</li>
-										</ul>
-									</div>
-								</div>
-
-
-
-							</div>
-						</div>
-					</li>
-				</ul>
-			</div>
-			<!-- 分页 -->
-			<div class="flex justify-center items-center py-4 bg-white mt-3 rounded-2xl shadow-lg">
-				<el-pagination v-if="page.rows > 0" background layout="prev, pager, next" :total="page.rows"
-					:page-size="page.pageSize" :current-page="page.current"
-					@current-change="handleChangePage"></el-pagination>
-			</div>
-
-			<!-- 固定 Post -->
-			<div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
-				<AddPost @add="addPostClicked" />
-			</div>
-
-
-			<Hint v-model:visible="isHintVisible" :confirmButton="false" title="this is the title"
-				message="this is is the message" @confirm="console.log('confirm clicked')" />
-
-			<NewPost ref="newPostRef" v-model:visible="isPostVisible" :confirmButton="false"
-				@publish="handlePublishPost" />
-		</div>
-
-
-	</div>
+        <!-- 最新帖子预览 -->
+        <div class="mt-4 pt-4 border-t border-[#E3E0DB]">
+          <p class="text-sm text-[#6B7C93] mb-2">最新帖子</p>
+          <div v-if="board.latestPost" class="text-sm">
+            <p class="truncate">{{ board.latestPost.discussPosts.title }}</p>
+            <p class="text-xs text-[#6B7C93] mt-1">
+              {{ board.latestPost.user.nickname }} · {{ formatDate(board.latestPost.discussPosts.createTime) }}
+            </p>
+          </div>
+          <p v-else class="text-sm text-[#6B7C93]">暂无帖子</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import AddPost from '~/components/AddPost.vue';
-import Hint from '~/tools/Hint.vue';
-import NewPost from '~/tools/NewPost.vue';
-import {
-	getPostsByPage
-} from '~/api/homeApi'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '~/stores/user';
-import { publishPost } from '~/api/postAPI';
+import { ElMessage } from 'element-plus'
+import { getBoardList } from '~/api/boardApi'
 
-const userStore = useUserStore();
-const router = useRouter();
-const isHintVisible = ref(false);
-const isPostVisible = ref(false);
-const newPostRef = ref(null);
-const allUnreadCount = ref(5);
-const keyword = ref('');
-const orderMode = ref(0);
-const loginUser = ref({
-	id: 1,
-	username: 'testuser',
-	headerUrl: 'https://via.placeholder.com/30'
-});
-const newPost = ref({
-	title: '',
-	content: ''
-});
-const discussPosts = ref([]);
-const page = ref({
-	rows: 0,
-	pageSize: 10,
-	current: 1
-});
+const router = useRouter()
 
-const dropdownOpen = ref(false);
+// 轮播图数据
+const carouselItems = ref([
+  {
+    id: 1,
+    imageUrl: 'https://picsum.photos/1200/300?random=1',
+    title: '欢迎来到技术社区',
+    description: '在这里，你可以找到志同道合的伙伴，一起探讨技术'
+  },
+  {
+    id: 2,
+    imageUrl: 'https://picsum.photos/1200/300?random=2',
+    title: '分享你的见解',
+    description: '让知识的价值得到最大化的展现'
+  },
+  {
+    id: 3,
+    imageUrl: 'https://picsum.photos/1200/300?random=3',
+    title: '社区最新动态',
+    description: '了解最新的技术趋势和社区活动'
+  }
+])
 
-const toggleDropdown = () => {
-	dropdownOpen.value = !dropdownOpen.value;
-};
-const search = () => {
-	// 搜索功能实现
-};
-const setOrderMode = (mode) => {
-	console.log('set order mode', mode);
-	initPosts(mode, page.value.current);
-	orderMode.value = mode;
-};
+// 统计概览数据
+const statistics = ref([
+  {
+    title: '总用户数',
+    value: '1,234',
+    icon: '👥',
+    bgColor: 'bg-[#A1B0C2]'
+  },
+  {
+    title: '今日发帖',
+    value: '56',
+    icon: '📝',
+    bgColor: 'bg-[#B6C2B9]'
+  },
+  {
+    title: '在线用户',
+    value: '328',
+    icon: '🟢',
+    bgColor: 'bg-[#E1DCCF]'
+  },
+  {
+    title: '总访问量',
+    value: '12,345',
+    icon: '👁️',
+    bgColor: 'bg-[#C4BDC3]'
+  }
+])
 
-const handlePublishPost = (content) => {
+const boards = ref([])
 
-	const post = newPostRef.value.getContent()
-	publishPost(post.title, post.content)
-		.then((res) => {
-			ElMessage.success('Publish successfully');
-			//isHintVisible.value = true;
-			initPosts(orderMode.value, page.value.current);
-		})
-		.catch((err) => {
-			ElMessage.error(err.message);
-		})
-
-	// 发布帖子功能实现
-	isPostVisible.value = false;
-	//const html = newPostRef.value.getHtml(content.content);
-	//console.log('html', html);
-};
-const handleChangePage = (newPage) => {
-	// console.log('newPage', newPage);
-	initPosts(orderMode.value, newPage);
-	window.scrollTo(0, 0);
-};
+// 格式化日期
 const formatDate = (date) => {
-	// 日期格式化功能实现
-	return new Date(date).toLocaleString();
-};
-const handleSelect = (key, keyPath) => {
-	console.log(key, keyPath);
-};
-const addPostClicked = () => {
-	isPostVisible.value = !isPostVisible.value;
-	if (newPostRef.value) {
-		newPostRef.value.clearForm();
-	}
-	console.log('add post clicked');
+  return new Date(date).toLocaleString()
 }
 
-const seeUserPrifile = (id) => {
-	console.log('see user profile', id);
+// 跳转到板块详情
+const enterBoard = (boardId) => {
+  router.push(`/board/${boardId}`)
 }
 
-const detailPostClicked = (id) => {
-	console.log('detail post clicked', id);
-	router.push({
-		path: '/post/' + id + '/1',
-	})
-
-}
-
-
-const initPosts = (originalOrderVal, pageChanged) => {
-
-	if (originalOrderVal === undefined)
-		originalOrderVal = 0;
-	if (pageChanged === undefined)
-		pageChanged = page.value.current;
-	// 获取帖子列表
-	// console.log(page.value);
-	getPostsByPage(pageChanged, orderMode.value, page.value.pageSize)
-		.then((res) => {
-			console.log('res', res);
-			page.value.current = res.currentPage;
-			// console.log(res);
-			if (res.discussPosts)
-				discussPosts.value = res.discussPosts;
-			if (res.totalRows)
-				page.value.rows = res.totalRows;
-			// console.log(page.value);
-		})
-		.catch((err) => {
-			ElMessage.error('Failed to get posts');
-			if (originalOrderVal !== undefined) {
-				orderMode.value = originalOrderVal;
-			}
-		});
-};
-initPosts(orderMode.value, page.value.current);
+onMounted(async () => {
+  try {
+    const res = await getBoardList()
+    boards.value = res.boardInfos
+  } catch (error) {
+    ElMessage.error(error.message || '获取板块信息失败')
+  }
+})
 </script>
 
+
 <style scoped>
-/* 分页按钮默认背景 */
-:deep(.el-pagination.is-background .el-pager li) {
-	background-color: #E3E0DB;
-	color: #4A4A4A;
-	border: none;
-	transition: all 0.3s;
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* 激活页 */
-:deep(.el-pagination.is-background .el-pager li.is-active) {
-	background-color: #A1A8C1;
-	color: #fff;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
 }
 
-/* 上一页、下一页按钮 */
-:deep(.el-pagination.is-background button) {
-	background-color: #E3E0DB;
-	color: #4A4A4A;
-	border: none;
-	transition: all 0.3s;
+::-webkit-scrollbar-thumb {
+  background: #A1A8C1;
+  border-radius: 4px;
 }
 
-/* 悬停效果 */
-:deep(.el-pagination.is-background button:hover),
-:deep(.el-pagination.is-background .el-pager li:hover) {
-	background-color: #C1B8A8;
-	color: #fff;
+::-webkit-scrollbar-thumb:hover {
+  background: #7A87A8;
 }
 
-/* 按钮样式 */
-:deep(.el-button--text) {
-	color: #6B7C93;
+/* 轮播图样式优化 */
+:deep(.el-carousel__item) {
+  border-radius: 1rem;
 }
 
-:deep(.el-button--text:hover) {
-	color: #A1A8C1;
+:deep(.el-carousel__button) {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
 }
 
-:deep(.el-dialog) {
-	margin: 0 !important;
-	top: 50% !important;
-	left: 50%;
-	transform: translate(-50%, -50%);
+:deep(.el-carousel__button:hover) {
+  background-color: rgba(255, 255, 255, 0.9);
 }
+
+/* 字体设置 */
+.font-sans {
+  font-family: 'Inter', 'Noto Sans SC', 'Helvetica Neue', sans-serif;
+}
+
+
+:deep(.el-button.custom-button) {
+  background-color: #A1A8C1;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+:deep(.el-button.custom-button:hover) {
+  background-color: #929BB5;
+}
+
+:deep(.el-button.custom-button:active) {
+  background-color: #7A87A8;
+  transform: scale(0.97);
+}
+
+:deep(.el-button.custom-button:focus) {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(193, 198, 204, 0.4);
+}
+
+:deep(.el-button.custom-button.is-disabled),
+:deep(.el-button.custom-button:disabled) {
+  background-color: #D9D9DD;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 </style>

@@ -356,7 +356,7 @@ const handleChangePage = (newPage) => {
 
 const initPosts = (page) => {
     console.log("initPosts", postId.value, page)
-    getPostByPage(postId.value, page)
+    getPostByPage(postId.value, page, pageSize.value, true)
         .then(res => {
             console.log(res)
             console.log(res.originalPost)
@@ -369,6 +369,8 @@ const initPosts = (page) => {
         })
         .catch(err => {
             console.log("post not found")
+            ElMessage.error(err.message || 'Post not found')
+            router.push('/')
         })
 }
 

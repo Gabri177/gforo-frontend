@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-[calc(100vh-120px)] flex items-center justify-center bg-[#E3E0DB] py-12 px-4" style="margin-top: 60px;">
+  <div class="w-full h-full flex-1 flex items-center justify-center bg-[#E3E0DB] py-12 px-4">
     <div class="w-full max-w-2xl p-8 border border-[#8E9EAB] backdrop-blur-md bg-white shadow-lg rounded-2xl text-center">
       <div class="space-y-6">
         <!-- 404 图标带动画 -->

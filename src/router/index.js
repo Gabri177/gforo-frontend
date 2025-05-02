@@ -10,6 +10,8 @@ import Profile from '~/views/Profile.vue'
 import Settings from '~/views/Settings.vue'
 import Post from '~/views/Post.vue'
 import NotFound from '~/views/NotFound.vue'
+import Admin from '~/views/Admin.vue'
+import Posts from '~/views/Posts.vue'
 
 import CaptchaExample from '~/example/CaptchaExample.vue'
 
@@ -98,6 +100,16 @@ const routes = [
     path: '/post/:postId/:currentPage',
     name: 'PostOfId',
     component: Post,
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: Admin,
+  },
+  {
+    path: '/board/:boardId',
+    name: 'BoardPosts',
+    component: Posts,
   },
   {
     path: '/:pathMatch(.*)*',
