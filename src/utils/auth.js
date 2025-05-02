@@ -22,6 +22,7 @@ export function removeToken() {
 
 // 获取 refresh token
 export function getRefreshToken() {
+  console.log("getRefreshToken=================")
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
@@ -49,6 +50,6 @@ export function isLoggedIn() {
 export function logoutAndRedirect() {
   removeToken()
   removeRefreshToken()
-  ElMessage.error('登录已过期，请重新登录')
+  ElMessage.error('Login has expired, please login again')
   router.push('/login')
 }

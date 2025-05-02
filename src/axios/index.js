@@ -28,9 +28,10 @@ axio.interceptors.request.use(
     const refreshToken = getRefreshToken()
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
-    } else if (refreshToken) {
-      config.headers['Authorization'] = `Bearer ${refreshToken}`
-    }
+    } 
+    // else if (refreshToken) {
+    //   config.headers['Authorization'] = `Bearer ${refreshToken}`
+    // }
     return config
   },
   (error) => Promise.reject(error)
