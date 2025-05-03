@@ -1,27 +1,50 @@
 <template>
     <div class="px-4 py-6 bg-[#E3E0DB] flex-1 flex flex-col justify-between w-full h-full">
 
+
+
+
         <div>
-            <!-- 标题部分 -->
-            <div class="mb-6 backdrop-blur-md bg-white/70 p-6 rounded-2xl shadow-lg">
-                <h1 class="text-2xl font-bold text-[#4A4A4A]">{{ originalPost?.title }}</h1>
-                <div class="mt-2 flex items-center gap-4 text-sm text-[#6B7C93]">
-                    <span>{{ originalPost?.author.name }}</span>
-                    <span>{{ formatDate(originalPost?.createTime) }}</span>
+
+            <!-- 面包屑导航 -->
+            <div class="mb-6">
+                <div
+                    class="bg-white/60 backdrop-blur-md border border-[#DAD7D2] px-5 py-3 rounded-xl shadow text-sm text-[#6B7C93]">
+                    <el-breadcrumb separator="/">
+                        <el-breadcrumb-item :to="{ path: '/' }">
+                            <span class="flex items-center gap-1">
+                                <el-icon>
+                                    <HomeFilled />
+                                </el-icon>首页
+                            </span>
+                        </el-breadcrumb-item>
+                        <el-breadcrumb-item :to="postsPath">{{ parentTitle }}</el-breadcrumb-item>
+                        <el-breadcrumb-item>{{ postsTitle }}</el-breadcrumb-item>
+                    </el-breadcrumb>
                 </div>
             </div>
+            <!-- 标题部分 -->
+            <div class="mb-6 backdrop-blur-md bg-white/60 p-6 rounded-2xl shadow-lg">
+                <h1 class="text-2xl font-bold text-[#4A4A4A] mb-2">{{ originalPost?.title }}</h1>
 
-            <!-- 楼主帖子 -->
-            <PostFloor :id="'comment-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
-                :floorNum="1" :reply-page-size="replyPageSize" :enable-content-expand="true"
-                :enable-replies-expand="true" :enableContentExpand="false" @reply="handleReplyPost"
-                @delete="handlePostFloorDeletePost" @report="handlePostFloorReportPost"
-                @edit="handlePostFloorEditPost" />
+                <!-- 楼主帖子 -->
+                <PostFloor :id="'post-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
+                    :floorNum="0" :reply-page-size="replyPageSize" :enable-content-expand="true"
+                    :enable-replies-expand="true" :enableContentExpand="false" @reply="handleReplyPost"
+                    @delete="handlePostFloorDeletePost" @report="handlePostFloorReportPost"
+                    @edit="handlePostFloorEditPost" />
+                <!-- <div class="mt-2 flex items-center gap-4 text-sm text-[#6B7C93]">
+                    <span>{{ originalPost?.author.nickname }}</span>
+                    <span>{{ formatDate(originalPost?.createTime) }}</span>
+                </div> -->
+            </div>
+
+
 
             <!-- 评论列表 -->
             <div class="mt-6 space-y-4">
                 <PostFloor v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
-                    :floorNum="index + 2 + (currentPage - 1) * pageSize" :floor="comment"
+                    :floorNum="index + 1 + (currentPage - 1) * pageSize" :floor="comment"
                     :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
                     @reply="handleReply" ref="floorRefs" @delete="handlePostFloorDelete" @report="handlePostFloorReport"
                     @edit="handlePostFloorEdit" />
@@ -137,6 +160,12 @@ const route = useRoute()
 const router = useRouter()
 const postId = ref(route.params.postId)
 const currentPage = ref(route.params.currentPage || 1)
+const parentTitle = computed(() =>
+    localStorage.getItem('breadcrumb_parentTitle'))
+const postsTitle = computed(() => localStorage.getItem('breadcrumb_postsTitle'));
+const postsPath = computed(() =>
+    localStorage.getItem('breadcrumb_postsPath'))
+
 
 
 // 编辑相关
@@ -212,7 +241,7 @@ const handlePostFloorDeletePost = (postOrComment, isFloor) => {
             deletePost(postOrComment.id)
                 .then(res => {
                     ElMessage.success('删除成功')
-                    router.push('/')
+                    router.back()
                 })
                 .catch(err => {
                     ElMessage.error(err.message || '删除失败')
@@ -534,11 +563,15 @@ const submitReply = () => {
         ? addCommentToComment(preCommentToComment.entityType,
             preCommentToComment.entityId,
             preCommentToComment.targetUserId,
-            preCommentToComment.content)
+            preCommentToComment.content,
+            postId.value
+        )
         : addCommentToComment(commentToComment.entityType,
             commentToComment.entityId,
             commentToComment.targetUserId,
-            commentToComment.content)
+            commentToComment.content,
+            postId.value
+        )
 
     action.then(res => {
         console.log(res)
@@ -549,17 +582,18 @@ const submitReply = () => {
         initPosts(currentPage.value)
 
 
-        nextTick(() => {
-            setTimeout(() => {
-                if (scrollTargetCommentId.value) {
-                    const el = document.getElementById('comment-' + scrollTargetCommentId.value)
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    }
-                }
-            }, 300)
-        })
+
         if (isOperationPost.value) {
+            nextTick(() => {
+                setTimeout(() => {
+                    if (scrollTargetCommentId.value) {
+                        const el = document.getElementById('post-' + scrollTargetCommentId.value)
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        }
+                    }
+                }, 300)
+            })
             scrollTargetCommentId.value = postId.value
             nextTick(() => {
                 setTimeout(() => {
@@ -570,6 +604,16 @@ const submitReply = () => {
             })
         }
         if (!isOperationPost.value) {
+            nextTick(() => {
+                setTimeout(() => {
+                    if (scrollTargetCommentId.value) {
+                        const el = document.getElementById('comment-' + scrollTargetCommentId.value)
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        }
+                    }
+                }, 300)
+            })
             console.log("comment to comment")
             nextTick(() => {
                 setTimeout(() => {
@@ -807,5 +851,37 @@ const scrollToFloorComment = (isForPost, floorId, replyId) => {
     background-color: #7A87A8;
     border-color: #5A6788;
     transform: translateY(0);
+}
+
+/* 面包屑样式 */
+:deep(.el-breadcrumb) {
+    --el-text-color-regular: #6B7C93;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+:deep(.el-breadcrumb__item) {
+    display: flex;
+    align-items: center;
+}
+
+:deep(.el-breadcrumb__separator) {
+    margin: 0 6px;
+    color: #A1A8C1;
+}
+
+:deep(.el-breadcrumb__inner.is-link) {
+    color: #6B7C93;
+    transition: color 0.2s ease;
+}
+
+:deep(.el-breadcrumb__inner.is-link:hover) {
+    color: #A1A8C1;
+    text-decoration: underline;
+}
+
+:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+    color: #4A4A4A;
+    font-weight: 600;
 }
 </style>

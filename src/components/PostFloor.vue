@@ -1,10 +1,10 @@
 <template>
-    <div
-        class="min-h-[400px] flex gap-4 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md bg-white/60 border border-white/20 shadow-lg rounded-xl p-6 from-[#F8FAFC] to-[#F1F5F9] border border-[#E3E0DB] hover:border-[#C1B8A8]">
+    <div class="min-h-[400px] flex gap-4 p-4 rounded-xl shadow-md transition-all duration-300 bg-white/70 backdrop-blur-md border border-white/20">
+
         <!-- 左侧用户信息 -->
         <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
             <div
-                class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center border border-[#E2E8F0] shadow">
+                class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center">
                 <div class="flex flex-col items-center">
                     <el-avatar :size="50" :src="floor?.author?.headerUrl" />
                     <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name"
@@ -24,7 +24,7 @@
             class="flex flex-col justify-between flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
 
             <div
-                class="flex-grow overflow-auto max-h-[500px] text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
+                class="flex-grow overflow-auto text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
                 <div ref="contentRef"
                     :class="{ 'content-wrapper': true, 'content-collapsed': !floor?.isExpanded && enableContentExpand && shouldShowExpandButton }">
                     <v-md-editor :model-value="floor?.content" mode="preview"></v-md-editor>
@@ -131,10 +131,8 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { ChatDotRound } from '@element-plus/icons-vue'
 import VMdEditor from '@kangc/v-md-editor';
 import { useUserStore } from '~/stores/user';
-import { componentToSlot } from 'element-plus/es/components/table-v2/src/utils.mjs';
 
 const userStore = useUserStore();
 const currentUserID = userStore.getBasicUserInfo().id
@@ -619,21 +617,25 @@ defineExpose({
 }
 
 /* 用户信息卡片样式 */
-.user-info-card {
-    @apply transition-all duration-200;
+
+
+html {
+  background-color: #E3E0DB; /* 柔和底色 */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.user-info-card:hover .user-name {
-    @apply text-[#4A5568];
-}
 
 /* 回复区域样式 */
 .reply-area {
-    @apply bg-[#FAFAF9]/80 rounded-md p-3 transition-all duration-200;
+  background-color: rgba(250, 250, 249, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  transition: all 0.2s ease-in-out;
 }
-
 .reply-area:hover {
-    @apply bg-[#fefffb98];
+  background-color: rgba(255, 255, 251, 0.6);
 }
 
 /* 滚动条样式 */

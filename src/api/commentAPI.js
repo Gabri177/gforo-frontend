@@ -7,12 +7,13 @@ export function addCommentToPost(postId, content) {
 	})
 }
 
-export function addCommentToComment(entityType, entityId, targetId, content) {
+export function addCommentToComment(entityType, entityId, targetId, content, postId) {
 	return axio.post("/comment/tocomment", {
 		entityType: entityType,
 		entityId: entityId,
 		targetId: targetId,
-		content: content
+		content: content,
+		postId: postId
 	})
 }
 

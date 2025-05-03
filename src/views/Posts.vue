@@ -3,40 +3,59 @@
 	<div class="bg-[#E3E0DB] flex flex-col flex-1 w-full flex-grow min-h-full">
 
 		<div class="flex flex-col flex-1 justify-between mx-7 my-5">
-			<div class="flex flex-col justify-between h-full">
 
-				<div class="flex justify-between">
-					<!-- 筛选条件 -->
-					<ul class="mb-3 flex">
-						<li class="mr-3">
-							<el-tag size="large" @click="setOrderMode(0)" :class="[
-								'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
-								orderMode === 0
-									? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
-									: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
-							]">
-								Newest
-							</el-tag>
-						</li>
-						<li>
-							<el-tag size="large" @click="setOrderMode(1)" :class="[
-								'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
-								orderMode === 1
-									? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
-									: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
-							]">
-								Hottest
-							</el-tag>
-						</li>
-					</ul>
+			<div class="flex flex-col justify-between h-full">
+				<!-- 面包屑导航 -->
+				<div
+					class="bg-white/60 backdrop-blur-md border border-[#DAD7D2] px-5 py-3 rounded-xl shadow mb-6 text-sm text-[#6B7C93]">
+					<el-breadcrumb separator="/">
+						<el-breadcrumb-item :to="{ path: '/' }">
+							<div class="flex items-center gap-1">
+								<el-icon>
+									<HomeFilled />
+								</el-icon>
+								首页
+							</div>
+						</el-breadcrumb-item>
+						<el-breadcrumb-item>{{ parentTitle }}</el-breadcrumb-item>
+					</el-breadcrumb>
 				</div>
-				<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-if="waitResponse = false">
+
+				<!-- 筛选头部区域 -->
+				<div class="flex items-center justify-between mb-4">
+					<!-- 左侧标题，可改为搜索栏 -->
+					<h2 class="text-lg font-semibold text-[#4A4A4A]">Posts List</h2>
+
+					<!-- 右侧筛选标签 -->
+					<div class="flex space-x-3">
+						<el-tag size="large" @click="setOrderMode(0)" :class="[
+							'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
+							orderMode === 0
+								? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
+								: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
+						]">
+							Newest
+						</el-tag>
+						<el-tag size="large" @click="setOrderMode(1)" :class="[
+							'cursor-pointer px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
+							orderMode === 1
+								? 'bg-[#A1A8C1] text-white shadow-md hover:bg-[#7A87A8] hover:shadow-lg active:bg-[#6B7C93] active:shadow-sm'
+								: 'bg-[#F8FAFC] text-[#6B7C93] border-[#C1B8A8] hover:bg-[#F1F5F9] hover:text-[#4A4A4A] hover:border-[#A1A8C1] hover:shadow-md active:bg-[#E3E0DB] active:shadow-sm'
+						]">
+							Hottest
+						</el-tag>
+					</div>
+				</div>
+
+				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-if="waitResponse = false">
+
 					<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="i in 5" :key="i">
 						<el-skeleton :rows="3" animated />
 					</li>
 				</ul>
 				<!-- 帖子列表 -->
-				<ul class="bg-white shadow-lg rounded-2xl p-4 space-y-3" v-else>
+				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-else>
+
 
 					<li v-if="discussPosts.length === 0" class="text-center py-10 text-[#6B7C93]">
 						<p class="text-lg">Oops, it's empty!</p>
@@ -70,7 +89,7 @@
 
 							<!-- 标题动效 -->
 							<div>
-								<a @click="detailPostClicked(map.discussPosts.id)"
+								<a @click="detailPostClicked(map.discussPosts.id, map.discussPosts.title)"
 									class="text-xl font-medium text-[#4A4A4A] hover:text-[#A1A8C1] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
 									{{ map.discussPosts.title }}
 								</a>
@@ -98,12 +117,14 @@
 									<div>
 										<ul class="inline float-right">
 											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">👍🏻
+												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
+													<i class="pi pi-thumbs-up" style="font-size: 1rem"></i>
 													&nbsp; <span>{{ map.likeCount }}</span></el-button>
 											</li>
 											<li class="inline ml-2 text-[#C1B8A8]">|</li>
 											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">📝
+												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
+													<i class="pi pi-comments" style="font-size: 1rem"></i>
 													&nbsp;
 													<span>{{ map.commentCount }}</span></el-button>
 											</li>
@@ -119,7 +140,8 @@
 				</ul>
 			</div>
 			<!-- 分页 -->
-			<div class="flex justify-center items-center py-4 bg-white mt-3 rounded-2xl shadow-lg">
+			<div class="flex justify-center items-center py-4 bg-white/60 backdrop-blur-md border border-white/20 mt-3 rounded-2xl shadow-lg">
+
 				<el-pagination v-if="page.rows > 0" background layout="prev, pager, next" :total="page.rows"
 					:page-size="page.pageSize" :current-page="page.current"
 					@current-change="handleChangePage"></el-pagination>
@@ -143,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import AddPost from '~/components/AddPost.vue';
 import Hint from '~/tools/Hint.vue';
@@ -155,7 +177,9 @@ import { publishPost, getBoardPostsPage } from '~/api/postAPI';
 
 const route = useRoute();
 const boardId = ref(route.params.boardId);
-
+const parentTitle = computed(() =>
+	localStorage.getItem('breadcrumb_parentTitle') || '默认父级'
+)
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -243,10 +267,11 @@ const seeUserPrifile = (id) => {
 	console.log('see user profile', id);
 }
 
-const detailPostClicked = (id) => {
+const detailPostClicked = (id, title) => {
 	console.log('detail post clicked', id);
+	localStorage.setItem('breadcrumb_postsTitle', title);
 	router.push({
-		path: '/post/' + id + '/1',
+		path: '/post/' + id + '/1'
 	})
 
 }
@@ -282,6 +307,12 @@ initPosts(orderMode.value, page.value.current);
 </script>
 
 <style scoped>
+
+ul.bg-white\/30 {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 /* 分页按钮默认背景 */
 :deep(.el-pagination.is-background .el-pager li) {
 	background-color: #E3E0DB;
@@ -325,5 +356,37 @@ initPosts(orderMode.value, page.value.current);
 	top: 50% !important;
 	left: 50%;
 	transform: translate(-50%, -50%);
+}
+
+/* 面包屑统一样式优化 */
+:deep(.el-breadcrumb) {
+	--el-text-color-regular: #6B7C93;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+:deep(.el-breadcrumb__item) {
+	display: flex;
+	align-items: center;
+}
+
+:deep(.el-breadcrumb__separator) {
+	margin: 0 6px;
+	color: #A1A8C1;
+}
+
+:deep(.el-breadcrumb__inner.is-link) {
+	color: #6B7C93;
+	transition: color 0.2s ease;
+}
+
+:deep(.el-breadcrumb__inner.is-link:hover) {
+	color: #A1A8C1;
+	text-decoration: underline;
+}
+
+:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+	color: #4A4A4A;
+	font-weight: 600;
 }
 </style>

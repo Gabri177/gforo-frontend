@@ -64,11 +64,11 @@
             <div class="p-6 border border-[#C1B8A8] rounded-xl stats-card">
               <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">Statistics</h3>
               <div class="grid grid-cols-2 gap-4">
-                <div class="stat-item">
+                <div class="stat-item" @click="handleProfilePosts">
                   <div class="text-2xl font-bold text-[#6B7C93]">{{ postCount }}</div>
                   <div class="text-[#8B93B1] mt-1">Posts</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" @click="hancleProfileComments">
                   <div class="text-2xl font-bold text-[#6B7C93]">{{ commentCount }}</div>
                   <div class="text-[#8B93B1] mt-1">Comments</div>
                 </div>
@@ -103,6 +103,7 @@ import { useUserStore } from '~/stores/user'
 import {
   getUserInfo
 } from '~/api/userApi'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -121,6 +122,18 @@ const commentCount = computed(() => userStore.userInfo.commentCount);
 const showAvatarPreview = ref(false) // 控制是否显示大图预览
 
 console.log("userInfo Profile", userStore.userInfo)
+
+const handleProfilePosts = () => {
+  router.push({
+    path: '/profile/posts'
+  })
+}
+
+const hancleProfileComments = () => {
+  router.push({
+    path: '/profile/comments'
+  })
+}
 
 function formatDateToYMD(dateString) {
   const parts = dateString.split(" "); // ["Sun", "Mar", "23", "22:48:09", "CET", "2025"]
@@ -157,12 +170,25 @@ onMounted(async () => {
 
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
+    ElMessage.error(error?.message || 'Failed to fetch user profile')
   }
 })
 
 </script>
 
 <style scoped>
+
+/* 按下效果 */
+.stat-item:active {
+  transform: scale(0.97);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #F1F5F9, #E3E0DB);
+}
+
+.stat-item:active .text-2xl {
+  color: #4A4A4A;
+}
+
 
 :deep(.el-dialog) {
   margin: 0 !important;

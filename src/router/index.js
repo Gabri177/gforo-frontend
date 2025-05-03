@@ -115,6 +115,16 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound
+  },
+  {
+    path: '/profile/posts',
+    name: 'UserPosts',
+    component: () => import('~/views/UserPosts.vue')
+  },
+  {
+    path: '/profile/comments',
+    name: 'UserComments',
+    component: () => import('~/views/UserComments.vue')
   }
 ]
 
