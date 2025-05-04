@@ -19,6 +19,7 @@
     "element-plus": "^2.2.30",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",
+    "tagcloud": "^1.1.0-1",
     "vue": "^3.5.13",
     "vue-router": "^4.1.6",
     "vuex": "^4.0.2"

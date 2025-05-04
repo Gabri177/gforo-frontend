@@ -52,7 +52,7 @@
 
         </div>
         <!-- 评论分页 -->
-        <div class="mt-6 flex justify-center bg-white p-4 rounded-2xl shadow-lg">
+        <div class="bg-white/70 backdrop-blur-md mt-6 flex justify-center p-4 rounded-2xl shadow-lg">
             <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="totalRows"
                 layout="prev, pager, next" @current-change="handleChangePage" background />
         </div>

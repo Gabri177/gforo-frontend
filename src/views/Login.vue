@@ -157,17 +157,19 @@ const onLogin = async () => {
     await verifyCaptcha(captchaInput.value, captchaId.value, SCENE.LOGIN);
 
     const loginRes = await loginUser(form);
+	console.log('loginRes:', loginRes);
     if (loginRes.access_token) setToken(loginRes.access_token);
     if (loginRes.refresh_token) setRefreshToken(loginRes.refresh_token);
 
     const userInfoRes = await getUserInfo();
+	console.log('userInfoRes:', userInfoRes);
 
     userStore.setUserInfo(userInfoRes);
 
     ElMessage.success('Login successful');
     router.push('/');
   } catch (err) {
-    console.error('Login error:', err);
+    //console.error('Login error:', err);
     ElMessage.error(err?.message || 'Login failed');
     changeCaptcha();
     captchaInput.value = '';

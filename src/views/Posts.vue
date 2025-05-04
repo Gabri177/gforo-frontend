@@ -149,7 +149,15 @@
 
 			<!-- 固定 Post -->
 			<div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
-				<AddPost @add="addPostClicked" />
+				<div class="flex flex-col gap-4">
+					<div>
+					<AddPost @add="addPostClicked" />
+				</div>
+				<div>
+                	<ReturnHome @return="handleReturn" />
+            	</div>
+				</div>
+				
 			</div>
 
 
@@ -170,6 +178,7 @@ import { ElMessage } from 'element-plus';
 import AddPost from '~/components/AddPost.vue';
 import Hint from '~/tools/Hint.vue';
 import NewPost from '~/tools/NewPost.vue';
+import ReturnHome from '~/components/ReturnHome.vue';
 
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '~/stores/user';
@@ -207,6 +216,10 @@ const page = ref({
 });
 
 const dropdownOpen = ref(false);
+
+const handleReturn = () => {
+	router.back();
+}
 
 
 const toggleDropdown = () => {

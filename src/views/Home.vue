@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full flex-1 bg-[#E3E0DB] min-h-screen p-6 font-sans text-main">
+  <div class="w-full h-full flex-1 bg-[#E3E0DB] p-6 font-sans text-main">
     <!-- Breadcrumb -->
     <div class="mb-10">
       <div class="bg-blur-box px-5 py-3 rounded-xl shadow flex items-center space-x-2 text-sm text-subtle">
@@ -16,7 +16,8 @@
 
     <!-- Carousel -->
     <div class="mb-10">
-      <el-carousel height="320px" class="rounded-2xl overflow-hidden shadow-xl border border-[#DAD7D2]">
+      <el-carousel height="320px" class="rounded-2xl overflow-hidden shadow-xl border border-[#DAD7D2]"
+      :interval="4000">
         <el-carousel-item v-for="item in carouselItems" :key="item.id">
           <div class="relative w-full h-full">
             <img :src="item.imageUrl" class="w-full h-full object-cover" :alt="item.title" />
@@ -65,7 +66,7 @@
       </template>
 
       <template v-else>
-        <div v-for="board in boards" :key="board.id" class="bg-blur-box p-6 rounded-2xl shadow-lg transition hover:scale-105 hover:ring-2 hover:ring-accent/40">
+        <div v-for="board in boards" :key="board.id" class="bg-blur-box p-6 rounded-2xl shadow-lg transition hover:scale-105 hover:ring-2 hover:ring-[#B4B8C5]">
           <div class="flex items-center mb-4">
             <el-avatar shape="square" :size="50" :src="board.iconUrl" />
             <div class="ml-4">
@@ -103,15 +104,17 @@
         </div>
       </template>
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getBoardList } from '~/api/boardApi'
 import { HomeFilled } from '@element-plus/icons-vue'
+
 
 const router = useRouter()
 const isLoading = ref(true)
@@ -152,6 +155,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
 :root {
   --el-text-color-regular: #6B7C93;
   --main-font: 'Inter', 'Noto Sans SC', 'Helvetica Neue', sans-serif;

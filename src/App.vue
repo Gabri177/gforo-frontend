@@ -21,8 +21,8 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { RouterView, useRoute } from 'vue-router'
-import Header from '~/components/Header.vue'
-import Footer from '~/components/Footer.vue'
+import Header from '~/layout/Header.vue'
+import Footer from '~/layout/Footer.vue'
 
 const route = useRoute()
 const store = useStore()

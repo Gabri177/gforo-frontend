@@ -14,7 +14,6 @@ const router = useRouter();
 const emits = defineEmits(['return']);
 
 const returnHome = () => {
-	router.push('/');
 	emits('return');
 };
 </script>

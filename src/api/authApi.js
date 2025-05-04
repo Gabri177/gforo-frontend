@@ -7,15 +7,13 @@ export function loginUser(userInfo){
 }
 
 export function getNewToken(refreshToken){
-	return pureAxios.post('/auth/refresh-token', null, {
-		headers: {
-		  Authorization: `Bearer ${refreshToken}`
-		}
+	return pureAxios.post('/auth/refresh-token', {
+		refreshToken
 	})
 }
 
 export function logoutUser(){
-	return axio.delete('/auth/logout')
+	return axio.delete('/user/logout')
 }
 
 // 用来获取六位数的验证码 
