@@ -47,7 +47,7 @@
 					</div>
 				</div>
 
-				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-if="waitResponse = false">
+				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-if="waitResponse">
 
 					<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="i in 5" :key="i">
 						<el-skeleton :rows="3" animated />
@@ -62,6 +62,7 @@
 						<p class="text-sm mt-2">Nobody has posted here yet. Start the conversation now! 🎉</p>
 
 					</li>
+
 					<li v-else class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]"
 						v-for="map in discussPosts" :key="map.discussPosts.id">
 
@@ -75,13 +76,14 @@
 							class="absolute top-2 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
 							<span class="font-bold">Essence</span>
 						</div>
+
 						<!-- 帖子内容 -->
 						<div class="flex justify-start items-center mb-3">
 							<!-- Avatar 动效 -->
-							<div class="w-[5rem] flex items-center justify-center ml-2">
+							<div class="w-[5rem] flex items-center justify-center ml-2 ">
 								<a @click="seeUserPrifile(map.user.id)">
 									<el-avatar :src="map.user.headerUrl" size="large"
-										class="mr-4 transform transition duration-300 ease-in-out hover:scale-110 hover:shadow-md hover:cursor-pointer">
+										class="border border-[#A1A8C1] mr-4 transform transition duration-300 ease-in-out hover:scale-110 hover:shadow-md hover:cursor-pointer">
 										avatar
 									</el-avatar>
 								</a>
@@ -102,9 +104,11 @@
 								<div class="flex justify-between items-center">
 									<div class="flex justify-between items-center">
 										<div class="w-[5rem] flex items-center justify-center">
-											<u class="text-center cursor-default truncate w-24">{{
+											<!-- <u class="text-center cursor-default truncate w-24">{{
 												map.user?.nickname
-											}}</u>
+											}}</u> -->
+											<UserInfoCard :user="map.user" :boardId="boardId" placement="right"/>
+
 										</div>
 										<div>
 											<span class="font-bold cursor-default">&nbsp Posted on &nbsp</span>
@@ -179,10 +183,21 @@ import AddPost from '~/components/AddPost.vue';
 import Hint from '~/tools/Hint.vue';
 import NewPost from '~/tools/NewPost.vue';
 import ReturnHome from '~/components/ReturnHome.vue';
+import UserInfoCard from '~/tools/UserInfoCard.vue';
 
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '~/stores/user';
 import { publishPost, getBoardPostsPage } from '~/api/postAPI';
+
+const user = {
+  id: 1,
+  username: 'user1',
+  nickname: '用户一',
+  email: 'user1@example.com',
+  headerUrl: '',
+  createTime: '2024-03-20T10:00:00Z',
+  status: '1'
+}
 
 const route = useRoute();
 const boardId = ref(route.params.boardId);
@@ -284,7 +299,7 @@ const detailPostClicked = (id, title) => {
 	console.log('detail post clicked', id);
 	localStorage.setItem('breadcrumb_postsTitle', title);
 	router.push({
-		path: '/post/' + id + '/1'
+		path: `/board/${boardId.value}/post/${id}/1`
 	})
 
 }
@@ -362,13 +377,6 @@ ul.bg-white\/30 {
 
 :deep(.el-button--text:hover) {
 	color: #A1A8C1;
-}
-
-:deep(.el-dialog) {
-	margin: 0 !important;
-	top: 50% !important;
-	left: 50%;
-	transform: translate(-50%, -50%);
 }
 
 /* 面包屑统一样式优化 */

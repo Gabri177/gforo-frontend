@@ -99,6 +99,7 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 
 import {
   getUserInfo
@@ -107,6 +108,7 @@ import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
+const authStore = useAuthStore()
 
 // 使用 store 中的数据
 const userId = computed(() => userStore.userInfo.id);
@@ -135,25 +137,7 @@ const hancleProfileComments = () => {
   })
 }
 
-function formatDateToYMD(dateString) {
-  const parts = dateString.split(" "); // ["Sun", "Mar", "23", "22:48:09", "CET", "2025"]
-
-  const monthMap = {
-    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
-    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"
-  };
-
-  const day = parts[2];
-  const month = monthMap[parts[1]];
-  const year = parts[5];
-
-  if (!month) {
-    console.warn("月份无法解析:", parts[1]);
-    return null;
-  }
-
-  return `${year}-${month}-${day.padStart(2, '0')}`;
-}
+const formatDateToYMD = (date) => new Date(date).toLocaleString()
 
 
 
@@ -162,7 +146,8 @@ onMounted(async () => {
   try {
     const userInfo = await getUserInfo()
     userStore.setUserInfo(userInfo)
-    console.log("userInfo", userInfo)
+    authStore.setPermissions(userInfo.permissions || [])
+    console.log("userInfo", userInfo, userInfo.permissions)
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()
     // postCount.value = stats.posts

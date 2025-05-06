@@ -73,3 +73,35 @@
   opacity: 0 !important;
   transform: translateY(-20px) !important;
 }
+
+.el-popover.el-popper.morandi-user-popover {
+  background-color: rgba(233, 233, 225, 0.08); /* 莫兰迪奶灰色半透明 */
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  color: #EAEAEA;
+
+  box-shadow:
+    0 12px 32px rgba(183, 188, 179, 0.5),  /* 主发散阴影 */
+    0 4px 6px rgba(0, 0, 0, 0.1);          /* 次级阴影 */
+
+  background-image: url('https://www.transparenttextures.com/patterns/dust.png'); /* 纹理 */
+  background-repeat: repeat;
+  background-size: auto;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  max-height: 90vh; /* 最多撑满屏幕 */
+}
+
+.el-popover.el-popper.morandi-user-popover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 16px 36px rgba(183, 188, 179, 0.6),
+    0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+
+

@@ -28,7 +28,7 @@
                 <h1 class="text-2xl font-bold text-[#4A4A4A] mb-2">{{ originalPost?.title }}</h1>
 
                 <!-- 楼主帖子 -->
-                <PostFloor :id="'post-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
+                <PostFloor :isPost="true" :boardId="boardId" :id="'post-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
                     :floorNum="0" :reply-page-size="replyPageSize" :enable-content-expand="true"
                     :enable-replies-expand="true" :enableContentExpand="false" @reply="handleReplyPost"
                     @delete="handlePostFloorDeletePost" @report="handlePostFloorReportPost"
@@ -43,7 +43,7 @@
 
             <!-- 评论列表 -->
             <div class="mt-6 space-y-4">
-                <PostFloor v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
+                <PostFloor :isPost="false" :boardId="boardId" v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
                     :floorNum="index + 1 + (currentPage - 1) * pageSize" :floor="comment"
                     :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
                     @reply="handleReply" ref="floorRefs" @delete="handlePostFloorDelete" @report="handlePostFloorReport"
@@ -118,6 +118,7 @@ import ReturnHome from '~/components/ReturnHome.vue';
 import LikePost from '~/components/LikePost.vue';
 import { getPostByPage, deletePost, updatePost } from '~/api/postAPI';
 import { addCommentToPost, addCommentToComment, deleteComment, updateComment } from '~/api/commentAPI';
+import { adminDeletePost, adminDeleteComment } from '~/api/adminApi';
 import { useRoute, useRouter } from 'vue-router';
 import Hint from '~/tools/Hint.vue';
 
@@ -159,6 +160,7 @@ const commentToPost = reactive({
 const route = useRoute()
 const router = useRouter()
 const postId = ref(route.params.postId)
+const boardId = ref(route.params.boardId)
 const currentPage = ref(route.params.currentPage || 1)
 const parentTitle = computed(() =>
     localStorage.getItem('breadcrumb_parentTitle'))
@@ -174,8 +176,8 @@ const editFloorType = ref(0) // 0 楼层 1 楼层评论
 const editTargetId = ref(0)
 const isEditting = ref(false)
 
-
 console.log("postId", route.params.postId)
+console.log("boardId", boardId.value)
 
 const showDeleteConfirm = (action) => {
     hintConfirmAction.value = action
@@ -196,6 +198,11 @@ const handleReturn = () => {
 
 // store
 const userStore = useUserStore()
+const isPostGester = ref(userStore.isGesterOfBoard(boardId.value) || userStore.hasRole('ROLE_ADMIN'))
+console.log("boardId: ", boardId.value)
+console.log("isboardGester: ", userStore.isGesterOfBoard(boardId))
+console.log('has ROLE_ADMIN: ', userStore.hasRole('ROLE_ADMIN'))
+console.log("isPostGester", isPostGester.value)
 
 const preCommentToComment = reactive({
     entityType: 1,
@@ -216,7 +223,21 @@ const handlePostFloorDelete = (comment) => {
     console.log('handlePostFloorDelete', comment?.id)
 
     showDeleteConfirm(() => {
-        deleteComment(comment?.id || 0)
+        if (isPostGester.value) {
+            adminDeleteComment(comment?.id || 0)
+              .then(res => {
+                    ElMessage.success('Delete success')
+                    initPosts(currentPage.value)
+                })
+              .catch(err => {
+                    ElMessage.error(err.message || 'Delete failed')
+                })
+              .finally(() => {
+                    isHintLoading.value = false
+                    isHintVisible.value = false
+              })
+        } else {
+            deleteComment(comment?.id || 0)
             .then(res => {
                 ElMessage.success('Delete success')
                 initPosts(currentPage.value)
@@ -228,6 +249,8 @@ const handlePostFloorDelete = (comment) => {
                 isHintLoading.value = false
                 isHintVisible.value = false
             })
+        }
+        
     })
 
 
@@ -238,7 +261,21 @@ const handlePostFloorDeletePost = (postOrComment, isFloor) => {
 
     if (isFloor == 0) { // 帖子的删除
         showDeleteConfirm(() => {
-            deletePost(postOrComment.id)
+            if (isPostGester.value) {
+                adminDeletePost(postOrComment.id)
+                  .then(res => {
+                        ElMessage.success('删除成功')
+                        router.back()
+                    })
+                  .catch(err => {
+                        ElMessage.error(err.message || '删除失败')
+                    })
+                  .finally(() => {
+                        isHintLoading.value = false
+                        isHintVisible.value = false
+                  })
+            } else {
+                deletePost(postOrComment.id)
                 .then(res => {
                     ElMessage.success('删除成功')
                     router.back()
@@ -250,6 +287,8 @@ const handlePostFloorDeletePost = (postOrComment, isFloor) => {
                     isHintLoading.value = false
                     isHintVisible.value = false
                 })
+            }
+            
         })
 
     }
@@ -693,25 +732,6 @@ const scrollToFloorComment = (isForPost, floorId, replyId) => {
 </script>
 
 <style scoped>
-:deep(.morandi-dialog) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-}
-
-.to-center {
-    margin: 0 !important;
-    top: 50% !important;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-:deep(.el-dialog) {
-    margin: 0 !important;
-    top: 50% !important;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
 
 /* 确保内容区域不会超出屏幕 */
 .text-base {

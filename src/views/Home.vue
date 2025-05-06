@@ -114,7 +114,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getBoardList } from '~/api/boardApi'
 import { HomeFilled } from '@element-plus/icons-vue'
-
+import { PERMISSIONS } from '~/constants/permissions'
 
 const router = useRouter()
 const isLoading = ref(true)

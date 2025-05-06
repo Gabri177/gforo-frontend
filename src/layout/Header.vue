@@ -45,6 +45,7 @@
 							<el-dropdown-menu>
 								<el-dropdown-item @click="router.push('/profile')">Profile</el-dropdown-item>
 								<el-dropdown-item @click="router.push('/settings')">Setting</el-dropdown-item>
+								<el-dropdown-item v-if="isAdmin" @click="router.push('/admin')">Gestion</el-dropdown-item>
 								<el-dropdown-item divided @click="handleLogout">Logout</el-dropdown-item>
 							</el-dropdown-menu>
 						</template>
@@ -62,6 +63,7 @@
 import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '~/stores/user';
+import { useAuthStore } from '~/stores/auth';
 import { Search } from '@element-plus/icons-vue';
 import { logoutUser } from '~/api/authApi';
 import { ElMessage } from 'element-plus';
@@ -69,7 +71,12 @@ import { ElMessage } from 'element-plus';
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const searchQuery = ref('');
+
+const isAdmin = computed(() => {
+	return (userStore.hasRole('ROLE_ADMIN') || userStore.hasRole('ROLE_BOARD'))
+});
 
 // 根据登录状态显示不同的导航项
 const navItems = computed(() => {
@@ -103,6 +110,7 @@ const handleLogout = () => {
 	})
 	.finally(()=> {
 		userStore.clearUserInfo();
+		authStore.clearPermissions();
 		router.push('/login');
 	});
 };

@@ -7,6 +7,7 @@ export const useUserStore = defineStore('user', () => {
     const savedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     
     const isLoggedInState = ref(isLoggedIn());
+
     const userInfo = ref({
         id: savedUserInfo.id || '',
         username: savedUserInfo.username || '',
@@ -18,6 +19,8 @@ export const useUserStore = defineStore('user', () => {
         postCount: savedUserInfo.postCount || 0,
         commentCount: savedUserInfo.commentCount || 0,
         nickname: savedUserInfo.nickname || '',
+        boardIds: savedUserInfo.boardIds || [],
+        roles: savedUserInfo.roles || []
     });
 
     function getBasicUserInfo() {
@@ -43,7 +46,9 @@ export const useUserStore = defineStore('user', () => {
             status: info.status || '',
             postCount: info.postCount || 0,
             commentCount: info.commentCount || 0,
-            nickname: info.nickname || ''
+            nickname: info.nickname || '',
+            boardIds: info.boardIds || [],
+            roles: info.roles || []
         };
         console.log("userInfo store", userInfo.value)
         isLoggedInState.value = true;
@@ -63,7 +68,9 @@ export const useUserStore = defineStore('user', () => {
             status: '',
             postCount: 0,
             commentCount: 0,
-            nickname: ''
+            nickname: '',
+            boardIds: [],
+            roles: []
         };
         isLoggedInState.value = false;
         // 清除 localStorage
@@ -84,6 +91,16 @@ export const useUserStore = defineStore('user', () => {
         localStorage.setItem('userInfo', JSON.stringify(userInfo.value));
     }
 
+    function isGesterOfBoard(boardId) {
+        const id = Number(boardId);
+        return userInfo.value.boardIds.includes(id) && hasRole('ROLE_BOARD');
+    }
+
+    function hasRole(role) {
+        //console.log("userhasrole: " + role + " ", userInfo.value.roles.includes(role))
+        return userInfo.value.roles.includes(role);
+    }
+
     return {
         isLoggedInState,
         userInfo,
@@ -91,6 +108,8 @@ export const useUserStore = defineStore('user', () => {
         clearUserInfo,
         updateAvatar,
         updateStatus,
-        getBasicUserInfo
+        getBasicUserInfo,
+        isGesterOfBoard,
+        hasRole
     };
 }); 

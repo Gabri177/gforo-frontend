@@ -13,7 +13,7 @@ import VMdEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import permissionDirective from '~/directives/permission'
 // highlightjs
 import hljs from 'highlight.js';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
@@ -29,6 +29,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 const app = createApp(App)
 const pinia = createPinia()
+app.directive('permission', permissionDirective)
 
 VMdEditor.use(githubTheme, {
 	Hljs: hljs,

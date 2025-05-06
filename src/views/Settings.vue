@@ -139,6 +139,7 @@ import { ref, reactive, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 import AvatarChoose from '~/components/AvatarChoose.vue'
 import {
   updateUserInfo,
@@ -150,6 +151,7 @@ import {
 } from '~/api/userApi'
 import VerifyCodeDialog from '~/components/VerifyCodeDialog.vue'
 
+const authStore = useAuthStore()
 const verifyCodeDialogRef = ref(null)
 const router = useRouter()
 const loading = ref(false)
@@ -219,6 +221,7 @@ const handleVerifyCode = (code) => {
         .then((res) => {
           console.log("email verified new user info: ", res)
           userStore.setUserInfo(res)
+          authStore.setPermissions(res.permissions || [])
         })
     })
     .catch((error) => {
@@ -267,6 +270,7 @@ const activeUsernameEdit = async () => {
           .then((res) => {
             console.log("email verified new user info: ", res)
             userStore.setUserInfo(res)
+            authStore.setPermissions(res.permissions || [])
             startChangeUsername.value = false
           })
       })
@@ -395,6 +399,7 @@ const handleProfileSave = async () => {
     const userInfoRes = await getUserInfo()
     console.log("new user info: ", userInfoRes)
     userStore.setUserInfo(userInfoRes)
+    authStore.setPermissions(userInfoRes.permissions || [])
     usernameEditInactive.value = true
     emailEditInactive.value = true
     ElMessage.success('Profile updated successfully')

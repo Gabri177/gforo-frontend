@@ -48,13 +48,14 @@
                                     <span
                                         class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] min-w-[50px]"
                                         :title="reply?.author?.nickname">
-                                        {{ reply?.author?.nickname }} :
+                                        <!-- {{ reply?.author?.nickname }} : -->
+                                        <UserInfoCard :user="reply.author" :boardId="boardId" placement="right" :addColon="true"/>
                                     </span>
 
                                     <span v-if="reply.targetUserInfo != null"
                                         class="text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-w-[100px] min-w-[50px]"
-                                        :title="reply.author.nickname">
-                                        @{{ reply?.targetUserInfo?.nickname }}
+                                        :title="reply.targetUserInfo.nickname">
+                                        <UserInfoCard :user="reply.targetUserInfo" :boardId="boardId" placement="right" :addAt="true"/>
                                     </span>
                                     <div class="text-[#4A5568] flex-grow">
                                         <div :class="{ 'line-clamp-2': !reply?.isExpanded && enableContentExpand }"
@@ -73,7 +74,8 @@
                                     <span>{{ formatDate(reply?.createTime) }}</span>
                                 </div>
                             </div>
-                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id"
+                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id 
+                            || userStore.isGesterOfBoard(props.boardId) || userStore.hasRole('ROLE_ADMIN')"
                                 type="danger" link size="small" class="ml-4 self-start"
                                 @click="$emit('delete', reply, 1)">Delete</el-button>
                             <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id"
@@ -111,10 +113,12 @@
 
                 <div>
                     <!-- 自己不是主人 -->
-                    <el-button v-if="userStore.isLoggedInState && currentUserID != props.floor?.author.id" type="danger"
+                    <el-button v-if="userStore.isLoggedInState && currentUserID != props.floor?.author.id 
+                    && !userStore.isGesterOfBoard(props.boardId) && !userStore.hasRole('ROLE_ADMIN')" type="danger"
                         link @click="$emit('report', floor, 0)">Report</el-button>
                     <!-- 自己是主人 -->
-                    <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id" type="danger"
+                    <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id
+                    || userStore.isGesterOfBoard(props.boardId) || userStore.hasRole('ROLE_ADMIN')" type="danger"
                         link @click="$emit('delete', floor, 0)">Delete</el-button>
                     <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id"
                         type="primary" link @click="$emit('edit', floor, 0)">Edit</el-button>
@@ -133,12 +137,24 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import VMdEditor from '@kangc/v-md-editor';
 import { useUserStore } from '~/stores/user';
+import { useAuthStore } from '~/stores/auth'; 
+import { PERMISSIONS } from '~/constants/permissions'
+import UserInfoCard from '~/tools/UserInfoCard.vue';
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const currentUserID = userStore.getBasicUserInfo().id
 const repliesContainerRef = ref(null)
 
 const props = defineProps({
+    isPost: {
+        type: Boolean,
+        required: true
+    },
+    boardId: {
+        type: Number,
+        required: true
+    },
     floorNum: {
         type: Number,
         required: true

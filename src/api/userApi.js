@@ -1,8 +1,11 @@
 import axio from '~/axios/index'
 
-export function getUserInfo(){
-	return axio.get('/user/info')
-}
+export function getUserInfo(userId) {
+	return axio.get('/user/info', {
+	  params: userId ? { userId } : {}
+	})
+  }
+  
 
 export function changeUsername(username){
 	return axio.put('/user/change-username', {

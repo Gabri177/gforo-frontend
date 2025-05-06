@@ -71,6 +71,7 @@ import {
 	verifyCaptcha
 } from '~/api/captchaApi';
 import { useUserStore } from '~/stores/user';
+import { useAuthStore } from '~/stores/auth';
 import { setToken, setRefreshToken } from '~/utils/auth';
 import { getUserInfo } from '~/api/userApi';
 import { SCENE } from '~/constants/scene';
@@ -78,6 +79,7 @@ import { SCENE } from '~/constants/scene';
 
 const router = useRouter();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const loginLoading = ref(false);
 const formRef = ref(null); // 表单引用
 const captchaImg = ref(null); // 图形验证码
@@ -165,6 +167,7 @@ const onLogin = async () => {
 	console.log('userInfoRes:', userInfoRes);
 
     userStore.setUserInfo(userInfoRes);
+	authStore.setPermissions(userInfoRes.permissions || []);
 
     ElMessage.success('Login successful');
     router.push('/');

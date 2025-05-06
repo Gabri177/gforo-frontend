@@ -1,63 +1,45 @@
 <template>
   <div class="mb-6">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-semibold text-[#6B7C93]">用户列表</h3>
+      <h3 class="text-xl font-semibold text-[#6B7C93]">User List</h3>
       <div class="flex space-x-2">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索用户"
-          class="w-64 morandi-input"
-          clearable
-        >
+        <el-input v-model="searchQuery" placeholder="Search User" class="w-64 morandi-input" clearable>
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
           </template>
         </el-input>
-        <el-button type="primary" class="morandi-button" @click="refreshUsers">刷新</el-button>
+        <el-button type="primary" class="morandi-button" @click="refreshUsers">Reload</el-button>
       </div>
     </div>
 
     <!-- 用户表格 -->
-    <el-table
-      :data="filteredUsers"
-      style="width: 100%"
-      border
-      stripe
-      class="morandi-table"
-      v-loading="tableLoading"
-    >
+    <el-table :data="filteredUsers" style="width: 100%" border stripe class="morandi-table" v-loading="tableLoading">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="用户名" width="120" />
-      <el-table-column prop="nickname" label="昵称" width="120" />
-      <el-table-column prop="email" label="邮箱" class-name="email-column" />
-      <el-table-column prop="createdAt" label="注册时间" width="180">
+      <el-table-column prop="username" label="User Name" width="120" />
+      <el-table-column prop="nickname" label="Nick Name" width="120" />
+      <el-table-column prop="email" label="Email" class-name="email-column" />
+      <el-table-column prop="createTime" label="Create Time" width="180">
         <template #default="scope">
-          {{ formatDateToYMD(scope.row.createdAt) }}
+          {{ formatDateToYMD(scope.row.createTime) }}
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="status" label="Status" width="100">
         <template #default="scope">
-          <el-tag :type="scope.row.status === '1' ? 'success' : 'danger'">
-            {{ scope.row.status === '1' ? '已激活' : '未激活' }}
+          <el-tag :type="scope.row.status == '1' ? 'success' : scope.row.status == '2' ? 'warning' : 'danger'">
+            {{ scope.row.status == '1' ? 'Enables' : scope.row.status == '2' ? 'Disabled' : 'Deleted' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200">
+      <el-table-column label="Operation" width="200">
         <template #default="scope">
-          <el-button
-            size="small"
-            class="morandi-view-btn mr-2"
-            @click="handleViewUser(scope.row)"
-          >
-            查看
+
+          <el-button size="small" class="morandi-view-btn mr-2" @click="handleViewUser(scope.row)">
+            View
           </el-button>
-          <el-button
-            size="small"
-            class="morandi-disable-btn"
-            @click="handleDisableUser(scope.row)"
-            :disabled="scope.row.status !== '1'"
-          >
-            禁用
+          <el-button size="small" :class="getBtnClass(scope.row.status)" @click="handleChangeUserStatus(scope.row)">
+            {{ scope.row.status == '1' ? 'Disable' : scope.row.status == '2' ? 'Enable' : 'Recover' }}
           </el-button>
         </template>
       </el-table-column>
@@ -65,27 +47,14 @@
 
     <!-- 分页 -->
     <div class="flex justify-center mt-4">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="totalUsers"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        background
-      />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper" :total="totalUsers" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" background popper-class="morandi-select-dropdown" />
     </div>
   </div>
 
   <!-- 用户详情对话框 -->
-  <el-dialog 
-    v-model="userDetailVisible" 
-    title="用户详情" 
-    width="500px" 
-    class="morandi-dialog"
-    append-to-body
-  >
+  <el-dialog v-model="userDetailVisible" title="User details" width="500px" append-to-body :align-center="true">
     <div v-if="selectedUser" class="user-detail">
       <div class="flex items-center mb-6">
         <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-[#A1A8C1]">
@@ -99,91 +68,88 @@
 
       <div class="space-y-4">
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">用户ID:</span>
+          <span class="text-[#8B93B1] w-24">User ID:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.id }}</span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">邮箱:</span>
+          <span class="text-[#8B93B1] w-24">Email:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.email }}</span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">注册时间:</span>
-          <span class="text-[#4A4A4A]">{{ formatDateToYMD(selectedUser.createdAt) }}</span>
+          <span class="text-[#8B93B1] w-24">Create Time:</span>
+          <span class="text-[#4A4A4A]">{{ formatDateToYMD(selectedUser.createTime) }}</span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">状态:</span>
+          <span class="text-[#8B93B1] w-24">Status:</span>
           <span class="text-[#4A4A4A]">
-            <el-tag :type="selectedUser.status === '1' ? 'success' : 'danger'">
-              {{ selectedUser.status === '1' ? '已激活' : '未激活' }}
+            <el-tag :type="selectedUser.status == '1' ? 'success' : selectedUser.status == '2' ? 'warning' : 'danger'">
+              {{ selectedUser.status == '1' ? 'Enabled' : selectedUser.status == '2' ? 'Disabled' : 'Deleted' }}
             </el-tag>
           </span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">帖子数:</span>
+          <span class="text-[#8B93B1] w-24">Posts:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.postCount || 0 }}</span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">评论数:</span>
+          <span class="text-[#8B93B1] w-24">Comments:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.commentCount || 0 }}</span>
         </div>
         <div class="flex">
-          <span class="text-[#8B93B1] w-24">个人简介:</span>
+          <span class="text-[#8B93B1] w-24">Bio:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.bio || '暂无简介' }}</span>
         </div>
       </div>
     </div>
     <template #footer>
       <span class="dialog-footer">
-        <el-button class="morandi-cancel-btn" @click="userDetailVisible = false">关闭</el-button>
-        <el-button class="morandi-disable-btn" @click="handleDisableUser(selectedUser)" :disabled="!selectedUser || selectedUser.status !== '1'">
-          禁用账户
+        <el-button class="morandi-view-btn" @click="userDetailVisible = false">Close</el-button>
+        <el-button class="morandi-disable-btn" @click="handleDeleteUser(selectedUser)"
+          :disabled="!selectedUser || selectedUser.status == 0">
+          Delete
         </el-button>
       </span>
     </template>
   </el-dialog>
 
   <!-- 确认对话框 -->
-  <el-dialog 
-    v-model="confirmDialogVisible" 
-    title="确认操作" 
-    width="400px" 
-    class="morandi-dialog"
-    append-to-body
-  >
+  <el-dialog v-model="confirmDialogVisible" title="Confirm Operation" width="400px" append-to-body :align-center="true">
     <div class="text-[#4A4A4A]">
-      确定要{{ confirmAction === 'disable' ? '禁用' : '启用' }}用户 "{{ selectedUser?.username }}" 吗？
+      Are you sure you want to
+      <span class="morandi-highlight">
+        {{ confirmAction === 'disable' ? 'disable' : confirmAction === 'delete' ? 'delete' : 'enable' }}
+      </span>
+      user
+      <span class="morandi-highlight">
+        "{{ selectedUser?.username }}"
+      </span>
+      ?
     </div>
+
     <template #footer>
       <span class="dialog-footer">
-        <el-button class="morandi-cancel-btn" @click="confirmDialogVisible = false">取消</el-button>
-        <el-button class="morandi-confirm-btn" @click="confirmOperation" :loading="operationLoading">确认</el-button>
+        <el-button class="morandi-disable-btn" @click="confirmDialogVisible = false">Cancel</el-button>
+        <el-button class="morandi-confirm-btn" @click="confirmOperation" :loading="operationLoading">Confirm</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from 'vue'
+import { ref, computed, defineEmits, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-
-// 定义属性和事件
-const props = defineProps({
-  users: {
-    type: Array,
-    default: () => []
-  },
-  tableLoading: {
-    type: Boolean,
-    default: false
-  },
-  totalUsers: {
-    type: Number,
-    default: 0
-  }
-})
-
-const emit = defineEmits(['fetch-users', 'size-change', 'current-change', 'disable-user'])
+import {
+  getUserList,
+  changeUserPassword,
+  activeUser,
+  disableUser,
+  deleteUser,
+  logoutUser
+} from '~/api/adminApi'
+const users = ref([])
+const tableLoading = ref(false)
+const totalUsers = ref(0)
 
 // 本地状态
 const searchQuery = ref('')
@@ -192,101 +158,245 @@ const pageSize = ref(10)
 const selectedUser = ref(null)
 const userDetailVisible = ref(false)
 const confirmDialogVisible = ref(false)
-const confirmAction = ref('')
+const confirmAction = ref('disable')
 const operationLoading = ref(false)
 
 // 过滤用户列表
 const filteredUsers = computed(() => {
-  if (!searchQuery.value) return props.users
-  
+  if (!searchQuery.value) return users.value
+
   const query = searchQuery.value.toLowerCase()
-  return props.users.filter(user => 
-    user.username.toLowerCase().includes(query) || 
-    user.nickname.toLowerCase().includes(query) || 
+  return users.value.filter(user =>
+    // user.username.toLowerCase().includes(query) ||
+    // user.nickname.toLowerCase().includes(query) ||
     user.email.toLowerCase().includes(query)
   )
+})
+
+const initPage = async (pageNum, limit) => {
+  try {
+    const res = await getUserList(0, pageNum,
+      limit,
+      false
+    )
+    users.value = res.userInfoList
+    totalUsers.value = res.totalRows
+    currentPage.value = res.currentPage
+    pageSize.value = res.pageSize
+  } catch (error) {
+    console.error('获取用户列表失败:', error)
+    ElMessage.error(error.message ? error.message : '获取用户列表失败')
+  }
+}
+
+onMounted(async () => {
+
+  initPage(currentPage.value, pageSize.value)
 })
 
 // 格式化日期
 function formatDateToYMD(dateString) {
   if (!dateString) return '未知'
-  
-  const parts = dateString.split(" ") // ["Sun", "Mar", "23", "22:48:09", "CET", "2025"]
-
-  const monthMap = {
-    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
-    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"
-  }
-
-  const day = parts[2]
-  const month = monthMap[parts[1]]
-  const year = parts[5]
-
-  if (!month) {
-    console.warn("月份无法解析:", parts[1])
-    return '未知'
-  }
-
-  return `${year}-${month}-${day.padStart(2, '0')}`
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return '未知'
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 // 用户操作
 function handleViewUser(user) {
+  console.log("view", user)
   selectedUser.value = user
   userDetailVisible.value = true
 }
 
-function handleDisableUser(user) {
+function handleDeleteUser(user) {
   selectedUser.value = user
-  confirmAction.value = 'disable'
+  confirmAction.value = 'delete'
   confirmDialogVisible.value = true
 }
 
+function handleChangeUserStatus(user) {
+  selectedUser.value = user
+  confirmAction.value = user.status == 1 ? 'disable' : 'enable'
+  confirmDialogVisible.value = true
+}
+
+function getBtnClass(status) {
+  if (status == 0) return 'morandi-orange-btn'
+  if (status == 1) return 'morandi-disable-btn'
+  if (status == 2) return 'morandi-button'
+  return 'morandi-cancel-btn'
+}
+
 function refreshUsers() {
-  emit('fetch-users')
+  initPage(currentPage.value, pageSize.value)
 }
 
 function handleSizeChange(size) {
   pageSize.value = size
-  emit('size-change', size)
+  initPage(currentPage.value, pageSize.value)
 }
 
 function handleCurrentChange(page) {
   currentPage.value = page
-  emit('current-change', page)
+  initPage(currentPage.value)
 }
 
 async function confirmOperation() {
+  console.log("selectedUser", selectedUser.value)
+  const userStatus = selectedUser.value.status
+  console.log("userStatus", userStatus)
   operationLoading.value = true
   try {
     // 发出禁用用户事件
-    emit('disable-user', selectedUser.value.id, confirmAction.value)
-    
-    // 更新本地数据
-    if (confirmAction.value === 'disable') {
-      if (selectedUser.value) {
-        selectedUser.value.status = '0'
+    ////////////////////////////////
+    if (confirmAction.value == 'enable')
+      await activeUser(selectedUser.value.id)
+    else if (confirmAction.value == 'disable')
+      await disableUser(selectedUser.value.id)
+    else if (confirmAction.value == 'delete')
+      await deleteUser(selectedUser.value.id)
+
+    ElMessage.success('操作成功')
+    filteredUsers.value.forEach((item, index) => {
+      if (item.id == selectedUser.value.id) {
+        let newStatus;
+        if (confirmAction.value == 'enable')
+          newStatus = 1
+        else if (confirmAction.value == 'disable')
+          newStatus = 2
+        else if (confirmAction.value == 'delete')
+          newStatus = 0
+        filteredUsers.value[index].status = newStatus
       }
-	  console.log("banded")
-      //ElMessage.success('用户已禁用')
-    } else {
-      if (selectedUser.value) {
-        selectedUser.value.status = '1'
-      }
-      ElMessage.success('用户已启用')
-    }
-    
+    })
+    //initPage(currentPage.value, pageSize.value)
+
     confirmDialogVisible.value = false
   } catch (error) {
     console.error('操作失败:', error)
-    ElMessage.error('操作失败')
+    ElMessage.error(error.message ? error.message : '操作失败')
   } finally {
+    userDetailVisible.value = false
     operationLoading.value = false
   }
 }
 </script>
 
 <style scoped>
+.morandi-highlight {
+  color: #83B59D;
+  font-weight: 600;
+}
+
+
+:deep(.el-dialog) {
+  margin: 0 !important;
+  top: 50% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.morandi-orange-btn {
+  background-color: #D8A373;
+  /* 主色调：柔和橙 */
+  border-color: #D8A373;
+  color: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.morandi-orange-btn:hover,
+.morandi-orange-btn:focus {
+  background-color: #C68C5E;
+  /* hover：偏深橙 */
+  border-color: #C68C5E;
+  color: #FFFFFF;
+}
+
+.morandi-orange-btn:active,
+.morandi-orange-btn.is-active {
+  background-color: #B07549;
+  /* active：低饱和深橙 */
+  border-color: #B07549;
+  color: #FFFFFF;
+}
+
+.morandi-orange-btn:disabled {
+  background-color: #EBD8C9;
+  /* disabled：淡橙灰 */
+  border-color: #EBD8C9;
+  color: #A1A8C1;
+}
+
+
+
+/* 莫兰迪风格标签 */
+:deep(.el-tag) {
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-tag--success) {
+  background-color: #E8F0EB;
+  border-color: #83B59D;
+  color: #5C8D75;
+}
+
+:deep(.el-tag--success:hover) {
+  background-color: #D5E5DD;
+  border-color: #6FA189;
+  color: #5C8D75;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-tag--danger) {
+  background-color: #F0E8E8;
+  border-color: #A87A7A;
+  color: #845C5C;
+}
+
+:deep(.el-tag--danger:hover) {
+  background-color: #E5D5D5;
+  border-color: #946B6B;
+  color: #845C5C;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 添加其他可能用到的标签样式 */
+:deep(.el-tag--warning) {
+  background-color: #F0EDE8;
+  border-color: #C1B8A8;
+  color: #8B7C6B;
+}
+
+:deep(.el-tag--warning:hover) {
+  background-color: #E5E0D5;
+  border-color: #B1A89A;
+  color: #8B7C6B;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-tag--info) {
+  background-color: #E8EBF0;
+  border-color: #A1A8C1;
+  color: #6B7C93;
+}
+
+:deep(.el-tag--info:hover) {
+  background-color: #D5DDE5;
+  border-color: #8B93B1;
+  color: #6B7C93;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 /* 莫兰迪风格按钮样式 */
 .morandi-view-btn {
   background-color: #A1B5A1;
@@ -295,13 +405,15 @@ async function confirmOperation() {
   transition: all 0.3s ease;
 }
 
-.morandi-view-btn:hover, .morandi-view-btn:focus {
+.morandi-view-btn:hover,
+.morandi-view-btn:focus {
   background-color: #8CA58C;
   border-color: #8CA58C;
   color: #FFFFFF;
 }
 
-.morandi-view-btn:active, .morandi-view-btn.is-active {
+.morandi-view-btn:active,
+.morandi-view-btn.is-active {
   background-color: #7A957A;
   border-color: #7A957A;
   color: #FFFFFF;
@@ -314,13 +426,15 @@ async function confirmOperation() {
   transition: all 0.3s ease;
 }
 
-.morandi-disable-btn:hover, .morandi-disable-btn:focus {
+.morandi-disable-btn:hover,
+.morandi-disable-btn:focus {
   background-color: #B28E8E;
   border-color: #B28E8E;
   color: #FFFFFF;
 }
 
-.morandi-disable-btn:active, .morandi-disable-btn.is-active {
+.morandi-disable-btn:active,
+.morandi-disable-btn.is-active {
   background-color: #A37A7A;
   border-color: #A37A7A;
   color: #FFFFFF;
@@ -339,13 +453,15 @@ async function confirmOperation() {
   transition: all 0.3s ease;
 }
 
-.morandi-cancel-btn:hover, .morandi-cancel-btn:focus {
+.morandi-cancel-btn:hover,
+.morandi-cancel-btn:focus {
   background-color: #D5D0C8;
   border-color: #B3A99A;
   color: #4A5A70;
 }
 
-.morandi-cancel-btn:active, .morandi-cancel-btn.is-active {
+.morandi-cancel-btn:active,
+.morandi-cancel-btn.is-active {
   background-color: #C7C0B6;
   border-color: #A59B8C;
   color: #3A4A60;
@@ -358,13 +474,15 @@ async function confirmOperation() {
   transition: all 0.3s ease;
 }
 
-.morandi-confirm-btn:hover, .morandi-confirm-btn:focus {
+.morandi-confirm-btn:hover,
+.morandi-confirm-btn:focus {
   background-color: #8CA58C;
   border-color: #8CA58C;
   color: #FFFFFF;
 }
 
-.morandi-confirm-btn:active, .morandi-confirm-btn.is-active {
+.morandi-confirm-btn:active,
+.morandi-confirm-btn.is-active {
   background-color: #7A957A;
   border-color: #7A957A;
   color: #FFFFFF;
@@ -381,55 +499,6 @@ async function confirmOperation() {
 
 .morandi-table :deep(.el-table__row) {
   transition: all 0.3s;
-}
-
-/* 对话框样式优化 */
-.morandi-dialog :deep(.el-dialog__header) {
-  border-bottom: 1px solid #E3E0DB;
-  padding-bottom: 15px;
-}
-
-.morandi-dialog :deep(.el-dialog__title) {
-  color: #6B7C93;
-  font-weight: 600;
-}
-
-.morandi-dialog :deep(.el-dialog__body) {
-  padding: 20px;
-  color: #4A4A4A;
-}
-
-.morandi-dialog :deep(.el-dialog__footer) {
-  border-top: 1px solid #E3E0DB;
-  padding-top: 15px;
-}
-
-/* 修复遮罩层问题 */
-:deep(.el-overlay) {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  z-index: 2000 !important;
-  height: 100% !important;
-  width: 100% !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(2px) !important;
-}
-
-:deep(.el-dialog) {
-  position: relative !important;
-  margin: 15vh auto 50px !important;
-  background: #fff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-  overflow: hidden !important;
-  max-width: 90% !important;
-}
-
-.morandi-dialog :deep(.el-dialog__headerbtn:hover .el-dialog__close) {
-  color: #A1B5C1;
 }
 
 /* 美化用户详情样式 */
@@ -459,5 +528,34 @@ async function confirmOperation() {
 
 .morandi-input :deep(.el-input__prefix) {
   color: #8B93B1;
+}
+
+/* 莫兰迪风格输入框 */
+:deep(.morandi-input .el-input__wrapper) {
+  background-color: #F8FAFC;
+  border: 1px solid #C1B8A8;
+  box-shadow: none;
+}
+
+:deep(.morandi-input .el-input__wrapper:hover) {
+  border-color: #A1A8C1;
+}
+
+:deep(.morandi-input .el-input__wrapper.is-focus) {
+  border-color: #A1A8C1;
+  box-shadow: 0 0 0 1px #A1A8C1;
+}
+
+/* 莫兰迪风格标签页 */
+:deep(.morandi-tabs .el-tabs__item) {
+  color: #6B7C93;
+}
+
+:deep(.morandi-tabs .el-tabs__item.is-active) {
+  color: #4A4A4A;
+}
+
+:deep(.morandi-tabs .el-tabs__active-bar) {
+  background-color: #83B59D;
 }
 </style>
