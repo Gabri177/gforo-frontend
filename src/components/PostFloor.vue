@@ -1,8 +1,9 @@
 <template>
-    <div class="min-h-[400px] flex gap-4 p-4 rounded-xl shadow-md transition-all duration-300 bg-white/70 backdrop-blur-md border border-white/20">
+    <div class="min-h-[400px] flex flex-col sm:flex-row gap-4 p-4 rounded-xl shadow-md transition-all duration-300 bg-white/70 backdrop-blur-md border border-white/20">
+
 
         <!-- 左侧用户信息 -->
-        <div class="w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
+        <div class="w-full sm:w-48 flex-shrink-0 flex flex-col items-center justify-center user-info-card ">
             <div
                 class="w-full p-4 rounded-lg backdrop-blur-sm bg-white/50 border border-[#E2E8F0] shadow-inner h-full flex flex-col justify-center">
                 <div class="flex flex-col items-center">
@@ -21,7 +22,7 @@
 
         <!-- 右侧内容 -->
         <div
-            class="flex flex-col justify-between flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
+            class="w-full flex flex-col justify-between flex-grow p-4 rounded-lg backdrop-blur-md bg-white/60 border border-[#E2E8F0] shadow">
 
             <div
                 class="flex-grow overflow-auto text-base leading-relaxed text-[#4A5568] min-h-[100px] max-h-[500px] custom-scrollbar">
@@ -74,15 +75,23 @@
                                     <span>{{ formatDate(reply?.createTime) }}</span>
                                 </div>
                             </div>
-                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id 
-                            || userStore.isGesterOfBoard(props.boardId) || userStore.hasRole('ROLE_ADMIN')"
+                            <div class="flex flex-col items-end">
+                                <div>
+                                <el-button v-if="ifShowDeleteBtn(reply?.author?.id, !props.isPost)"
                                 type="danger" link size="small" class="ml-4 self-start"
                                 @click="$emit('delete', reply, 1)">Delete</el-button>
-                            <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id"
-                                type="primary" link size="small" class="ml-4 self-start"
-                                @click="$emit('edit', floor, 1, reply)">Edit</el-button>
-                            <el-button v-if="userStore.isLoggedInState" type="success" link size="small"
-                                class="ml-4 self-start" @click="$emit('reply', floor, reply)">Reply</el-button>
+                                <el-button v-if="userStore.isLoggedInState && currentUserID == reply.author.id"
+                                    type="primary" link size="small" class="ml-4 self-start"
+                                    @click="$emit('edit', floor, 1, reply)">Edit</el-button>
+                                <el-button v-if="userStore.isLoggedInState" type="success" link size="small"
+                                    class="ml-4 self-start" @click="$emit('reply', floor, reply)">Reply</el-button>
+                                </div>
+                                <div class="flex items-end">
+                                    <el-button v-if="userStore.isLoggedInState" type="info" link size="small"
+                                    class="ml-4 self-start" @click="handleLikeComment(reply?.id)">{{ reply?.isLike ? 'Liked' : 'Like' }} ({{ reply?.likeCount }})</el-button>
+                                </div>
+                            </div>
+                            
 
                         </div>
                     </div>
@@ -113,12 +122,10 @@
 
                 <div>
                     <!-- 自己不是主人 -->
-                    <el-button v-if="userStore.isLoggedInState && currentUserID != props.floor?.author.id 
-                    && !userStore.isGesterOfBoard(props.boardId) && !userStore.hasRole('ROLE_ADMIN')" type="danger"
+                    <el-button v-if="!ifShowDeleteBtn(props.floor?.author.id, !props.isPost) && userStore.isLoggedInState" type="danger"
                         link @click="$emit('report', floor, 0)">Report</el-button>
                     <!-- 自己是主人 -->
-                    <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id
-                    || userStore.isGesterOfBoard(props.boardId) || userStore.hasRole('ROLE_ADMIN')" type="danger"
+                    <el-button v-if="ifShowDeleteBtn(props.floor?.author.id, !props.isPost)" type="danger"
                         link @click="$emit('delete', floor, 0)">Delete</el-button>
                     <el-button v-if="userStore.isLoggedInState && currentUserID == props.floor?.author.id"
                         type="primary" link @click="$emit('edit', floor, 0)">Edit</el-button>
@@ -126,6 +133,8 @@
                     <!-- 通用 -->
                     <el-button v-if="userStore.isLoggedInState" type="success" link
                         @click="$emit('reply', floor)">Reply</el-button>
+                    <el-button v-if="userStore.isLoggedInState && !props.isPost" type="info" link
+                        @click="handleLikeComment(props.floor?.id)">{{ props.floor?.isLike ? 'Liked' : 'Like' }} ({{ props.floor?.likeCount }})</el-button>
 
                 </div>
             </div>
@@ -140,6 +149,8 @@ import { useUserStore } from '~/stores/user';
 import { useAuthStore } from '~/stores/auth'; 
 import { PERMISSIONS } from '~/constants/permissions'
 import UserInfoCard from '~/tools/UserInfoCard.vue';
+import { likePost, likeComment } from '~/api/likeApi';
+import { ElMessage } from 'element-plus';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -184,6 +195,30 @@ const currentPage = ref(1)
 const contentRef = ref(null)
 const shouldShowExpandButton = ref(false)
 
+const handleLikeComment = async (commentId) => {
+    console.log('commentId', commentId)
+    try {
+        await likeComment(commentId)
+        // ElMessage.success('Like success')
+        // 更新点赞状态
+        pagedReplies.value.forEach(reply => {
+            console.log("original isLike reply", reply, reply.isLike, reply.likeCount)
+            if (reply.id == commentId) {
+                reply.isLike = !reply.isLike
+                reply.likeCount += reply.isLike? 1 : -1
+            }
+        })
+        if (props.floor.id == commentId) {
+            console.log("original isLike floor", props.floor, props.floor.isLike, props.floor.likeCount)
+            props.floor.isLike = !props.floor.isLike;
+            props.floor.likeCount += props.floor.isLike ? 1 : -1;
+        }
+        
+    } catch (error) {
+        ElMessage.error(error.message ? error.message : 'Like failed')
+    }
+}
+
 const formatDate = (isoString) => {
     if (!isoString) return ''
     const date = new Date(isoString)
@@ -194,6 +229,22 @@ const formatDate = (isoString) => {
     const minutes = date.getMinutes().toString().padStart(2, '0')
 
     return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const ifShowDeleteBtn = (authorId, isComment) => {
+
+    if (!userStore.isLoggedInState)
+        return false
+    if (currentUserID == authorId)
+        return true
+    else if (!isComment && (authStore.hasPermission('post:delete:any') ||
+            authStore.hasPermission('post:delete:board') && authStore.hasBoardId(props.boardId)))
+        return true
+    else if (isComment && (authStore.hasPermission('comment:delete:any') ||
+        authStore.hasPermission('comment:delete:board') && authStore.hasBoardId(props.boardId)))
+        return true
+    return false
+    
 }
 
 
@@ -679,4 +730,19 @@ html {
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
+
+@media (max-width: 640px) {
+  .user-name {
+    font-size: 14px;
+    text-align: center;
+  }
+  .floor {
+    padding: 12px;
+  }
+  .el-avatar {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
 </style>

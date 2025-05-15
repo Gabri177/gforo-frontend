@@ -1,10 +1,10 @@
 <template>
 	<el-popover :placement="props.placement" width="300" trigger="manual" :visible="visible"
-	:popper-options="popperOptions"
-		popper-class="morandi-user-popover">
+		:popper-options="popperOptions" popper-class="morandi-user-popover">
 		<template #reference>
 			<span class=" user-name-ellipsis text-[#6B7C93] cursor-pointer hover:underline" @click.stop="handleClick">
-				{{ props.addAt ? '@' : '' }}{{ basicUser.nickname || basicUser.username }}{{ props.addColon ? ':' : '' }}
+				{{ props.addAt ? '@' : '' }}{{ basicUser.nickname || basicUser.username }}{{ props.addColon ? ':' : ''
+				}}
 			</span>
 		</template>
 
@@ -36,6 +36,13 @@
 					{{ detailedUser.status === 2 ? 'Disabled' : detailedUser.status === 1 ? 'Normal' : 'Deleted' }}
 				</span>
 			</div>
+			<!-- 获得点赞数量 -->
+			<div class="text-sm text-[#6B7C93] mb-1 card">
+			❤️ Likes Received:
+			<span class="font-semibold text-[#4A4A4A]">
+				{{ detailedUser.getLikeCount ?? 0 }}
+			</span>
+			</div>
 			<!-- Email -->
 			<p v-if="detailedUser.email" class="text-sm text-[#6B7C93] mb-1 card">
 				📧 Email:
@@ -50,10 +57,9 @@
 				</span>
 			</p>
 
-			<!-- 帖子和评论数量 -->
 			<!-- 帖子和评论数量 - 毛玻璃卡片布局 -->
 			<div class="flex justify-between gap-2 mt-2">
-				<div class="glass-card flex-1 text-center">
+				<div class="glass-card flex-1 text-center" @click="handleViewOthersPosts(detailedUser)">
 					📝 Posts<br />
 					<span class="font-semibold text-[#4A4A4A] text-base">{{ detailedUser.postCount }}</span>
 				</div>
@@ -63,26 +69,18 @@
 				</div>
 			</div>
 
-
 			<!-- Bio -->
-			<!-- Bio -->
-			<!-- Bio -->
-<div
-  v-if="detailedUser.bio"
-  class="text-sm text-[#4A4A4A] mt-1 card bio-card"
->
-  👤 Bio:
-  <div class="mt-1 whitespace-pre-wrap">
-    <span>{{ isBioExpanded ? detailedUser.bio : truncatedBio }}</span>
-    <button
-      v-if="detailedUser.bio.length > 30"
-      class="ml-2 text-[#83B59D] hover:underline focus:outline-none text-xs font-medium"
-      @click.stop="toggleBio"
-    >
-      {{ isBioExpanded ? 'Collapse' : 'Expand' }}
-    </button>
-  </div>
-</div>
+			<div v-if="detailedUser.bio" class="text-sm text-[#4A4A4A] mt-1 card bio-card">
+				👤 Bio:
+				<div class="mt-1 whitespace-pre-wrap">
+					<span>{{ isBioExpanded ? detailedUser.bio : truncatedBio }}</span>
+					<button v-if="detailedUser.bio.length > 30"
+						class="ml-2 text-[#83B59D] hover:underline focus:outline-none text-xs font-medium"
+						@click.stop="toggleBio">
+						{{ isBioExpanded ? 'Collapse' : 'Expand' }}
+					</button>
+				</div>
+			</div>
 
 
 		</div>
@@ -104,20 +102,20 @@ const props = defineProps({
 })
 
 const popperOptions = {
-  modifiers: [
-    {
-      name: 'flip',
-      options: {
-        fallbackPlacements: ['left', 'right', 'top', 'bottom']
-      }
-    },
-    {
-      name: 'preventOverflow',
-      options: {
-        padding: 8
-      }
-    }
-  ]
+	modifiers: [
+		{
+			name: 'flip',
+			options: {
+				fallbackPlacements: ['left', 'right', 'top', 'bottom']
+			}
+		},
+		{
+			name: 'preventOverflow',
+			options: {
+				padding: 8
+			}
+		}
+	]
 }
 
 
@@ -142,13 +140,17 @@ const truncatedBio = computed(() => {
 const userRoleLabel = computed(() => {
 	if (!detailedUser.value) return ''
 
-	const roles = detailedUser.value.roles || []
-	const boardIds = detailedUser.value.boardIds || []
+	const roles = detailedUser.value?.accessControl?.roles || []
+	const boardIds = detailedUser.value?.accessControl?.boardIds || []
 	console.log("roles", roles)
 	console.log("boardIds", boardIds)
 	console.log("boardId", props.boardId)
 	if (detailedUser.value.status == 0) return 'GHOST'
 	const currentBoardId = Number(props.boardId)
+	// ==============================================
+	// 这里有问题 需要修改
+	// ==============================================
+	if (roles.includes('ROLE_SUPER_ADMIN')) return 'Super Admin'
 	if (roles.includes('ROLE_ADMIN')) return 'Admin'
 	if (roles.includes('ROLE_BOARD') && boardIds.includes(currentBoardId)) return 'Moderator'
 	return 'User'
@@ -166,6 +168,13 @@ function handleClick() {
 	} else {
 		visible.value = false
 	}
+}
+
+const handleViewOthersPosts = (user) => {
+	localStorage.setItem('lastVisitedUser', JSON.stringify(user))
+	console.log("user", user)
+	window.location.href = `/profile/posts/${user.id}`
+	
 }
 
 async function loadUser() {
@@ -207,22 +216,22 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-
 .bio-card {
-  max-height: 120px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  white-space: pre-wrap;
-  word-break: break-word;
+	max-height: 120px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	white-space: pre-wrap;
+	word-break: break-word;
 }
 
 /* 可选滚动条美化 */
 .bio-card::-webkit-scrollbar {
-  width: 6px;
+	width: 6px;
 }
+
 .bio-card::-webkit-scrollbar-thumb {
-  background-color: #C1B8A8;
-  border-radius: 3px;
+	background-color: #C1B8A8;
+	border-radius: 3px;
 }
 
 .user-name-ellipsis {

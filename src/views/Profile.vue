@@ -123,7 +123,7 @@ const postCount = computed(() => userStore.userInfo.postCount);
 const commentCount = computed(() => userStore.userInfo.commentCount);
 const showAvatarPreview = ref(false) // 控制是否显示大图预览
 
-console.log("userInfo Profile", userStore.userInfo)
+//console.log("userInfo Profile", userStore.userInfo)
 
 const handleProfilePosts = () => {
   router.push({
@@ -146,7 +146,7 @@ onMounted(async () => {
   try {
     const userInfo = await getUserInfo()
     userStore.setUserInfo(userInfo)
-    authStore.setPermissions(userInfo.permissions || [])
+    authStore.setAuthInfo(userInfo)
     console.log("userInfo", userInfo, userInfo.permissions)
     // TODO: 获取其他用户信息（如统计数据等）
     // const stats = await getUserStats()

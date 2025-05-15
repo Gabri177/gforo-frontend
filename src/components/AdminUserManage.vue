@@ -28,7 +28,7 @@
       <el-table-column prop="status" label="Status" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.status == '1' ? 'success' : scope.row.status == '2' ? 'warning' : 'danger'">
-            {{ scope.row.status == '1' ? 'Enables' : scope.row.status == '2' ? 'Disabled' : 'Deleted' }}
+            {{ scope.row.status == '1' ? 'Enabled' : scope.row.status == '2' ? 'Disabled' : 'Deleted' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -54,7 +54,8 @@
   </div>
 
   <!-- 用户详情对话框 -->
-  <el-dialog v-model="userDetailVisible" title="User details" width="500px" append-to-body :align-center="true">
+  <el-dialog v-model="userDetailVisible" title="User details" width="500px" append-to-body :align-center="true"
+    @close="selectedUser = []">
     <div v-if="selectedUser" class="user-detail">
       <div class="flex items-center mb-6">
         <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-[#A1A8C1]">
@@ -88,6 +89,22 @@
           </span>
         </div>
         <div class="flex">
+          <span class="text-[#8B93B1] w-24">Roles:</span>
+          <span class="text-[#4A4A4A]">
+            <el-checkbox-group v-model="selectedRoles" @change="handleRoleCheckBoxChange">
+              <el-checkbox v-for="role in roles" :key="role.name" :label="role.name" border />
+            </el-checkbox-group>
+          </span>
+        </div>
+        <div class="flex" v-show="isBoardRoleChecked">
+          <span class="text-[#8B93B1] w-24">Boards:</span>
+          <span class="text-[#4A4A4A]">
+            <el-checkbox-group v-model="selectedBoards" @change="handleBoardCheckBoxChange">
+              <el-checkbox v-for="board in boardPosterInfo" :key="board.name" :label="board.name" border />
+            </el-checkbox-group>
+          </span>
+        </div>
+        <div class="flex">
           <span class="text-[#8B93B1] w-24">Posts:</span>
           <span class="text-[#4A4A4A]">{{ selectedUser.postCount || 0 }}</span>
         </div>
@@ -102,12 +119,18 @@
       </div>
     </div>
     <template #footer>
-      <span class="dialog-footer">
-        <el-button class="morandi-view-btn" @click="userDetailVisible = false">Close</el-button>
-        <el-button class="morandi-disable-btn" @click="handleDeleteUser(selectedUser)"
-          :disabled="!selectedUser || selectedUser.status == 0">
+      <span class="dialog-footer flex justify-between">
+        <div>
+          <el-button class="morandi-disable-btn" @click="handleDeleteUser(selectedUser)"
+          :disabled="!selectedUser || selectedUser.status == 0" v-show="authStore.isSuperAdmin" >
           Delete
         </el-button>
+        </div>
+        <div>
+          <el-button class="morandi-orange-btn" @click="userDetailVisible = false;selectedUser = []">Cancel</el-button>
+          <el-button class="morandi-view-btn" @click="handleConfirmUserInfo(selectedUser)">Confirm</el-button>
+        </div>
+
       </span>
     </template>
   </el-dialog>
@@ -136,9 +159,10 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits, onMounted } from 'vue'
+import { ref, computed, defineEmits, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import { getBoardList } from '~/api/boardApi'
 import {
   getUserList,
   changeUserPassword,
@@ -147,9 +171,12 @@ import {
   deleteUser,
   logoutUser
 } from '~/api/adminApi'
+import { getRoleDetailList, updateUserRole } from '~/api/permissionApi'
+import { useAuthStore } from '~/stores/auth'
 const users = ref([])
 const tableLoading = ref(false)
 const totalUsers = ref(0)
+const authStore = useAuthStore()
 
 // 本地状态
 const searchQuery = ref('')
@@ -160,6 +187,115 @@ const userDetailVisible = ref(false)
 const confirmDialogVisible = ref(false)
 const confirmAction = ref('disable')
 const operationLoading = ref(false)
+const roles = ref([])
+const isBoardRoleChecked = ref(false)
+const boardPosterInfo = ref([])
+const selectedRoles = ref([])
+const selectedBoards = ref([])
+
+const handleRoleCheckBoxChange = (val) => {
+
+  if (val.includes('ROLE_BOARD')) {
+    console.log('board role checked')
+    isBoardRoleChecked.value = true
+  } else {
+    console.log('board role unchecked')
+    isBoardRoleChecked.value = false
+    selectedBoards.value = []
+  }
+  console.log('checkbox change:', val)
+}
+
+const handleBoardCheckBoxChange = (val) => {
+  console.log('checkbox change:', val)
+}
+
+watch(
+  () => selectedUser.value,
+  (newUser) => {
+    if (newUser?.accessControl?.roles) {
+      selectedRoles.value = [...newUser.accessControl.roles]
+      handleRoleCheckBoxChange(selectedRoles.value)
+    } else {
+      selectedRoles.value = []
+    }
+    if (newUser?.accessControl?.boardIds) {
+      selectedBoards.value = boardPosterInfo.value.filter(board => newUser.accessControl.boardIds.includes(board.id)).map(board => board.name)
+      console.log('selectedBoards: ', selectedBoards.value)
+    } else {
+      selectedBoards.value = []
+    }
+  },
+  { immediate: true }
+)
+
+function arraysEqual(arr1, arr2) {
+  if (!arr1 || !arr2) return false
+  if (arr1.length !== arr2.length) return false
+  return arr1.every(item => arr2.includes(item)) && arr2.every(item => arr1.includes(item))
+}
+
+
+
+const handleConfirmUserInfo = async (curUser) => {
+
+  selectedUser.value = curUser
+  console.log('role original value: ', selectedUser.value.accessControl.roles)
+  if (!curUser) {
+    ElMessage.error('用户信息为空')
+    return
+  }
+
+
+  console.log('checkbox group: ', selectedRoles.value)
+  if (selectedRoles.value.length == 0) {
+    ElMessage.error('请选择用户角色')
+    return
+  }
+  if (selectedRoles.value.includes('ROLE_BOARD') && selectedBoards.value.length == 0) {
+    ElMessage.error('请选择用户看板')
+    return
+  }
+  if (arraysEqual(selectedRoles.value, selectedUser.value.accessControl.roles) &&
+    arraysEqual(selectedBoards.value, boardPosterInfo.value
+      .filter(board => selectedUser.value.accessControl.boardIds.includes(board.id))
+      .map(board => board.name)
+    )) {
+    ElMessage.info('用户角色未发生变化')
+    userDetailVisible.value = false;
+    selectedUser.value = []
+    return 
+  }
+
+  try {
+    let roleIds = roles.value
+    .filter(role => selectedRoles.value.includes(role.name))
+    .map(role => role.id)
+    console.log('roleIds: ', roleIds)
+    let boardIds = boardPosterInfo.value
+      .filter(board => selectedBoards.value.includes(board.name))
+      .map(board => board.id)
+    console.log('boardIds: ', boardIds)
+    console.log('selectedUser.value.id: ', selectedUser.value.id)
+    await updateUserRole(selectedUser.value.id, roleIds, boardIds)
+    users.value = users.value.map(user => {
+      if (user.id === selectedUser.value.id) {
+        user.accessControl.roles = selectedRoles.value
+        user.accessControl.boardIds = boardIds
+      }
+      return user
+    })
+    ElMessage.success('用户信息更新成功')
+  } catch (error) {
+    ElMessage.error('提交失败')
+    console.error(error)
+  }
+  
+  
+  userDetailVisible.value = false;
+  selectedUser.value = []
+}
+
 
 // 过滤用户列表
 const filteredUsers = computed(() => {
@@ -183,15 +319,40 @@ const initPage = async (pageNum, limit) => {
     totalUsers.value = res.totalRows
     currentPage.value = res.currentPage
     pageSize.value = res.pageSize
+    console.log('userList: ', res)
   } catch (error) {
     console.error('获取用户列表失败:', error)
     ElMessage.error(error.message ? error.message : '获取用户列表失败')
   }
 }
 
+const fetchRoleData = async () => {
+  try {
+    const res = await getRoleDetailList()
+    console.log('roleList: ', res)
+    roles.value = res.roleDetailsList || []
+  } catch (e) {
+    ElMessage.error('获取权限数据失败')
+    console.error(e)
+  }
+}
+
+const fetchBoardPosterInfo = async () => {
+  try {
+    const res = await getBoardList()
+    boardPosterInfo.value = res.boardInfos
+    console.log('boardPosterInfo: ', boardPosterInfo.value)
+  } catch (error) {
+    console.error('获取板块信息失败:', error)
+    ElMessage.error(error.message ? error.message : '获取板块信息失败')
+  }
+}
+
 onMounted(async () => {
 
   initPage(currentPage.value, pageSize.value)
+  fetchRoleData()
+  fetchBoardPosterInfo()
 })
 
 // 格式化日期
@@ -275,13 +436,14 @@ async function confirmOperation() {
     })
     //initPage(currentPage.value, pageSize.value)
 
-    confirmDialogVisible.value = false
+    
   } catch (error) {
     console.error('操作失败:', error)
     ElMessage.error(error.message ? error.message : '操作失败')
   } finally {
     userDetailVisible.value = false
     operationLoading.value = false
+    confirmDialogVisible.value = false
   }
 }
 </script>
@@ -444,27 +606,6 @@ async function confirmOperation() {
   background-color: #E3E0DB;
   border-color: #E3E0DB;
   color: #A1A8C1;
-}
-
-.morandi-cancel-btn {
-  background-color: #E3E0DB;
-  border-color: #C1B8A8;
-  color: #6B7C93;
-  transition: all 0.3s ease;
-}
-
-.morandi-cancel-btn:hover,
-.morandi-cancel-btn:focus {
-  background-color: #D5D0C8;
-  border-color: #B3A99A;
-  color: #4A5A70;
-}
-
-.morandi-cancel-btn:active,
-.morandi-cancel-btn.is-active {
-  background-color: #C7C0B6;
-  border-color: #A59B8C;
-  color: #3A4A60;
 }
 
 .morandi-confirm-btn {

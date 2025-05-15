@@ -167,7 +167,7 @@ const onLogin = async () => {
 	console.log('userInfoRes:', userInfoRes);
 
     userStore.setUserInfo(userInfoRes);
-	authStore.setPermissions(userInfoRes.permissions || []);
+	authStore.setAuthInfo(userInfoRes);
 
     ElMessage.success('Login successful');
     router.push('/');

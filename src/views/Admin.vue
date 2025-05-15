@@ -3,23 +3,24 @@
     <div class="w-full h-full flex justify-center items-center">
       <div class="w-3/4 p-8 border border-[#C1B8A8] backdrop-blur-md bg-white shadow-lg rounded-2xl">
         <div class="max-w-5xl mx-auto">
-          <h2 class="text-2xl font-bold text-[#6B7C93] mb-8">管理员控制台</h2>
+          <h2 class="text-2xl font-bold text-[#6B7C93] mb-8">Console</h2>
 
-          <el-tabs class="morandi-tabs" @tab-click="handleTabClick">
+          <el-tabs class="morandi-tabs" @tab-click="handleTabClick" >
 
             <!-- 用户管理 -->
-            <el-tab-pane label="用户管理">
-              <AdminUserManage />
+            <el-tab-pane label="User">
+              <AdminUserManage v-if="activeTab == 'User'"/>
             </el-tab-pane>
 
             <!-- 数据统计 -->
-            <el-tab-pane label="数据统计">
-              <AdminUserAnalyse :statistics="statistics" />
+            <el-tab-pane label="Data Analysis">
+              <AdminUserAnalyse :statistics="statistics" v-if="activeTab == 'Data Analysis'"/>
             </el-tab-pane>
             
             <!-- 公告管理 -->
-            <el-tab-pane label="公告管理">
+            <el-tab-pane label="Announcement" >
               <AdminAnnouncement 
+                v-if="activeTab == 'Announcement'"
                 :announcements="announcements" 
                 :loading="announcementLoading"
                 :total="totalAnnouncements"
@@ -30,6 +31,17 @@
                 @update-announcement="handleUpdateAnnouncement"
                 @delete-announcement="handleDeleteAnnouncement"
               />
+            </el-tab-pane>
+
+
+            <!-- 权限管理 -->
+            <el-tab-pane label="Permission">
+              <AdminPermissionManage  v-if="activeTab == 'Permission'" />
+            </el-tab-pane>
+
+            <!-- 布局走马灯... -->
+            <el-tab-pane label="Layout" v-if="authStore.isSuperAdmin">
+              <AdminCarouselManage v-if="activeTab == 'Layout'"/>
             </el-tab-pane>
           </el-tabs>
         </div>
@@ -43,10 +55,13 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 import { getUserInfo } from '~/api/userApi'
 import AdminUserManage from '~/components/AdminUserManage.vue'
 import AdminUserAnalyse from '~/components/AdminUserAnalyse.vue'
+import AdminPermissionManage from '~/components/AdminPermissionManage.vue'
 import AdminAnnouncement from '~/components/AdminAnnouncement.vue'
+import AdminCarouselManage from '~/components/AdminCarouselManage.vue'
 import {
   getUserList,
   changeUserPassword,
@@ -55,6 +70,8 @@ import {
   deleteUser,
   logoutUser
 } from '~/api/adminApi'
+
+const authStore = useAuthStore()
 
 // 路由和状态管理
 const router = useRouter()
@@ -87,8 +104,11 @@ const statistics = reactive({
 })
 
 // 标签页切换处理
-function handleTabClick() {
-  // 如果需要在标签页切换时执行特定操作，可以在这里添加
+const activeTab = ref('User')
+
+function handleTabClick(tab) {
+  activeTab.value = tab.props.label
+  //console.log('Active tab:', tab.props.label)
 }
 
 // 获取用户列表
@@ -99,14 +119,14 @@ async function fetchUsers() {
     // const response = await getUserList(currentPage.value, pageSize.value)
     // users.value = response.data
     // totalUsers.value = response.total
-    const res = await getUserList(0)
-    users.value = res.userInfoList
-    currentPage.value = res.currentPage
-    pageSize.value = res.pageSize
-    totalUsers.value = res.totalRows
-    console.log(res)
-    totalUsers.value = users.value.length
-    tableLoading.value = false
+    // const res = await getUserList(0)
+    // users.value = res.userInfoList
+    // currentPage.value = res.currentPage
+    // pageSize.value = res.pageSize
+    // totalUsers.value = res.totalRows
+    // console.log(res)
+    // totalUsers.value = users.value.length
+    // tableLoading.value = false
     
     // 模拟数据
     // setTimeout(() => {
@@ -143,134 +163,108 @@ async function fetchUsers() {
 }
 
 
-// 禁用用户
-async function handleDisableUser(userId, action) {
-  try {
-    // 这里应该调用禁用/启用用户的API
-    // await updateUserStatus(userId, action === 'disable' ? 0 : 1)
-    if (action == 'disable')
-      await activeUser(userId)
-    else
-      await disableUser(userId)
+// // 获取公告列表
+// async function fetchAnnouncements() {
+//   announcementLoading.value = true
+//   try {
+//     // 这里应该调用获取公告列表的API
+//     // const response = await getAnnouncementList(currentAnnouncementPage.value, announcementPageSize.value)
+//     // announcements.value = response.data
+//     // totalAnnouncements.value = response.total
     
-    // 模拟API调用
-    // await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 更新本地数据
-    const index = users.value.findIndex(u => u.id === userId)
-    if (index != -1) {
-      users.value[index].status = action == 'disable' ? '0' : '1'
-    }
-    
-    ElMessage.success(`用户已${action === 'disable' ? '禁用' : '启用'}`)
-  } catch (error) {
-    console.error('操作失败:', error)
-    ElMessage.error('操作失败')
-  }
-}
-
-// 获取公告列表
-async function fetchAnnouncements() {
-  announcementLoading.value = true
-  try {
-    // 这里应该调用获取公告列表的API
-    // const response = await getAnnouncementList(currentAnnouncementPage.value, announcementPageSize.value)
-    // announcements.value = response.data
-    // totalAnnouncements.value = response.total
-    
-    // 模拟数据
-    setTimeout(() => {
-      announcements.value = Array(10).fill().map((_, index) => ({
-        id: index + 1,
-        title: `公告标题 ${index + 1}`,
-        content: `这是公告内容 ${index + 1}，包含了一些重要信息...`,
-        createdAt: 'Sun Mar 23 22:48:09 CET 2023',
-        updatedAt: 'Sun Mar 23 22:48:09 CET 2023',
-        status: index % 3 === 0 ? '0' : '1', // 0: 草稿, 1: 已发布
-        author: '管理员',
-        priority: index % 5 // 0-4: 优先级从低到高
-      }))
-      totalAnnouncements.value = 30
+//     // 模拟数据
+//     setTimeout(() => {
+//       announcements.value = Array(10).fill().map((_, index) => ({
+//         id: index + 1,
+//         title: `公告标题 ${index + 1}`,
+//         content: `这是公告内容 ${index + 1}，包含了一些重要信息...`,
+//         createdAt: 'Sun Mar 23 22:48:09 CET 2023',
+//         updatedAt: 'Sun Mar 23 22:48:09 CET 2023',
+//         status: index % 3 === 0 ? '0' : '1', // 0: 草稿, 1: 已发布
+//         author: '管理员',
+//         priority: index % 5 // 0-4: 优先级从低到高
+//       }))
+//       totalAnnouncements.value = 30
       
-      announcementLoading.value = false
-    }, 1000)
-  } catch (error) {
-    console.error('Failed to fetch announcements:', error)
-    ElMessage.error('获取公告列表失败')
-    announcementLoading.value = false
-  }
-}
+//       announcementLoading.value = false
+//     }, 1000)
+//   } catch (error) {
+//     console.error('Failed to fetch announcements:', error)
+//     ElMessage.error('获取公告列表失败')
+//     announcementLoading.value = false
+//   }
+// }
 
-// 公告分页处理
-function handleAnnouncementSizeChange(size) {
-  announcementPageSize.value = size
-  fetchAnnouncements()
-}
+// // 公告分页处理
+// function handleAnnouncementSizeChange(size) {
+//   announcementPageSize.value = size
+//   fetchAnnouncements()
+// }
 
-function handleAnnouncementCurrentChange(page) {
-  currentAnnouncementPage.value = page
-  fetchAnnouncements()
-}
+// function handleAnnouncementCurrentChange(page) {
+//   currentAnnouncementPage.value = page
+//   fetchAnnouncements()
+// }
 
-// 创建公告
-async function handleCreateAnnouncement(announcement) {
-  try {
-    // 这里应该调用创建公告的API
-    // await createAnnouncement(announcement)
+// // 创建公告
+// async function handleCreateAnnouncement(announcement) {
+//   try {
+//     // 这里应该调用创建公告的API
+//     // await createAnnouncement(announcement)
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+//     // 模拟API调用
+//     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // 刷新公告列表
-    fetchAnnouncements()
+//     // 刷新公告列表
+//     fetchAnnouncements()
     
-    ElMessage.success('公告创建成功')
-  } catch (error) {
-    console.error('创建公告失败:', error)
-    ElMessage.error('创建公告失败')
-  }
-}
+//     ElMessage.success('公告创建成功')
+//   } catch (error) {
+//     console.error('创建公告失败:', error)
+//     ElMessage.error('创建公告失败')
+//   }
+// }
 
-// 更新公告
-async function handleUpdateAnnouncement(id, announcement) {
-  try {
-    // 这里应该调用更新公告的API
-    // await updateAnnouncement(id, announcement)
+// // 更新公告
+// async function handleUpdateAnnouncement(id, announcement) {
+//   try {
+//     // 这里应该调用更新公告的API
+//     // await updateAnnouncement(id, announcement)
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+//     // 模拟API调用
+//     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // 更新本地数据
-    const index = announcements.value.findIndex(a => a.id === id)
-    if (index !== -1) {
-      announcements.value[index] = { ...announcements.value[index], ...announcement }
-    }
+//     // 更新本地数据
+//     const index = announcements.value.findIndex(a => a.id === id)
+//     if (index !== -1) {
+//       announcements.value[index] = { ...announcements.value[index], ...announcement }
+//     }
     
-    ElMessage.success('公告更新成功')
-  } catch (error) {
-    console.error('更新公告失败:', error)
-    ElMessage.error('更新公告失败')
-  }
-}
+//     ElMessage.success('公告更新成功')
+//   } catch (error) {
+//     console.error('更新公告失败:', error)
+//     ElMessage.error('更新公告失败')
+//   }
+// }
 
-// 删除公告
-async function handleDeleteAnnouncement(id) {
-  try {
-    // 这里应该调用删除公告的API
-    // await deleteAnnouncement(id)
+// // 删除公告
+// async function handleDeleteAnnouncement(id) {
+//   try {
+//     // 这里应该调用删除公告的API
+//     // await deleteAnnouncement(id)
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+//     // 模拟API调用
+//     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // 更新本地数据
-    announcements.value = announcements.value.filter(a => a.id !== id)
+//     // 更新本地数据
+//     announcements.value = announcements.value.filter(a => a.id !== id)
     
-    ElMessage.success('公告删除成功')
-  } catch (error) {
-    console.error('删除公告失败:', error)
-    ElMessage.error('删除公告失败')
-  }
-}
+//     ElMessage.success('公告删除成功')
+//   } catch (error) {
+//     console.error('删除公告失败:', error)
+//     ElMessage.error('删除公告失败')
+//   }
+// }
 
 // 在 onMounted 中添加获取公告列表的调用
 onMounted(async () => {
@@ -288,8 +282,8 @@ onMounted(async () => {
     // }
     
     // 加载数据
-    fetchUsers()
-    fetchAnnouncements() // 添加获取公告列表
+    // fetchUsers()
+    // fetchAnnouncements() // 添加获取公告列表
   } catch (error) {
     console.error('Failed to fetch user info:', error)
     ElMessage.error('获取用户信息失败')

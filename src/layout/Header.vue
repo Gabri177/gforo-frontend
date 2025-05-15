@@ -75,7 +75,7 @@ const authStore = useAuthStore();
 const searchQuery = ref('');
 
 const isAdmin = computed(() => {
-	return (userStore.hasRole('ROLE_ADMIN') || userStore.hasRole('ROLE_BOARD'))
+	return (authStore.hasPermission('user:info:any'))
 });
 
 // 根据登录状态显示不同的导航项

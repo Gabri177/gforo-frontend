@@ -102,6 +102,11 @@ const routes = [
     component: Post,
   },
   {
+    path: '/board/:boardId/post/:postId/:currentPage/location/:entityId/:targetId/:isPostFloor',
+    name: 'PostWithLocation',
+    component: Post,
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: Admin,
@@ -119,6 +124,11 @@ const routes = [
   {
     path: '/profile/posts',
     name: 'UserPosts',
+    component: () => import('~/views/UserPosts.vue')
+  },
+  {
+    path: '/profile/posts/:userId',
+    name: 'UserPostsWithUserId',
     component: () => import('~/views/UserPosts.vue')
   },
   {

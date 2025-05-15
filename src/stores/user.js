@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { isLoggedIn, clearTokens } from '~/utils/auth';
+import { useAuthStore } from '~/stores/auth'; 
 
 export const useUserStore = defineStore('user', () => {
     // 从 localStorage 获取存储的用户信息
@@ -35,7 +36,7 @@ export const useUserStore = defineStore('user', () => {
 
     // 设置用户信息
     function setUserInfo(info) {
-        console.log(info)
+        //console.log(info)
         userInfo.value = {
             id: info.id || '',
             username: info.username || '',
@@ -50,7 +51,7 @@ export const useUserStore = defineStore('user', () => {
             boardIds: info.boardIds || [],
             roles: info.roles || []
         };
-        console.log("userInfo store", userInfo.value)
+        //console.log("userInfo store", userInfo.value)
         isLoggedInState.value = true;
         // 保存到 localStorage
         localStorage.setItem('userInfo', JSON.stringify(userInfo.value));
@@ -76,6 +77,8 @@ export const useUserStore = defineStore('user', () => {
         // 清除 localStorage
         localStorage.removeItem('userInfo');
         clearTokens();
+        const authStore = useAuthStore();
+        authStore.clearAuthInfo();
     }
 
     // 更新头像
@@ -91,16 +94,6 @@ export const useUserStore = defineStore('user', () => {
         localStorage.setItem('userInfo', JSON.stringify(userInfo.value));
     }
 
-    function isGesterOfBoard(boardId) {
-        const id = Number(boardId);
-        return userInfo.value.boardIds.includes(id) && hasRole('ROLE_BOARD');
-    }
-
-    function hasRole(role) {
-        //console.log("userhasrole: " + role + " ", userInfo.value.roles.includes(role))
-        return userInfo.value.roles.includes(role);
-    }
-
     return {
         isLoggedInState,
         userInfo,
@@ -108,8 +101,6 @@ export const useUserStore = defineStore('user', () => {
         clearUserInfo,
         updateAvatar,
         updateStatus,
-        getBasicUserInfo,
-        isGesterOfBoard,
-        hasRole
+        getBasicUserInfo
     };
 }); 

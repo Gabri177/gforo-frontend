@@ -14,7 +14,7 @@
 								<el-icon>
 									<HomeFilled />
 								</el-icon>
-								首页
+								Home
 							</div>
 						</el-breadcrumb-item>
 						<el-breadcrumb-item>{{ parentTitle }}</el-breadcrumb-item>
@@ -47,14 +47,16 @@
 					</div>
 				</div>
 
-				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-if="waitResponse">
+				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3"
+					v-if="waitResponse">
 
 					<li class="relative media pb-3 pt-3 mb-3 border-b border-[#C1B8A8]" v-for="i in 5" :key="i">
 						<el-skeleton :rows="3" animated />
 					</li>
 				</ul>
 				<!-- 帖子列表 -->
-				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3" v-else>
+				<ul class="bg-white/60 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 space-y-3"
+					v-else>
 
 
 					<li v-if="discussPosts.length === 0" class="text-center py-10 text-[#6B7C93]">
@@ -95,6 +97,7 @@
 									class="text-xl font-medium text-[#4A4A4A] hover:text-[#A1A8C1] transform transition duration-300 ease-in-out hover:-translate-y-1 hover:cursor-pointer">
 									{{ map.discussPosts.title }}
 								</a>
+								<p class="text-[#6B7C93] text-sm mt-1">{{ stripMarkdown(map.discussPosts.content) }}</p>
 							</div>
 						</div>
 
@@ -107,7 +110,7 @@
 											<!-- <u class="text-center cursor-default truncate w-24">{{
 												map.user?.nickname
 											}}</u> -->
-											<UserInfoCard :user="map.user" :boardId="boardId" placement="right"/>
+											<UserInfoCard :user="map.user" :boardId="boardId" placement="right" />
 
 										</div>
 										<div>
@@ -121,16 +124,16 @@
 									<div>
 										<ul class="inline float-right">
 											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
+												<span type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
 													<i class="pi pi-thumbs-up" style="font-size: 1rem"></i>
-													&nbsp; <span>{{ map.likeCount }}</span></el-button>
+													&nbsp; <span>{{ map.likeCount }}</span></span>
 											</li>
 											<li class="inline ml-2 text-[#C1B8A8]">|</li>
 											<li class="inline ml-2">
-												<el-button type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
+												<span type="text" class="text-[#6B7C93] hover:text-[#A1A8C1]">
 													<i class="pi pi-comments" style="font-size: 1rem"></i>
 													&nbsp;
-													<span>{{ map.commentCount }}</span></el-button>
+													<span>{{ map.commentCount }}</span></span>
 											</li>
 										</ul>
 									</div>
@@ -144,7 +147,8 @@
 				</ul>
 			</div>
 			<!-- 分页 -->
-			<div class="flex justify-center items-center py-4 bg-white/60 backdrop-blur-md border border-white/20 mt-3 rounded-2xl shadow-lg">
+			<div
+				class="flex justify-center items-center py-4 bg-white/60 backdrop-blur-md border border-white/20 mt-3 rounded-2xl shadow-lg">
 
 				<el-pagination v-if="page.rows > 0" background layout="prev, pager, next" :total="page.rows"
 					:page-size="page.pageSize" :current-page="page.current"
@@ -152,16 +156,16 @@
 			</div>
 
 			<!-- 固定 Post -->
-			<div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
+			<div class="fixed bottom-10 right-10 z-50">
 				<div class="flex flex-col gap-4">
+					<div v-if="userStore.isLoggedInState" >
+						<AddPost @add="addPostClicked" />
+					</div>
 					<div>
-					<AddPost @add="addPostClicked" />
+						<ReturnHome @return="handleReturn" />
+					</div>
 				</div>
-				<div>
-                	<ReturnHome @return="handleReturn" />
-            	</div>
-				</div>
-				
+
 			</div>
 
 
@@ -190,13 +194,13 @@ import { useUserStore } from '~/stores/user';
 import { publishPost, getBoardPostsPage } from '~/api/postAPI';
 
 const user = {
-  id: 1,
-  username: 'user1',
-  nickname: '用户一',
-  email: 'user1@example.com',
-  headerUrl: '',
-  createTime: '2024-03-20T10:00:00Z',
-  status: '1'
+	id: 1,
+	username: 'user1',
+	nickname: '用户一',
+	email: 'user1@example.com',
+	headerUrl: '',
+	createTime: '2024-03-20T10:00:00Z',
+	status: '1'
 }
 
 const route = useRoute();
@@ -212,7 +216,7 @@ const isPostVisible = ref(false);
 const newPostRef = ref(null);
 const allUnreadCount = ref(5);
 const keyword = ref('');
-const orderMode = ref(0);
+const orderMode = ref(parseInt(localStorage.getItem('order_mode')) || 0);
 const waitResponse = ref(false);
 const loginUser = ref({
 	id: 1,
@@ -236,6 +240,14 @@ const handleReturn = () => {
 	router.back();
 }
 
+const stripMarkdown = (content) => {
+	return content
+		?.replace(/!\[.*?\]\(.*?\)/g, '')  // 移除图片标签
+		?.replace(/#+\s?/g, '')           // 移除标题符号
+		?.replace(/[*_~`>[\]]/g, '')      // 移除其他markdown符号
+		?.slice(0, 100) || ''             // 限制长度
+}
+
 
 const toggleDropdown = () => {
 	dropdownOpen.value = !dropdownOpen.value;
@@ -243,10 +255,12 @@ const toggleDropdown = () => {
 const search = () => {
 	// 搜索功能实现
 };
+
 const setOrderMode = (mode) => {
 	console.log('set order mode', mode);
-	initPosts(mode, page.value.current);
 	orderMode.value = mode;
+	localStorage.setItem('order_mode', mode); // 同步保存
+	initPosts(mode, page.value.current);
 };
 
 const handlePublishPost = (content) => {
@@ -335,10 +349,9 @@ initPosts(orderMode.value, page.value.current);
 </script>
 
 <style scoped>
-
 ul.bg-white\/30 {
-  backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.3);
+	backdrop-filter: blur(12px);
+	background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* 分页按钮默认背景 */

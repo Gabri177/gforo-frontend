@@ -79,13 +79,13 @@
     </div>
 
     <!-- 固定 Post -->
-    <div v-if="userStore.isLoggedInState" class="fixed bottom-10 right-10 z-50">
+    <div class="fixed bottom-10 right-10 z-50">
         <div class="flex flex-col gap-4">
-            <div>
-                <LikePost @like="likePostClicked" />
+            <div v-if="userStore.isLoggedInState">
+                <LikePost @like="likePostClicked" :isFilled = "isLikePostFilled"/>
             </div>
-            <div>
-                <AddPost @add="addReplyPostClicked" :isFilled="isLikePostFilled" />
+            <div v-if="userStore.isLoggedInState">
+                <AddPost @add="addReplyPostClicked" />
             </div>
             <div>
                 <ReturnHome @return="handleReturn" />
@@ -121,6 +121,9 @@ import { addCommentToPost, addCommentToComment, deleteComment, updateComment } f
 import { adminDeletePost, adminDeleteComment } from '~/api/adminApi';
 import { useRoute, useRouter } from 'vue-router';
 import Hint from '~/tools/Hint.vue';
+import { useAuthStore } from '~/stores/auth'; 
+import { likePost } from '~/api/likeAPI';
+
 
 // 确认删除
 const isHintLoading = ref(false)
@@ -161,6 +164,9 @@ const route = useRoute()
 const router = useRouter()
 const postId = ref(route.params.postId)
 const boardId = ref(route.params.boardId)
+const locationEntityId = ref(route.params.entityId)
+const locationTargetId = ref(route.params.targetId)
+const isPostFloor = ref(route.params.isPostFloor)
 const currentPage = ref(route.params.currentPage || 1)
 const parentTitle = computed(() =>
     localStorage.getItem('breadcrumb_parentTitle'))
@@ -198,11 +204,12 @@ const handleReturn = () => {
 
 // store
 const userStore = useUserStore()
-const isPostGester = ref(userStore.isGesterOfBoard(boardId.value) || userStore.hasRole('ROLE_ADMIN'))
-console.log("boardId: ", boardId.value)
-console.log("isboardGester: ", userStore.isGesterOfBoard(boardId))
-console.log('has ROLE_ADMIN: ', userStore.hasRole('ROLE_ADMIN'))
-console.log("isPostGester", isPostGester.value)
+const authStore = useAuthStore()
+const hasPostDeleteAuth = ref(authStore.hasPermission('post:delete:any') || 
+            (authStore.hasPermission('post:delete:board') && authStore.hasBoardId(boardId.value)))
+const hasCommentDeleteAuth = ref(authStore.hasPermission('comment:delete:any') ||
+            (authStore.hasPermission('comment:delete:board') && authStore.hasBoardId(boardId.value)))
+console.log("hasDeletAuth", hasPostDeleteAuth.value, hasCommentDeleteAuth.value)
 
 const preCommentToComment = reactive({
     entityType: 1,
@@ -223,7 +230,7 @@ const handlePostFloorDelete = (comment) => {
     console.log('handlePostFloorDelete', comment?.id)
 
     showDeleteConfirm(() => {
-        if (isPostGester.value) {
+        if (hasCommentDeleteAuth.value) {
             adminDeleteComment(comment?.id || 0)
               .then(res => {
                     ElMessage.success('Delete success')
@@ -261,7 +268,7 @@ const handlePostFloorDeletePost = (postOrComment, isFloor) => {
 
     if (isFloor == 0) { // 帖子的删除
         showDeleteConfirm(() => {
-            if (isPostGester.value) {
+            if (hasPostDeleteAuth.value) {
                 adminDeletePost(postOrComment.id)
                   .then(res => {
                         ElMessage.success('删除成功')
@@ -429,6 +436,7 @@ const initPosts = (page) => {
             console.log(res)
             console.log(res.originalPost)
             originalPost.value = res.originalPost
+            isLikePostFilled.value = res.originalPost.isLike
             comments.value = res.replies || []
             currentPage.value = res.currentPage
             pageSize.value = 10
@@ -445,10 +453,20 @@ const initPosts = (page) => {
 onMounted(() => {
     console.log("onMounted post page")
     initPosts(currentPage.value)
+    if (locationEntityId.value && locationTargetId.value && isPostFloor.value) {
+        console.log("locationEntityId.value", locationEntityId.value)
+        console.log("locationTargetId.value", locationTargetId.value)
+        console.log("isPostFloor.value", isPostFloor.value)
+        let trigger = false;
+        if (isPostFloor.value == 'true')
+            trigger = true
+        scrollToFloorComment(trigger, Number(locationEntityId.value), Number(locationTargetId.value))
+        // scrollToFloorComment(false, 1, 84)
+    } 
     // 注意 滚动到指定位置只需要 先跳转到指定的页面 然后在运行这个函数
     // 而且注意  第一个参数是 是否为Post楼层的  第二个参数是楼层的id 第三个是楼层评论的ID（如果有的话）
-    // scrollToFloorComment(false, 351, 372) 
-    // scrollToFloorComment(true, 30451, 514) 
+    // scrollToFloorComment(false, 11, 19)  // 如果是false 第二个参数 为楼层评论的id 第二个参数为楼层中评论的id
+    // scrollToFloorComment(true, 5, 14) // 如果为true 第一个参数为post的id 第二个参数为楼层评论的id
 })
 
 // 是否点赞
@@ -526,9 +544,15 @@ const publishReplyPost = () => {
     isReplyPostVisible.value = false
 }
 
-const likePostClicked = () => {
+const likePostClicked = async() => {
     console.log("likePostClicked")
-    isLikePostFilled.value = !isLikePostFilled.value
+    try {
+        await likePost(postId.value)
+        isLikePostFilled.value = !isLikePostFilled.value
+    } catch (err) {
+        console.log(err)
+        ElMessage.error(err.message ? err.message: 'like failed')
+    }
 }
 
 
@@ -547,12 +571,12 @@ const handleReplyPost = (floor, reply) => {
     if (reply == undefined) {
         console.log("具体楼层 帖子的楼层的评论")
         console.log("floor", floor)
-        currentReplyTo.value = floor.author.name
+        currentReplyTo.value = floor.author.nickname
     }
     else {
         console.log("具体评论 帖子评论的评论")
         console.log("reply", reply)
-        currentReplyTo.value = reply.author.name
+        currentReplyTo.value = reply.author.nickname
         preCommentToComment.targetUserId = reply.author.id
     }
     preCommentToComment.entityId = floor.id
@@ -567,12 +591,12 @@ const handleReply = (floor, reply) => {
     if (reply == undefined) {
         console.log("具体楼层 帖子的楼层的评论")
         console.log("floor", floor)
-        currentReplyTo.value = floor.author.name
+        currentReplyTo.value = floor.author.nickname
     }
     else {
         console.log("具体评论 帖子评论的评论")
-        console.log("reply", reply)
-        currentReplyTo.value = reply.author.name
+        console.log("reply to ", reply)
+        currentReplyTo.value = reply.author.nickname
         commentToComment.targetUserId = reply.author.id
     }
     commentToComment.entityId = floor.id

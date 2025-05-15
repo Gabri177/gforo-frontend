@@ -40,3 +40,7 @@ export function adminDeletePost(postId) {
 export function adminDeleteComment(commentId) {
 	return axio.delete('/admin/comment/delete/' + commentId)
 }
+
+export function getDashboardStats() {
+	return axio.get('/admin/statistics')
+}

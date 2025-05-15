@@ -132,7 +132,9 @@
 <script setup>
 import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
 import { User, Document, ChatDotRound, UserFilled, View, DocumentAdd, ChatLineRound } from '@element-plus/icons-vue'
+import { getDashboardStats } from '~/api/adminApi'
 import * as echarts from 'echarts'
+import { ElMessage } from 'element-plus'
 
 // 属性定义
 const props = defineProps({
@@ -405,7 +407,15 @@ const handleResize = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async() => {
+
+  try {
+    const res = await getDashboardStats()
+    console.log("====================", res)
+  } catch (error) {
+    console.log(error.message)
+    ElMessage.error(error.message ? error.message : "获取数据失败")
+  }
   // 延迟初始化，确保DOM已完全渲染
   setTimeout(() => {
     initCharts();

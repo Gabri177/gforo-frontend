@@ -18,15 +18,19 @@
     <div class="mb-10">
       <el-carousel height="320px" class="rounded-2xl overflow-hidden shadow-xl border border-[#DAD7D2]"
       :interval="4000">
-        <el-carousel-item v-for="item in carouselItems" :key="item.id">
-          <div class="relative w-full h-full">
-            <img :src="item.imageUrl" class="w-full h-full object-cover" :alt="item.title" />
-            <div class="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-4 backdrop-blur-sm">
-              <h3 class="text-xl font-semibold">{{ item.title }}</h3>
-              <p class="text-sm mt-1">{{ item.description }}</p>
-            </div>
-          </div>
-        </el-carousel-item>
+      <el-carousel-item v-for="item in carouselItems" :key="item.id">
+  <component :is="item.targetUrl ? 'a' : 'div'" 
+             :href="item.targetUrl" 
+             target="_blank" 
+             class="block relative w-full h-full cursor-pointer">
+    <img :src="item.imageUrl" class="w-full h-full object-cover" :alt="item.title" />
+    <div class="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-4 backdrop-blur-sm">
+      <h3 class="text-xl font-semibold">{{ item.title }}</h3>
+      <p class="text-sm mt-1">{{ item.description }}</p>
+    </div>
+  </component>
+</el-carousel-item>
+
       </el-carousel>
     </div>
 
@@ -115,6 +119,8 @@ import { ElMessage } from 'element-plus'
 import { getBoardList } from '~/api/boardApi'
 import { HomeFilled } from '@element-plus/icons-vue'
 import { PERMISSIONS } from '~/constants/permissions'
+import { getCarouselList} from '~/api/layoutApi'
+
 
 const router = useRouter()
 const isLoading = ref(true)
@@ -143,14 +149,24 @@ const enterBoard = (boardId, boardName) => {
 }
 
 onMounted(async () => {
+  
   try {
     const res = await getBoardList()
+    const carouselInfo = await getCarouselList()
+    
+    if (carouselInfo.length > 0) {
+      carouselItems.value = carouselInfo
+    }
     boards.value = res.boardInfos
   } catch (error) {
     ElMessage.error(error.message || 'Failed to fetch board information')
   } finally {
     isLoading.value = false
+
   }
+
+  
+
 })
 </script>
 

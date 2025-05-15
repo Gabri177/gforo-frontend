@@ -221,7 +221,7 @@ const handleVerifyCode = (code) => {
         .then((res) => {
           console.log("email verified new user info: ", res)
           userStore.setUserInfo(res)
-          authStore.setPermissions(res.permissions || [])
+          authStore.setAuthInfo(res)
         })
     })
     .catch((error) => {
@@ -270,7 +270,7 @@ const activeUsernameEdit = async () => {
           .then((res) => {
             console.log("email verified new user info: ", res)
             userStore.setUserInfo(res)
-            authStore.setPermissions(res.permissions || [])
+            authStore.setAuthInfo(res)
             startChangeUsername.value = false
           })
       })
@@ -399,7 +399,7 @@ const handleProfileSave = async () => {
     const userInfoRes = await getUserInfo()
     console.log("new user info: ", userInfoRes)
     userStore.setUserInfo(userInfoRes)
-    authStore.setPermissions(userInfoRes.permissions || [])
+    authStore.setAuthInfo(userInfoRes)
     usernameEditInactive.value = true
     emailEditInactive.value = true
     ElMessage.success('Profile updated successfully')

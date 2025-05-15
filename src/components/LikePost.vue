@@ -31,7 +31,7 @@ watch(() => props.isFilled, (newVal) => {
 });
 
 const like = () => {
-	internalIsFilled.value = !internalIsFilled.value;
+	// internalIsFilled.value = !internalIsFilled.value;
 	emits('like');
 	emits('update:isFilled', internalIsFilled.value);
 };

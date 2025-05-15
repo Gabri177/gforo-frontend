@@ -22,7 +22,7 @@ export function removeToken() {
 
 // 获取 refresh token
 export function getRefreshToken() {
-  console.log("getRefreshToken=================")
+  // console.log("getRefreshToken=================")
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 

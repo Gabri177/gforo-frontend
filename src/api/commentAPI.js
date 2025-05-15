@@ -27,3 +27,7 @@ export function updateComment(commentId, content) {
 		content:content
 	})
 }
+
+export function getCommentLocation(commentId) {
+	return axio.get(`/comment/location/${commentId}`)
+}

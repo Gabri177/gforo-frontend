@@ -36,5 +36,26 @@ export function sendVerifyEmail(email){
 	return axio.post('/user/send-verify-email', {email: email})
 }
 
+export function getUserComments(currentPage, pageSize, isAsc) {
+	console.log(currentPage, pageSize, isAsc)
+	return axio.get('/user/comments', {
+	  params: {
+		currentPage: currentPage ? currentPage : 1,
+		pageSize: pageSize ? pageSize : 10,
+		isAsc: isAsc !== undefined ? isAsc : true
+	  }
+	})
+  }
+
+export function getUserPosts(userId, currentPage, pageSize, isAsc) {
+	return axio.get('/user/posts', {
+	  params: {
+		userId: userId,
+		currentPage: currentPage? currentPage : 1,
+		pageSize: pageSize? pageSize : 10,
+		isAsc: isAsc!== undefined? isAsc : true
+	  }
+	})
+  }
 
 
