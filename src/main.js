@@ -7,17 +7,19 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css' // 更新路径
 import './index.css'
 import 'primeicons/primeicons.css'
-
-
 import VMdEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
 import permissionDirective from '~/directives/permission'
+import { useWebSocketStore } from '~/stores/websocket';
+import { useUserStore } from '~/stores/user';
 // highlightjs
 import hljs from 'highlight.js';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // main.ts
+
+
 
 (function getDeviceId() {
 	let deviceId = localStorage.getItem('deviceId');
@@ -36,11 +38,18 @@ VMdEditor.use(githubTheme, {
   });
 
 app.use(VMdEditor);
-
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 	app.component(key, component)
   }
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
+
+const userStore = useUserStore();
+const wsStore = useWebSocketStore();
+if (userStore.isLoggedInState){
+	console.log('WebSocket 连接');
+	wsStore.connect();
+  }
+
 app.mount('#app')

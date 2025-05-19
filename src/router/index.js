@@ -12,10 +12,24 @@ import Post from '~/views/Post.vue'
 import NotFound from '~/views/NotFound.vue'
 import Admin from '~/views/Admin.vue'
 import Posts from '~/views/Posts.vue'
+import Notification from '~/views/Notification.vue'
 
 import CaptchaExample from '~/example/CaptchaExample.vue'
+import WsTest from '~/example/WsTest.vue'
 
 const routes = [
+  {
+    path: '/notification',
+    name: 'Notification',
+    component: Notification,
+    //meta: { transition: null } 
+  },
+  {
+    path: '/test',
+    name: 'WsTest',
+    component: WsTest,
+    //meta: { transition: null } 
+  },
   {
     path: '/',
     name: 'Home',
@@ -141,6 +155,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
+})
+router.beforeEach((to, from, next) => {
+  console.log('[Router] 路由跳转:', from.fullPath, '=>', to.fullPath)
+  next()
 })
 
 export default router

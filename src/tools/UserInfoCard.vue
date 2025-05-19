@@ -91,7 +91,9 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserInfo } from '~/api/userApi'
+import { useUserStore } from '~/stores/user'
 
+const userStore = useUserStore()
 // 接收基础信息 + 当前板块 ID（用于判断是否为该板块版主）
 const props = defineProps({
 	user: Object,
@@ -161,6 +163,8 @@ const userRoleLabel = computed(() => {
 const eventBus = window.__userPopoverBus__ || (window.__userPopoverBus__ = new EventTarget())
 
 function handleClick() {
+	if (!userStore.isLoggedInState)
+		return ;
 	if (!visible.value) {
 		eventBus.dispatchEvent(new Event('close-all'))
 		loadUser()

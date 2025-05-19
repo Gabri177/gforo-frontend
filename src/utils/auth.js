@@ -1,5 +1,6 @@
 import router from '~/router'
 import { ElMessage } from 'element-plus'
+import { getNewToken } from '~/api/authApi';
 
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -52,4 +53,32 @@ export function logoutAndRedirect() {
   removeRefreshToken()
   ElMessage.error('Login has expired, please login again')
   router.push('/login')
+}
+
+// 封装自动刷新 AccessToken 的逻辑
+export async function refreshAccessToken() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    logoutAndRedirect();
+    return Promise.reject(new Error('RefreshToken 不存在'));
+  }
+
+  try {
+    const res = await getNewToken(refreshToken);
+    const data = res.data;
+
+    if (data && data.accessToken && data.refreshToken) {
+      setToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+      console.log('🔁 已自动刷新 Token');
+      return data;
+    } else {
+      throw new Error('返回数据格式错误');
+    }
+
+  } catch (err) {
+    console.warn('🚫 Token刷新失败：', err);
+    logoutAndRedirect();
+    return Promise.reject(err);
+  }
 }

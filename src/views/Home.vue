@@ -110,6 +110,9 @@
     </div>
 
   </div>
+  <div>
+    {{ test }}
+  </div>
 </template>
 
 <script setup>
@@ -120,10 +123,14 @@ import { getBoardList } from '~/api/boardApi'
 import { HomeFilled } from '@element-plus/icons-vue'
 import { PERMISSIONS } from '~/constants/permissions'
 import { getCarouselList} from '~/api/layoutApi'
+import { getStatistics } from '~/api/statisticsApi'
+import { useUserStore } from '~/stores/user'
 
-
+const userStore = useUserStore()
 const router = useRouter()
 const isLoading = ref(true)
+const test = ref()
+const isLogin = userStore.isLoggedInState
 
 const carouselItems = ref([
   { id: 1, imageUrl: 'https://picsum.photos/1200/300?random=1', title: 'Welcome to the Tech Community', description: 'Find like-minded peers and discuss technology together.' },
@@ -131,12 +138,7 @@ const carouselItems = ref([
   { id: 3, imageUrl: 'https://picsum.photos/1200/300?random=3', title: 'Latest Community Updates', description: 'Stay up to date with tech trends and activities.' }
 ])
 
-const statistics = ref([
-  { title: 'Total Users', value: '1,234', icon: '<i class="pi pi-user" style="font-size: 1rem"></i>', bgColor: 'bg-[#A1B0C2]' },
-  { title: 'Posts Today', value: '56', icon: '<i class="pi pi-pencil" style="font-size: 1rem"></i>', bgColor: 'bg-[#B6C2B9]' },
-  { title: 'Online Users', value: '328', icon: '<i class="pi pi-clock" style="font-size: 1rem"></i>', bgColor: 'bg-[#E1DCCF]' },
-  { title: 'Total Visits', value: '12,345', icon: '<i class="pi pi-eye" style="font-size: 1rem"></i>', bgColor: 'bg-[#C4BDC3]' }
-])
+const statistics = ref()
 
 const boards = ref([])
 
@@ -149,10 +151,39 @@ const enterBoard = (boardId, boardName) => {
 }
 
 onMounted(async () => {
+
   
   try {
     const res = await getBoardList()
     const carouselInfo = await getCarouselList()
+    const statisticsInfo = await getStatistics()
+    //statistics.value = statisticsInfo
+    statistics.value = [
+      {
+        title: 'Total Users',
+        value: statisticsInfo.totalUsers.toLocaleString(),
+        icon: '<i class="pi pi-user" style="font-size: 1rem"></i>',
+        bgColor: 'bg-[#A1B0C2]'
+      },
+      {
+        title: 'Total Posts',
+        value: statisticsInfo.totalPosts.toLocaleString(),
+        icon: '<i class="pi pi-pencil" style="font-size: 1rem"></i>',
+        bgColor: 'bg-[#B6C2B9]'
+      },
+      {
+        title: 'Online Users',
+        value: statisticsInfo.activeUsers.toLocaleString(),
+        icon: '<i class="pi pi-clock" style="font-size: 1rem"></i>',
+        bgColor: 'bg-[#E1DCCF]'
+      },
+      {
+        title: 'Visits Today',
+        value: statisticsInfo.visitToday.toLocaleString(),
+        icon: '<i class="pi pi-eye" style="font-size: 1rem"></i>',
+        bgColor: 'bg-[#C4BDC3]'
+      }
+    ]
     
     if (carouselInfo.length > 0) {
       carouselItems.value = carouselInfo
@@ -162,10 +193,7 @@ onMounted(async () => {
     ElMessage.error(error.message || 'Failed to fetch board information')
   } finally {
     isLoading.value = false
-
   }
-
-  
 
 })
 </script>

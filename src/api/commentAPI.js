@@ -1,19 +1,21 @@
 import axio from '~/axios/index'
 
-export function addCommentToPost(postId, content) {
+export function addCommentToPost(postId, content, toPostUserId) {
 	return axio.post("/comment/topost", {
 		entityId: postId,
-		content: content
+		content: content,
+		toPostUserId: toPostUserId
 	})
 }
 
-export function addCommentToComment(entityType, entityId, targetId, content, postId) {
+export function addCommentToComment(entityType, entityId, targetId, content, postId, toCommentUserId) {
 	return axio.post("/comment/tocomment", {
 		entityType: entityType,
 		entityId: entityId,
 		targetId: targetId,
 		content: content,
-		postId: postId
+		postId: postId,
+		toCommentUserId: toCommentUserId
 	})
 }
 

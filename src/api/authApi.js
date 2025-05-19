@@ -8,7 +8,8 @@ export function loginUser(userInfo){
 
 export function getNewToken(refreshToken){
 	return pureAxios.post('/auth/refresh-token', {
-		refreshToken
+		refreshToken,
+		symbol: localStorage.getItem('deviceId') ? localStorage.getItem('deviceId') : 'USDT'
 	})
 }
 

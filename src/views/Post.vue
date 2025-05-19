@@ -148,6 +148,7 @@ const floorRefs = ref([])
 const dialogVisible = ref(false)
 const newComment = ref('')
 const currentReplyTo = ref(null)
+const currentReplyToUserId = ref(null)
 const replyToReply = ref(null)
 const isReplyPostVisible = ref(false)
 const originalPost = ref(null)
@@ -163,6 +164,7 @@ const commentToPost = reactive({
 const route = useRoute()
 const router = useRouter()
 const postId = ref(route.params.postId)
+const postUserId = ref(null)
 const boardId = ref(route.params.boardId)
 const locationEntityId = ref(route.params.entityId)
 const locationTargetId = ref(route.params.targetId)
@@ -441,6 +443,8 @@ const initPosts = (page) => {
             currentPage.value = res.currentPage
             pageSize.value = 10
             totalRows.value = res.totalRows
+            postUserId.value = res.originalPost.author.id
+            console.log("postUserId", postUserId.value)
 
         })
         .catch(err => {
@@ -512,7 +516,8 @@ const publishReplyPost = () => {
     commentToPost.content = content
     commentToPost.entityId = postId
     addCommentToPost(commentToPost.entityId,
-        commentToPost.content
+        commentToPost.content,
+        postUserId.value,
     )
         .then(res => {
             console.log(res)
@@ -572,11 +577,13 @@ const handleReplyPost = (floor, reply) => {
         console.log("具体楼层 帖子的楼层的评论")
         console.log("floor", floor)
         currentReplyTo.value = floor.author.nickname
+        currentReplyToUserId.value = floor.author.id
     }
     else {
         console.log("具体评论 帖子评论的评论")
         console.log("reply", reply)
         currentReplyTo.value = reply.author.nickname
+        currentReplyToUserId.value = reply.author.id
         preCommentToComment.targetUserId = reply.author.id
     }
     preCommentToComment.entityId = floor.id
@@ -592,11 +599,13 @@ const handleReply = (floor, reply) => {
         console.log("具体楼层 帖子的楼层的评论")
         console.log("floor", floor)
         currentReplyTo.value = floor.author.nickname
+        currentReplyToUserId.value = floor.author.id
     }
     else {
         console.log("具体评论 帖子评论的评论")
         console.log("reply to ", reply)
         currentReplyTo.value = reply.author.nickname
+        currentReplyToUserId.value = reply.author.id
         commentToComment.targetUserId = reply.author.id
     }
     commentToComment.entityId = floor.id
@@ -627,13 +636,15 @@ const submitReply = () => {
             preCommentToComment.entityId,
             preCommentToComment.targetUserId,
             preCommentToComment.content,
-            postId.value
+            postId.value,
+            currentReplyToUserId.value
         )
         : addCommentToComment(commentToComment.entityType,
             commentToComment.entityId,
             commentToComment.targetUserId,
             commentToComment.content,
-            postId.value
+            postId.value,
+            currentReplyToUserId.value
         )
 
     action.then(res => {

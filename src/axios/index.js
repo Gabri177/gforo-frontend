@@ -28,6 +28,7 @@ axio.interceptors.request.use(
     const refreshToken = getRefreshToken()
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
+      config.headers['gforo-deviceId'] = `${localStorage.getItem('deviceId')}`
     } 
     // else if (refreshToken) {
     //   config.headers['Authorization'] = `Bearer ${refreshToken}`

@@ -75,8 +75,10 @@ import { useAuthStore } from '~/stores/auth';
 import { setToken, setRefreshToken } from '~/utils/auth';
 import { getUserInfo } from '~/api/userApi';
 import { SCENE } from '~/constants/scene';
+import { useWebSocketStore } from '~/stores/webSocket';
 // import { loginUser } from '../api/loginApi';
 
+const webSocketStore = useWebSocketStore();
 const router = useRouter();
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -168,6 +170,8 @@ const onLogin = async () => {
 
     userStore.setUserInfo(userInfoRes);
 	authStore.setAuthInfo(userInfoRes);
+
+	webSocketStore.connect()
 
     ElMessage.success('Login successful');
     router.push('/');

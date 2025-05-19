@@ -44,3 +44,26 @@ export function adminDeleteComment(commentId) {
 export function getDashboardStats() {
 	return axio.get('/admin/statistics')
 }
+
+
+export function adminGetNotification(currentPage, pageSize, isAsc){
+	return axio.get('/admin/notification', {
+		params: {
+			currentPage: currentPage !== undefined ? currentPage : 1,
+			pageSize: pageSize !== undefined? pageSize : 10,
+			isAsc: isAsc !== undefined? isAsc : true
+		}
+	})
+}
+
+export function adminDeleteNotification(notificationId){
+	return axio.delete('/admin/notification/' + notificationId)
+}
+
+export function adminPublishNotification(notification){
+	return axio.post('/admin/notification', notification)
+}
+
+export function adminUpdateNotification(notification){
+	return axio.put('/admin/notification', notification)
+}

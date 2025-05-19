@@ -3,12 +3,12 @@
 		<div class="container mx-auto px-4 h-full flex items-center justify-between">
 			<!-- 左侧导航 -->
 			<div class="flex items-center">
-				<router-link to="/" class="text-2xl font-bold text-[#4A4A4A] hover:text-[#6B7C93] transition-colors duration-300">
+				<router-link to="/"
+					class="text-2xl font-bold text-[#4A4A4A] hover:text-[#6B7C93] transition-colors duration-300">
 					GForo
 				</router-link>
 				<nav class="ml-8 flex space-x-6">
-					<router-link v-for="item in navItems" :key="item.path" 
-						:to="item.path || route.path"
+					<router-link v-for="item in navItems" :key="item.path" :to="item.path || route.path"
 						class="nav-link">
 						{{ item.name }}
 					</router-link>
@@ -19,13 +19,11 @@
 			<div class="flex items-center space-x-6">
 				<!-- 搜索框 -->
 				<div class="relative">
-					<el-input
-						v-model="searchQuery"
-						placeholder="Search Post ..."
-						class="w-[300px]"
-					>
+					<el-input v-model="searchQuery" placeholder="Search Post ..." class="w-[300px]">
 						<template #prefix>
-							<el-icon class="text-[#6B7C93]"><Search /></el-icon>
+							<el-icon class="text-[#6B7C93]">
+								<Search />
+							</el-icon>
 						</template>
 					</el-input>
 				</div>
@@ -34,18 +32,26 @@
 				<div v-if="userStore.isLoggedInState" class="flex items-center space-x-4">
 					<el-dropdown trigger="click">
 						<div class="flex items-center space-x-2 cursor-pointer">
-							<el-avatar 
-								:size="32" 
-								:src="userStore.userInfo.headerUrl || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
-								@error="() => true"
-							/>
+							<el-badge is-dot :hidden="!notificationStore.hasUnread">
+								<el-avatar :size="32"
+									:src="userStore.userInfo.headerUrl || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
+									@error="() => true" />
+							</el-badge>
 							<span class="text-[#4A4A4A]">{{ userStore.userInfo?.nickname }}</span>
 						</div>
 						<template #dropdown>
 							<el-dropdown-menu>
 								<el-dropdown-item @click="router.push('/profile')">Profile</el-dropdown-item>
+								<el-dropdown-item
+									@click="router.push('/notification'); notificationStore.setUnread(false)"><span
+										class="relative">
+										Notice
+										<span v-if="notificationStore.hasUnread"
+											class="absolute top-2 -right-3 w-2 h-2 bg-red-500 rounded-full"></span>
+									</span></el-dropdown-item>
 								<el-dropdown-item @click="router.push('/settings')">Setting</el-dropdown-item>
-								<el-dropdown-item v-if="isAdmin" @click="router.push('/admin')">Gestion</el-dropdown-item>
+								<el-dropdown-item v-if="isAdmin"
+									@click="router.push('/admin')">Gestion</el-dropdown-item>
 								<el-dropdown-item divided @click="handleLogout">Logout</el-dropdown-item>
 							</el-dropdown-menu>
 						</template>
@@ -67,11 +73,13 @@ import { useAuthStore } from '~/stores/auth';
 import { Search } from '@element-plus/icons-vue';
 import { logoutUser } from '~/api/authApi';
 import { ElMessage } from 'element-plus';
+import { useNotificationStore } from '~/stores/notification';
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 const searchQuery = ref('');
 
 const isAdmin = computed(() => {
@@ -86,15 +94,17 @@ const navItems = computed(() => {
 	];
 
 	if (route.path.startsWith('/post'))
-		items.push({ name: 'Post'});
+		items.push({ name: 'Post' });
 	if (route.path.startsWith('/profile'))
-		items.push({ name: 'Profile'});
+		items.push({ name: 'Profile' });
 	if (route.path.startsWith('/settings'))
-		items.push({ name: 'Settings'});
+		items.push({ name: 'Settings' });
 	if (route.path.startsWith('/register'))
-		items.push({ name: 'Register'});
+		items.push({ name: 'Register' });
+	if (route.path.startsWith('/notification'))
+		items.push({ name: 'Notification' });
 	if (route.path.startsWith('/forget-password'))
-		items.push({ name: 'Forget Password'});
+		items.push({ name: 'Forget Password' });
 
 	return items;
 });
@@ -102,17 +112,17 @@ const navItems = computed(() => {
 const handleLogout = () => {
 
 	logoutUser()
-	.then((res)=> {
-		ElMessage.success("Logout successfully")
-	})
-	.catch((err)=> {
-		ElMessage.error(err.message)
-	})
-	.finally(()=> {
-		userStore.clearUserInfo();
-		authStore.clearPermissions();
-		router.push('/login');
-	});
+		.then((res) => {
+			ElMessage.success("Logout successfully")
+		})
+		.catch((err) => {
+			ElMessage.error(err.message)
+		})
+		.finally(() => {
+			userStore.clearUserInfo();
+			authStore.clearAuthInfo();
+			router.push('/login');
+		});
 };
 
 const search = () => {
