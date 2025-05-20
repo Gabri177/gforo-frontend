@@ -6,13 +6,16 @@ import { getToken } from '~/utils/auth';
 import { useNotificationStore } from '~/stores/notification';
 import { ElMessage } from 'element-plus';
 import { ElNotification } from 'element-plus'
+import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
+import { getUserInfo } from '~/api/userApi'
 
 const openSystemNotification = (title, content) => {
-  ElNotification({
-    title: title ? title : '系统消息',
-    message: content ? content : '您有新的消息',
-    type: 'info',
-  })
+	ElNotification({
+		title: title ? title : '系统消息',
+		message: content ? content : '您有新的消息',
+		type: 'info',
+	})
 }
 
 function getDeviceId() {
@@ -54,17 +57,25 @@ export const useWebSocketStore = defineStore('websocket', () => {
 			startHeartbeat();
 		};
 
-		socket.onmessage = (event) => {
+		socket.onmessage = async (event) => {
 			try {
 				const msg = JSON.parse(event.data);
 				const notificationStore = useNotificationStore();
 				notificationStore.setUnread(true); // 有新通知
 				console.log("收到消息：", msg);
-        if (msg.type == "SYSTEM_MESSAGE"){
-          console.log("收到系统消息：", msg.content);
-          const not = JSON.parse(msg.content);
-          openSystemNotification(not?.title, not?.content);
-        }
+				if (msg.type == "SYSTEM_MESSAGE") {
+					console.log("收到系统消息：", msg.content);
+					const not = JSON.parse(msg.content);
+					openSystemNotification(not?.title, not?.content);
+				}
+				if (msg.type == "REFRESH_USER_INFO"){
+					
+					const userStore = useUserStore();
+					const authStore = useAuthStore();
+					const userInfoRes = await getUserInfo();
+					userStore.setUserInfo(userInfoRes);
+					authStore.setAuthInfo(userInfoRes);
+				}
 				emitter.emit(msg.type, msg);
 				emitter.emit('message', msg);
 			} catch (e) {

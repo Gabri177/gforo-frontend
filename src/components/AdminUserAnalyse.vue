@@ -6,7 +6,7 @@
       <div class="p-6 border border-[#C1B8A8] rounded-xl bg-[#F8FAFC] shadow-sm hover:shadow-md transition-shadow duration-300">
         <div class="flex items-center justify-between">
           <div>
-            <h4 class="text-lg font-medium text-[#6B7C93]">总用户数</h4>
+            <h4 class="text-lg font-medium text-[#6B7C93]">All Users</h4>
             <p class="text-3xl font-bold text-[#4A4A4A] mt-2">{{ statistics.totalUsers }}</p>
           </div>
           <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#E6F0EB]">
@@ -14,7 +14,7 @@
           </div>
         </div>
         <div class="mt-4 text-sm text-[#8B93B1]">
-          <span class="text-[#83B59D] font-medium">↑ {{ statistics.userGrowthRate }}%</span> 较上月增长
+          <span class="text-[#83B59D] font-medium">↑ {{ statistics.userGrowthRate }}%</span> This Month
         </div>
         <div class="mt-3 h-1 w-full bg-[#E3E0DB] rounded-full overflow-hidden">
           <div class="h-full bg-[#83B59D] rounded-full" :style="{width: `${Math.min(statistics.userGrowthRate * 5, 100)}%`}"></div>
@@ -25,7 +25,7 @@
       <div class="p-6 border border-[#C1B8A8] rounded-xl bg-[#F8FAFC] shadow-sm hover:shadow-md transition-shadow duration-300">
         <div class="flex items-center justify-between">
           <div>
-            <h4 class="text-lg font-medium text-[#6B7C93]">总帖子数</h4>
+            <h4 class="text-lg font-medium text-[#6B7C93]">All Posts</h4>
             <p class="text-3xl font-bold text-[#4A4A4A] mt-2">{{ statistics.totalPosts }}</p>
           </div>
           <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#E6EDF5]">
@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class="mt-4 text-sm text-[#8B93B1]">
-          <span class="text-[#6B8EB2] font-medium">↑ {{ statistics.postGrowthRate }}%</span> 较上月增长
+          <span class="text-[#6B8EB2] font-medium">↑ {{ statistics.postGrowthRate }}%</span> This Month
         </div>
         <div class="mt-3 h-1 w-full bg-[#E3E0DB] rounded-full overflow-hidden">
           <div class="h-full bg-[#6B8EB2] rounded-full" :style="{width: `${Math.min(statistics.postGrowthRate * 5, 100)}%`}"></div>
@@ -44,7 +44,7 @@
       <div class="p-6 border border-[#C1B8A8] rounded-xl bg-[#F8FAFC] shadow-sm hover:shadow-md transition-shadow duration-300">
         <div class="flex items-center justify-between">
           <div>
-            <h4 class="text-lg font-medium text-[#6B7C93]">总评论数</h4>
+            <h4 class="text-lg font-medium text-[#6B7C93]">All Comments</h4>
             <p class="text-3xl font-bold text-[#4A4A4A] mt-2">{{ statistics.totalComments }}</p>
           </div>
           <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#F0E9E9]">
@@ -52,7 +52,7 @@
           </div>
         </div>
         <div class="mt-4 text-sm text-[#8B93B1]">
-          <span class="text-[#B28E8E] font-medium">↑ {{ statistics.commentGrowthRate }}%</span> 较上月增长
+          <span class="text-[#B28E8E] font-medium">↑ {{ statistics.commentGrowthRate }}%</span> This Month
         </div>
         <div class="mt-3 h-1 w-full bg-[#E3E0DB] rounded-full overflow-hidden">
           <div class="h-full bg-[#B28E8E] rounded-full" :style="{width: `${Math.min(statistics.commentGrowthRate * 5, 100)}%`}"></div>
@@ -68,7 +68,7 @@
             <el-icon class="text-[#83B59D]" :size="20"><UserFilled /></el-icon>
           </div>
           <div>
-            <p class="text-sm text-[#8B93B1]">活跃用户</p>
+            <p class="text-sm text-[#8B93B1]">Active Users</p>
             <p class="text-xl font-bold text-[#4A4A4A]">{{ statistics.activeUsers }}</p>
           </div>
         </div>
@@ -80,7 +80,7 @@
             <el-icon class="text-[#6B8EB2]" :size="20"><View /></el-icon>
           </div>
           <div>
-            <p class="text-sm text-[#8B93B1]">今日访问</p>
+            <p class="text-sm text-[#8B93B1]">Visits Today</p>
             <p class="text-xl font-bold text-[#4A4A4A]">{{ todayVisits }}</p>
           </div>
         </div>
@@ -92,7 +92,7 @@
             <el-icon class="text-[#B28E8E]" :size="20"><DocumentAdd /></el-icon>
           </div>
           <div>
-            <p class="text-sm text-[#8B93B1]">今日新帖</p>
+            <p class="text-sm text-[#8B93B1]">Posts Today</p>
             <p class="text-xl font-bold text-[#4A4A4A]">{{ todayPosts }}</p>
           </div>
         </div>
@@ -104,7 +104,7 @@
             <el-icon class="text-[#8E8EB2]" :size="20"><ChatLineRound /></el-icon>
           </div>
           <div>
-            <p class="text-sm text-[#8B93B1]">今日评论</p>
+            <p class="text-sm text-[#8B93B1]">Comments Today</p>
             <p class="text-xl font-bold text-[#4A4A4A]">{{ todayComments }}</p>
           </div>
         </div>
@@ -113,7 +113,7 @@
 
     <!-- 活跃度图表 -->
     <div class="mb-8">
-      <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">用户活跃度</h3>
+      <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">User Activity</h3>
       <div class="p-4 border border-[#C1B8A8] rounded-xl bg-white" style="height: 400px;">
         <div ref="activityChartRef" class="w-full h-full"></div>
       </div>
@@ -121,7 +121,7 @@
 
     <!-- 注册趋势图表 -->
     <div>
-      <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">用户注册趋势</h3>
+      <h3 class="text-xl font-semibold text-[#6B7C93] mb-4">User Registration Trends</h3>
       <div class="p-4 border border-[#C1B8A8] rounded-xl bg-white" style="height: 400px;">
         <div ref="registrationChartRef" class="w-full h-full"></div>
       </div>
@@ -130,311 +130,164 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
-import { User, Document, ChatDotRound, UserFilled, View, DocumentAdd, ChatLineRound } from '@element-plus/icons-vue'
-import { getDashboardStats } from '~/api/adminApi'
+import { ref, onMounted, nextTick, onUnmounted } from 'vue'
+import { getStatistics, getWeeklyActivity, getMonthlyRegistration } from '~/api/statisticsApi'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
 
-// 属性定义
-const props = defineProps({
-  statistics: {
-    type: Object,
-    default: () => ({
-      totalUsers: 0,
-      activeUsers: 0,
-      userGrowthRate: 0,
-      totalPosts: 0,
-      postGrowthRate: 0,
-      totalComments: 0,
-      commentGrowthRate: 0
-    })
-  }
+const statistics = ref({
+  totalUsers: 0,
+  activeUsers: 0,
+  userGrowthRate: 0,
+  totalPosts: 0,
+  postGrowthRate: 0,
+  totalComments: 0,
+  commentGrowthRate: 0
 })
 
-// 今日数据（模拟数据）
-const todayVisits = ref(Math.floor(Math.random() * 500) + 100)
-const todayPosts = ref(Math.floor(Math.random() * 50) + 5)
-const todayComments = ref(Math.floor(Math.random() * 100) + 20)
+const todayVisits = ref(0)
+const todayPosts = ref(0)
+const todayComments = ref(0)
 
-// 图表引用
 const activityChartRef = ref(null)
 const registrationChartRef = ref(null)
 
-// 图表实例
 let activityChart = null
 let registrationChart = null
 
-// 初始化图表
-const initCharts = () => {
-  // 确保DOM已经渲染完成
+const initCharts = (weeklyData, monthlyData) => {
   nextTick(() => {
-    // 初始化活跃度图表
     if (activityChartRef.value) {
-      activityChart = echarts.init(activityChartRef.value, null, {
-        renderer: 'canvas',
-        useDirtyRect: false
-      });
-      const activityOption = {
+      activityChart = echarts.init(activityChartRef.value)
+      activityChart.setOption({
         title: {
-          text: '用户活跃度统计',
+          text: 'User Activity Statistics',
           left: 'center',
-          textStyle: {
-            color: '#6B7C93',
-            fontWeight: 'normal',
-            fontSize: 16
-          }
+          textStyle: { color: '#6B7C93', fontWeight: 'normal', fontSize: 16 }
         },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          },
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          borderColor: '#C1B8A8',
-          borderWidth: 1,
-          textStyle: {
-            color: '#4A4A4A'
-          }
-        },
-        legend: {
-          data: ['活跃用户', '发帖数', '评论数'],
-          bottom: '0%',
-          textStyle: {
-            color: '#6B7C93'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '10%',
-          top: '15%',
-          containLabel: true
-        },
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['Active Users', 'Number of posts', 'Number of comments'], bottom: '0%', textStyle: { color: '#6B7C93' } },
         xAxis: {
           type: 'category',
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-          axisLine: {
-            lineStyle: {
-              color: '#A1A8C1'
-            }
-          },
-          axisLabel: {
-            color: '#6B7C93'
-          }
+          data: weeklyData.map(i => i.date.slice(5)),
+          axisLabel: { color: '#6B7C93' },
+          axisLine: { lineStyle: { color: '#A1A8C1' } }
         },
         yAxis: {
           type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#A1A8C1'
-            }
-          },
-          axisLabel: {
-            color: '#6B7C93'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#E3E0DB'
-            }
-          }
+          axisLabel: { color: '#6B7C93' },
+          splitLine: { lineStyle: { color: '#E3E0DB' } },
+          axisLine: { lineStyle: { color: '#A1A8C1' } }
         },
         series: [
           {
-            name: '活跃用户',
-            type: 'bar',
-            data: [120, 200, 150, 80, 70, 110, 130],
-            itemStyle: {
-              color: '#83B59D'
-            }
+            name: 'Active Users', type: 'bar', data: weeklyData.map(i => i.activeUsers), itemStyle: { color: '#83B59D' }
           },
           {
-            name: '发帖数',
-            type: 'bar',
-            data: [60, 80, 100, 40, 35, 55, 65],
-            itemStyle: {
-              color: '#6B8EB2'
-            }
+            name: 'Number of posts', type: 'bar', data: weeklyData.map(i => i.postCount), itemStyle: { color: '#6B8EB2' }
           },
           {
-            name: '评论数',
-            type: 'line',
-            data: [90, 120, 140, 60, 50, 80, 100],
-            smooth: true,
-            symbolSize: 8,
-            lineStyle: {
-              color: '#B28E8E',
-              width: 3
-            },
-            itemStyle: {
-              color: '#B28E8E'
-            }
+            name: 'Number of comments', type: 'line', data: weeklyData.map(i => i.commentCount),
+            smooth: true, lineStyle: { color: '#B28E8E', width: 3 }, itemStyle: { color: '#B28E8E' }
           }
         ]
-      }
-      activityChart.setOption(activityOption);
-      activityChart.resize(); // 强制调整大小
+      })
     }
 
-    // 初始化注册趋势图表
     if (registrationChartRef.value) {
-      registrationChart = echarts.init(registrationChartRef.value, null, {
-        renderer: 'canvas',
-        useDirtyRect: false
-      });
-      const registrationOption = {
+      registrationChart = echarts.init(registrationChartRef.value)
+      registrationChart.setOption({
         title: {
-          text: '用户注册趋势',
+          text: 'Trends In User Registration',
           left: 'center',
-          textStyle: {
-            color: '#6B7C93',
-            fontWeight: 'normal',
-            fontSize: 16
-          }
+          textStyle: { color: '#6B7C93', fontWeight: 'normal', fontSize: 16 }
         },
-        tooltip: {
-          trigger: 'axis',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          borderColor: '#C1B8A8',
-          borderWidth: 1,
-          textStyle: {
-            color: '#4A4A4A'
-          }
-        },
-        legend: {
-          data: ['注册用户', '活跃用户'],
-          bottom: '0%',
-          textStyle: {
-            color: '#6B7C93'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '10%',
-          top: '15%',
-          containLabel: true
-        },
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['Registered User', 'Active Users'], bottom: '0%', textStyle: { color: '#6B7C93' } },
         xAxis: {
           type: 'category',
-          boundaryGap: false,
-          data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-          axisLine: {
-            lineStyle: {
-              color: '#A1A8C1'
-            }
-          },
-          axisLabel: {
-            color: '#6B7C93'
-          }
+          data: monthlyData.map(i => i.month),
+          axisLabel: { color: '#6B7C93' },
+          axisLine: { lineStyle: { color: '#A1A8C1' } }
         },
         yAxis: {
           type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#A1A8C1'
-            }
-          },
-          axisLabel: {
-            color: '#6B7C93'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#E3E0DB'
-            }
-          }
+          axisLabel: { color: '#6B7C93' },
+          splitLine: { lineStyle: { color: '#E3E0DB' } },
+          axisLine: { lineStyle: { color: '#A1A8C1' } }
         },
         series: [
           {
-            name: '注册用户',
+            name: 'Registered User',
             type: 'line',
-            data: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65],
+            data: monthlyData.map(i => i.registeredUsers),
             smooth: true,
-            lineStyle: {
-              color: '#83B59D',
-              width: 3
-            },
-            itemStyle: {
-              color: '#83B59D'
-            },
+            lineStyle: { color: '#83B59D', width: 3 },
+            itemStyle: { color: '#83B59D' },
             areaStyle: {
               color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
+                type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
                 colorStops: [
-                  {
-                    offset: 0,
-                    color: 'rgba(131, 181, 157, 0.5)'
-                  },
-                  {
-                    offset: 1,
-                    color: 'rgba(131, 181, 157, 0.1)'
-                  }
+                  { offset: 0, color: 'rgba(131, 181, 157, 0.5)' },
+                  { offset: 1, color: 'rgba(131, 181, 157, 0.1)' }
                 ]
               }
             }
           },
           {
-            name: '活跃用户',
+            name: 'Active Users',
             type: 'line',
-            data: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+            data: monthlyData.map(i => i.activeUsers),
             smooth: true,
-            lineStyle: {
-              color: '#6B8EB2',
-              width: 3
-            },
-            itemStyle: {
-              color: '#6B8EB2'
-            }
+            lineStyle: { color: '#6B8EB2', width: 3 },
+            itemStyle: { color: '#6B8EB2' }
           }
         ]
-      }
-      registrationChart.setOption(registrationOption)
+      })
     }
-  });
+  })
 }
 
-// 监听窗口大小变化，调整图表大小
-const handleResize = () => {
-  if (activityChart) {
-    activityChart.resize();
-  }
-  if (registrationChart) {
-    registrationChart.resize();
-  }
-}
-
-onMounted(async() => {
-
+onMounted(async () => {
   try {
-    const res = await getDashboardStats()
-    console.log("====================", res)
-  } catch (error) {
-    console.log(error.message)
-    ElMessage.error(error.message ? error.message : "获取数据失败")
+    const statRes = await getStatistics()
+    statistics.value = {
+      totalUsers: statRes.totalUsers,
+      activeUsers: statRes.activeUsers,
+      userGrowthRate: statRes.userGrowthPercent,
+      totalPosts: statRes.totalPosts,
+      postGrowthRate: statRes.postGrowthPercent,
+      totalComments: statRes.totalComments,
+      commentGrowthRate: statRes.commentGrowthPercent
+    }
+    todayVisits.value = statRes.visitToday
+    todayPosts.value = statRes.newPostsToday
+    todayComments.value = statRes.newCommentsToday
+
+    const [weeklyRes, monthlyRes] = await Promise.all([
+      getWeeklyActivity(),
+      getMonthlyRegistration()
+    ])
+
+    initCharts(weeklyRes, monthlyRes)
+    window.addEventListener('resize', handleResize)
+  } catch (e) {
+    ElMessage.error(e.message || '获取统计数据失败')
   }
-  // 延迟初始化，确保DOM已完全渲染
-  setTimeout(() => {
-    initCharts();
-    window.addEventListener('resize', handleResize);
-  }, 300);
 })
+
+const handleResize = () => {
+  if (activityChart) activityChart.resize()
+  if (registrationChart) registrationChart.resize()
+}
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
-  if (activityChart) {
-    activityChart.dispose()
-    activityChart = null
-  }
-  if (registrationChart) {
-    registrationChart.dispose()
-    registrationChart = null
-  }
+  if (activityChart) activityChart.dispose()
+  if (registrationChart) registrationChart.dispose()
 })
 </script>
+
 
 <style scoped>
 .morandi-table :deep(.el-table__header) {

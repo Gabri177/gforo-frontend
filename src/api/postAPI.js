@@ -52,3 +52,7 @@ export function updatePost(postId, title, content){
 		content
 	});
 }
+
+export function changePostType(postId, type) {
+	return axio.put(`/post/change-type/${postId}/${type}`);
+}

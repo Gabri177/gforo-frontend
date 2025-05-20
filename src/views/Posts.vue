@@ -69,12 +69,12 @@
 						v-for="map in discussPosts" :key="map.discussPosts.id">
 
 						<!-- 置顶标签 -->
-						<div v-if="map.discussPosts.type == 1"
+						<div v-if="map.discussPosts.type == 1 || map.discussPosts.type == 3"
 							class="absolute top-8 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform -rotate-12 cursor-default">
 							<span class="font-bold">TOP</span>
 						</div>
 						<!-- 精华标签 -->
-						<div v-if="map.discussPosts.type == 2"
+						<div v-if="map.discussPosts.type == 2 || map.discussPosts.type == 3"
 							class="absolute top-2 right-2 bg-[#A1A8C1] text-white text-xs px-2 py-1 rounded shadow-md transform rotate-12 cursor-default">
 							<span class="font-bold">Essence</span>
 						</div>

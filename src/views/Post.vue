@@ -1,9 +1,5 @@
 <template>
     <div class="px-4 py-6 bg-[#E3E0DB] flex-1 flex flex-col justify-between w-full h-full">
-
-
-
-
         <div>
 
             <!-- 面包屑导航 -->
@@ -26,6 +22,21 @@
             <!-- 标题部分 -->
             <div class="mb-6 backdrop-blur-md bg-white/60 p-6 rounded-2xl shadow-lg">
                 <h1 class="text-2xl font-bold text-[#4A4A4A] mb-2">{{ originalPost?.title }}</h1>
+
+                <!-- 权限控制的右上角印章按钮 -->
+                <div v-if="hasChangeTypeAuth" class="absolute top-4 right-4 flex gap-2">
+                    <el-button circle size="big" type="primary" class="!bg-[#A1A8C1] !text-white !border-none hover:shadow-lg"
+                    @click="handleAddTop">
+                        <i v-if="originalPost?.type == 1 || originalPost?.type == 3" class="pi pi-sort-up-fill" style="font-size: 1rem"></i>
+                        <i v-else class="pi pi-sort-up" style="font-size: 1rem"></i>
+                    </el-button>
+                    <el-button circle size="big" type="info" class="!bg-[#C1B8A8] !text-white !border-none hover:shadow-lg"
+                    @click="handleAddEssence">
+                        <i v-if="originalPost?.type == 2 || originalPost?.type == 3" class="pi pi-star-fill" style="font-size: 1rem"></i>
+                        <i v-else class="pi pi-star" style="font-size: 1rem"></i>
+                    
+                    </el-button>
+                </div>
 
                 <!-- 楼主帖子 -->
                 <PostFloor :isPost="true" :boardId="boardId" :id="'post-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
@@ -116,7 +127,7 @@ import AddPost from '~/components/AddPost.vue';
 import NewPost from '~/tools/NewPost.vue';
 import ReturnHome from '~/components/ReturnHome.vue';
 import LikePost from '~/components/LikePost.vue';
-import { getPostByPage, deletePost, updatePost } from '~/api/postAPI';
+import { getPostByPage, deletePost, updatePost, changePostType } from '~/api/postAPI';
 import { addCommentToPost, addCommentToComment, deleteComment, updateComment } from '~/api/commentAPI';
 import { adminDeletePost, adminDeleteComment } from '~/api/adminApi';
 import { useRoute, useRouter } from 'vue-router';
@@ -187,6 +198,50 @@ const isEditting = ref(false)
 console.log("postId", route.params.postId)
 console.log("boardId", boardId.value)
 
+const handleAddTop = async () => {
+    
+    try {
+        if (originalPost.value?.type == 3) {
+            await changePostType(originalPost.value.id, 2)
+            originalPost.value.type = 2
+        } else if (originalPost.value?.type == 1) {
+            await changePostType(originalPost.value.id, 0)
+            originalPost.value.type = 0
+        } else if (originalPost.value?.type == 2) {
+            await changePostType(originalPost.value.id, 3)
+            originalPost.value.type = 3
+        } else {
+            await changePostType(originalPost.value.id, 1)
+            originalPost.value.type = 1
+        }
+        ElMessage.success('Change type success')
+    } catch (error) {
+        ElMessage.error(error.message ? error.message : 'Change type failed')
+    }
+}
+
+const handleAddEssence = async () => {
+    
+    try {
+        if (originalPost.value?.type == 3) {
+            await changePostType(originalPost.value.id, 1)
+            originalPost.value.type = 1
+        } else if (originalPost.value?.type == 2) {
+            await changePostType(originalPost.value.id, 0)
+            originalPost.value.type = 0
+        } else if (originalPost.value?.type == 1) {
+            await changePostType(originalPost.value.id, 3)
+            originalPost.value.type = 3
+        } else {
+            await changePostType(originalPost.value.id, 2)
+            originalPost.value.type = 2
+        }
+        ElMessage.success('Change type success')
+    } catch (error) {
+        ElMessage.error(error.message? error.message : 'Change type failed')
+    }
+}
+
 const showDeleteConfirm = (action) => {
     hintConfirmAction.value = action
     isHintVisible.value = true
@@ -211,6 +266,8 @@ const hasPostDeleteAuth = ref(authStore.hasPermission('post:delete:any') ||
             (authStore.hasPermission('post:delete:board') && authStore.hasBoardId(boardId.value)))
 const hasCommentDeleteAuth = ref(authStore.hasPermission('comment:delete:any') ||
             (authStore.hasPermission('comment:delete:board') && authStore.hasBoardId(boardId.value)))
+const hasChangeTypeAuth = ref(authStore.hasPermission('post:change-type:any') ||
+            (authStore.hasPermission('post:change-type:board') && authStore.hasBoardId(boardId.value)))
 console.log("hasDeletAuth", hasPostDeleteAuth.value, hasCommentDeleteAuth.value)
 
 const preCommentToComment = reactive({

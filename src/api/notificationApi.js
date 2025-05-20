@@ -12,5 +12,27 @@ export function getMyNotificationList(currentPage, pageSize, isAsc){
 }
 
 export function readNotification(notificationId){
-	return axio.post(`/notification/${notificationId}`);
+	return axio.put(`/notification/${notificationId}`);
+}
+
+export function readAllNotification(){
+	return axio.put('/notification');
+}
+
+export function getMyUnreadNotificationList(currentPage, pageSize){
+	return axio.get('/notification/unread', {
+		params: {
+			currentPage: currentPage !== undefined?currentPage:1,
+			pageSize: pageSize !== undefined?pageSize:10
+		}
+	});
+}
+
+export function getMyReadNotificationList(currentPage, pageSize){
+	return axio.get('/notification/read', {
+		params: {
+			currentPage: currentPage !== undefined?currentPage:1,
+			pageSize: pageSize !== undefined?pageSize:10
+		}
+	});
 }

@@ -31,3 +31,7 @@ export function addRolePermission(roleName, roleDescription, roleLevel, permissi
 		roleLevel: roleLevel
 	})
 }
+
+export function deleteRole(roleId) {
+	return axio.delete(`/permission/role/${roleId}`)
+}

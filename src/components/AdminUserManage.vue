@@ -114,7 +114,7 @@
         </div>
         <div class="flex">
           <span class="text-[#8B93B1] w-24">Bio:</span>
-          <span class="text-[#4A4A4A]">{{ selectedUser.bio || '暂无简介' }}</span>
+          <span class="text-[#4A4A4A]">{{ selectedUser.bio || 'No introduction yet' }}</span>
         </div>
       </div>
     </div>
@@ -315,6 +315,8 @@ const initPage = async (pageNum, limit) => {
       limit,
       false
     )
+
+    console.log('userList: ', res)
     users.value = res.userInfoList
     totalUsers.value = res.totalRows
     currentPage.value = res.currentPage

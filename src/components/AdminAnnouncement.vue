@@ -1,11 +1,11 @@
 <template>
   <div class="mb-6">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-semibold text-[#6B7C93]">公告管理</h3>
+      <h3 class="text-xl font-semibold text-[#6B7C93]">Announcement Management</h3>
       <div class="flex space-x-2">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索公告"
+          placeholder="Search Announcement"
           class="w-64 morandi-input"
           clearable
         >
@@ -14,7 +14,7 @@
           </template>
         </el-input>
         <el-button type="primary" class="morandi-button" @click="handleCreateClick">
-          <el-icon class="mr-1"><Plus /></el-icon>新建公告
+          <el-icon class="mr-1"><Plus /></el-icon>Add New
         </el-button>
       </div>
     </div>
@@ -28,13 +28,13 @@
       v-loading="loading"
     >
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="title" label="标题" min-width="180" />
-      <el-table-column prop="content" label="内容" min-width="250">
+      <el-table-column prop="title" label="Title" min-width="180" />
+      <el-table-column prop="content" label="Content" min-width="250">
         <template #default="scope">
           <div class="truncate-text">{{ scope.row.content }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200">
+      <el-table-column label="Operation" width="200">
         <template #default="scope">
           <el-button size="small" class="morandi-view-btn mr-2" @click="handleEditAnnouncement(scope.row)">
             编辑
@@ -62,23 +62,23 @@
     <!-- 编辑/创建弹窗 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? '编辑公告' : '新建公告'"
+      :title="isEdit ? 'Editorial Bulletin' : 'New announcement'"
       width="600px"
       class="morandi-dialog"
       append-to-body
     >
       <el-form :model="announcementForm" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="标题" prop="title">
-          <el-input v-model="announcementForm.title" placeholder="请输入标题" />
+        <el-form-item label="Title" prop="title">
+          <el-input v-model="announcementForm.title" placeholder="Please enter a title" />
         </el-form-item>
-        <el-form-item label="内容" prop="content">
-          <el-input v-model="announcementForm.content" type="textarea" rows="6" placeholder="请输入内容" />
+        <el-form-item label="Content" prop="content">
+          <el-input v-model="announcementForm.content" type="textarea" rows="6" placeholder="Please enter content" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span>
-          <el-button class="morandi-cancel-btn" @click="dialogVisible = false">取消</el-button>
-          <el-button class="morandi-confirm-btn" @click="submitForm" :loading="submitLoading">确认</el-button>
+          <el-button class="morandi-disable-btn" @click="dialogVisible = false">Cancel</el-button>
+          <el-button class="morandi-confirm-btn" @click="submitForm" :loading="submitLoading">Confirm</el-button>
         </span>
       </template>
     </el-dialog>

@@ -41,11 +41,6 @@ export function adminDeleteComment(commentId) {
 	return axio.delete('/admin/comment/delete/' + commentId)
 }
 
-export function getDashboardStats() {
-	return axio.get('/admin/statistics')
-}
-
-
 export function adminGetNotification(currentPage, pageSize, isAsc){
 	return axio.get('/admin/notification', {
 		params: {
