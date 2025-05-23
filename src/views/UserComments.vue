@@ -136,7 +136,7 @@ const fetchComments = async () => {
 		currentPage.value = res.currentPage
 		pageSize.value = res.pageSize
 	} catch (error) {
-		ElMessage.error('获取评论列表失败')
+		ElMessage.error(error.measage ? error.message : "Cannot get comments")
 	}
 }
 
@@ -231,14 +231,6 @@ onMounted(() => {
 	background-color: #A1A8C1;
 }
 
-.morandi-green {
-	color: #5D7F71;
-}
-
-.morandi-green:hover {
-	background-color: #A7C4A0 !important;
-	color: white !important;
-}
 
 /* 使用深度穿透来修改 Element Plus 的 dropdown item 样式 */
 :deep(.el-dropdown-menu__item.morandi-green) {

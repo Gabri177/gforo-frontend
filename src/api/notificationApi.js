@@ -28,6 +28,15 @@ export function getMyUnreadNotificationList(currentPage, pageSize){
 	});
 }
 
+export async function isUnreadNotification(){
+	try {
+		await axio.get('/notification/is-unread');
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export function getMyReadNotificationList(currentPage, pageSize){
 	return axio.get('/notification/read', {
 		params: {

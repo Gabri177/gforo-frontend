@@ -53,52 +53,6 @@ const handleConfirm = () => {
 
 <style scoped>
 
-
-.el-button.cancel-button {
-	background-color: #C1A1A1;
-	/* 莫兰迪红色 */
-	color: #ffffff;
-	/* 按钮字体颜色 */
-	border: none;
-	/* 去掉边框 */
-	font-family: 'Arial', sans-serif;
-	/* 修改字体 */
-	margin-right: 10px;
-	/* 按钮间距 */
-}
-
-.el-button.cancel-button:hover {
-	background-color: #A87A7A;
-	/* 按钮悬停红色 */
-	color: #ffffff;
-	/* 按钮悬停字体颜色 */
-}
-
-.el-button.confirm-button {
-	background-color: #A1A8C1;
-	/* 莫兰迪蓝色 */
-	color: #ffffff;
-	/* 按钮字体颜色 */
-	border: none;
-	/* 去掉边框 */
-	font-family: 'Arial', sans-serif;
-	/* 修改字体 */
-}
-
-.el-button.confirm-button:hover {
-	background-color: #7A87A8;
-	/* 按钮悬停蓝色 */
-	color: #ffffff;
-	/* 按钮悬停字体颜色 */
-}
-
-.morandi-dialog {
-	background-color: #E3E0DB;
-	color: #4a4a4a;
-	border-radius: 12px;
-	padding: 24px;
-}
-
 /* 正文样式 */
 .dialog-message {
 	font-size: 18px;

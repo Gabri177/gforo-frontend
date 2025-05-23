@@ -190,7 +190,7 @@ onMounted(async () => {
     }
     boards.value = res.boardInfos
   } catch (error) {
-    ElMessage.error(error.message || 'Failed to fetch board information')
+    ElMessage.error(error?.message ? error?.message : 'Failed to fetch board list')
   } finally {
     isLoading.value = false
   }

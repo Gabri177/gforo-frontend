@@ -3,7 +3,7 @@
 		:popper-options="popperOptions" popper-class="morandi-user-popover">
 		<template #reference>
 			<span class=" user-name-ellipsis text-[#6B7C93] cursor-pointer hover:underline" @click.stop="handleClick">
-				{{ props.addAt ? '@' : '' }}{{ basicUser.nickname || basicUser.username }}{{ props.addColon ? ':' : ''
+				{{ props.addAt ? '@' : '' }}{{ basicUser?.nickname || basicUser?.username }}{{ props.addColon ? ':' : ''
 				}}
 			</span>
 		</template>
@@ -58,7 +58,7 @@
 			</p>
 
 			<!-- 帖子和评论数量 - 毛玻璃卡片布局 -->
-			<div class="flex justify-between gap-2 mt-2">
+			<div class="flex justify-between gap-2 mt-2" v-show="!detailedUser.status == 0">
 				<div class="glass-card flex-1 text-center" @click="handleViewOthersPosts(detailedUser)">
 					📝 Posts<br />
 					<span class="font-semibold text-[#4A4A4A] text-base">{{ detailedUser.postCount }}</span>
@@ -193,7 +193,7 @@ async function loadUser() {
 			...props.user,
 			status: 0
 		}
-		ElMessage.error('获取用户信息失败')
+		ElMessage.error(err.message ? err.message : 'Failed to load user info')
 	} finally {
 		loading.value = false
 	}

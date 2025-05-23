@@ -564,35 +564,6 @@ const changeCaptcha = () => {
 	transform: scale(1.05);
 }
 
-.avatar-grid {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 20px;
-	padding: 20px;
-	max-height: 500px;
-	overflow-y: auto;
-}
-
-.avatar-item {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 10px;
-	border-radius: 12px;
-	cursor: pointer;
-	transition: all 0.3s ease;
-	background-color: #F8FAFC;
-}
-
-.avatar-item:hover {
-	background-color: #F1F5F9;
-	transform: translateY(-2px);
-}
-
-.avatar-item.selected {
-	background-color: #A1A8C1;
-	transform: scale(1.05);
-}
 
 /* 对话框样式 */
 .avatar-dialog .el-dialog {
@@ -648,20 +619,6 @@ const changeCaptcha = () => {
 	background-color: #9B8E9B !important;
 	color: white !important;
 	border-color: #9B8E9B !important;
-}
-
-.text-morandi-link {
-	color: #A1A8C1;
-	font-size: 14px;
-	transition: all 0.3s ease;
-	padding: 0;
-	height: auto;
-	line-height: 1.5;
-}
-
-.text-morandi-link-hover {
-	color: #7A87A8;
-	text-decoration: underline;
 }
 
 :deep(.el-link) {

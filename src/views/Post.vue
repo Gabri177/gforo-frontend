@@ -149,10 +149,6 @@ const originalPostRef = ref(null)
 const pageSize = ref(10)
 const replyPageSize = ref(10)
 
-// 展开状态管理
-const expandedComments = ref(new Set())
-
-
 // 回复相关的状态
 const isNeedTitle = ref(false)
 const floorRefs = ref([])
@@ -160,7 +156,6 @@ const dialogVisible = ref(false)
 const newComment = ref('')
 const currentReplyTo = ref(null)
 const currentReplyToUserId = ref(null)
-const replyToReply = ref(null)
 const isReplyPostVisible = ref(false)
 const originalPost = ref(null)
 const comments = ref([])
@@ -366,12 +361,12 @@ const handlePostFloorDeletePost = (postOrComment, isFloor) => {
 
 const handlePostFloorReportPost = (post, isFloor) => {
     console.log('handlePostFloorReportPost', post?.id, isFloor)
-    ElMessage.warning('举报功能暂未实现 post' + isFloor)
+    ElMessage.warning('Repost function is now work at the moment -- post' + isFloor)
 }
 
 const handlePostFloorReport = (comment) => {
     console.log('handlePostFloorReport', comment?.id)
-    ElMessage.warning('举报功能暂未实现')
+    ElMessage.warning('Repost function is now work at the moment')
 }
 
 const handlePostFloorEdit = (floor, isFloor, reply) => { // 不是帖子
@@ -540,18 +535,6 @@ const addReplyPostClicked = () => {
     isReplyPostVisible.value = true
     isEditting.value = false
     newPostRef.value.clearForm()
-}
-
-const formatDate = (isoString) => {
-    if (!isoString) return ''
-    const date = new Date(isoString)
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    const hours = date.getHours().toString().padStart(2, '0')
-    const minutes = date.getMinutes().toString().padStart(2, '0')
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
 const publishReplyPost = () => {

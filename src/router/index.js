@@ -13,11 +13,20 @@ import NotFound from '~/views/NotFound.vue'
 import Admin from '~/views/Admin.vue'
 import Posts from '~/views/Posts.vue'
 import Notification from '~/views/Notification.vue'
+import SearchResultPage from '~/views/SearchResultPage.vue'
 
 import CaptchaExample from '~/example/CaptchaExample.vue'
 import WsTest from '~/example/WsTest.vue'
+import { useWebSocketStore } from '~/stores/webSocket'
+import { useUserStore } from '~/stores/user'
 
 const routes = [
+  {
+    path: '/search',
+    name: 'SearchResultPage',
+    component: SearchResultPage,
+    //meta: { transition: null } 
+  },
   {
     path: '/notification',
     name: 'Notification',
@@ -157,6 +166,11 @@ const router = createRouter({
   routes
 })
 router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  const webSocketStore = useWebSocketStore()
+  if (userStore.isLoggedInState){
+    webSocketStore.connect()
+  }
   console.log('[Router] 路由跳转:', from.fullPath, '=>', to.fullPath)
   next()
 })

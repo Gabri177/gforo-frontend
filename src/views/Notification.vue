@@ -4,15 +4,15 @@
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-[#6B7C93]">My Notification</h2>
         <el-button type="primary" class="morandi-button" @click="markAllAsRead" :loading="markingAll">
-          全部标记为已读
+          Mark All As Read
         </el-button>
       </div>
 
       <div class="mb-6">
         <el-radio-group v-model="activeType" class="flex space-x-4">
-          <el-radio-button label="all">全部通知</el-radio-button>
-          <el-radio-button label="unread">未读通知</el-radio-button>
-          <el-radio-button label="read">已读通知</el-radio-button>
+          <el-radio-button label="all">All</el-radio-button>
+          <el-radio-button label="unread">Unread</el-radio-button>
+          <el-radio-button label="read">Read</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -21,7 +21,8 @@
           class="border border-[#E3E0DB] rounded-xl p-4 transition-all duration-300" :class="[
             { 'bg-[#F8FAFC]': !notification.isRead },
             { 'hover:bg-[#F1F5F9] cursor-pointer': notification.type === 5 || notification.type === 6 }
-          ]" @click="(notification.type === 5 || notification.type === 6) && handleSystemNotificationClick(notification)">
+          ]"
+          @click="(notification.type === 5 || notification.type === 6) && handleSystemNotificationClick(notification)">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center space-x-2">
@@ -29,44 +30,47 @@
                   {{ getNotificationTypeText(notification.type) }}
                 </el-tag>
                 <span v-if="!notification.isRead" class="bg-[#C1A1A1] px-2 py-0.5 rounded text-white text-xs">
-                  新消息
+                  New Notification
                 </span>
               </div>
               <p class="text-[#6B7C93] mb-2">
                 {{ notification.id }}
                 <template v-if="notification.type !== 5">
-                  用户 @<span class="text-[#4A5568] font-medium">{{ notification.author?.nickname ||
+                  User @<span class="text-[#4A5568] font-medium">{{ notification.author?.nickname ||
                     notification.author?.username }}</span>
                   <span v-if="notification.entityType === 1 && notification.type == 2">
-                    点赞了你的帖子
+                    Likes your Post:
                     <a class="text-[#6B7C93] hover:text-[#4A5568] underline"
                       :href="`/board/${notification?.post?.boardId}/post/${notification.entityId}/1`">《{{
                         notification.post?.title || 'Your Post (Deleted)' }}》</a>
                   </span>
                   <span v-else-if="notification.entityType === 2 && notification.type == 2">
-                    点赞了你的评论：
+                    Likes your comment：
                     <a class="text-[#6B7C93] hover:text-[#4A5568] underline"
                       @click="handleToComment(notification?.post?.boardId, notification?.post?.id, notification?.comment?.id)">{{
                         notification.comment?.content || 'Your Comment (Deleted)' }}</a>
                   </span>
-                  <span v-else-if="notification.entityType === 1 && notification.type === 1">
-                    回复了你的帖子：
+                  <span v-else-if="notification.type === 1">
+                    Reply your post：
                     <a class="text-[#6B7C93] hover:text-[#4A5568] underline"
                       @click="handleToComment(notification?.post?.boardId, notification?.post?.id, notification?.comment?.id)">{{
                         notification.comment?.content || '你的评论' }}</a>
                   </span>
-                  <span v-else-if="notification.entityType === 2 && notification.type === 1">
-                    回复了你的评论：
+                  <span v-else-if="notification.type === 0">
+                    Replay your comment：
                     <a class="text-[#6B7C93] hover:text-[#4A5568] underline"
                       @click="handleToComment(notification?.post?.boardId, notification?.post?.id, notification?.comment?.id)">{{
-                        notification.comment?.content || '你的评论' }}</a>
+                        notification.comment?.content || 'Your Comment' }}</a>
                   </span>
-                  <span v-else-if="notification.type === 6">
-                    : {{ notification.title || '你的评论' }}
+                  <span v-else-if="notification.type === 6 && notification.entityType == 0">
+                    : {{ notification.title || 'Your Comment' }}
+                  </span>
+                  <span v-else-if="notification.type === 6 && notification.entityType == 3">
+                    : {{ notification.title || 'New title has been granted' }}
                   </span>
                 </template>
                 <template v-else>
-                  {{ notification.title || '系统通知' }}
+                  {{ notification.title || 'Sys notification' }}
                 </template>
               </p>
               <div class="flex items-center justify-between text-sm text-[#8B93B1]">
@@ -76,7 +80,7 @@
           </div>
         </div>
 
-        <el-empty v-if="filteredNotifications.length === 0" description="暂无通知" />
+        <el-empty v-if="filteredNotifications.length === 0" description="No notification yet  " />
       </div>
 
       <div class="mt-6 flex justify-center">
@@ -124,8 +128,8 @@ const dialogContent = ref('')
 const handleSystemNotificationClick = async (notification) => {
   try {
     await readNotification(notification.id)
-    dialogTitle.value = notification.title || '系统通知'
-    dialogContent.value = notification.content || '暂无内容'
+    dialogTitle.value = notification.title || 'System Notification'
+    dialogContent.value = notification.content || 'No content available'
     dialogVisible.value = true
     if (activeType.value == 'unread') {
       notifications.value = notifications.value.filter(n => n.id !== notification.id)
@@ -136,7 +140,7 @@ const handleSystemNotificationClick = async (notification) => {
     }
 
   } catch (error) {
-    ElMessage.error(error.message ? error.message : '加载通知失败')
+    ElMessage.error(error.message ? error.message : 'Cannot load notification')
   }
 }
 
@@ -168,10 +172,11 @@ const fetchNotifications = async () => {
     } else {
       res = await getMyNotificationList(currentPage.value, pageSize.value, isAsc.value)
     }
+    console.log("res: ", res)
     notifications.value = res.notificationList || []
     total.value = res.totalRows || 0
   } catch (e) {
-    ElMessage.error('加载通知失败')
+    ElMessage.error(e.message ? e.message : 'Cannot load notification')
   } finally {
     loading.value = false
   }
@@ -184,11 +189,17 @@ const markAllAsRead = async () => {
     if (activeType.value == 'unread') {
       notifications.value = notifications.value.filter(n => n.type == 5)
     } else {
-      notifications.value = notifications.value
-        .filter(n => n.type !== 5)
-        .map(n => ({ ...n, isRead: true }))
+      notifications.value = notifications.value.map(n => {
+        if (n.type !== 5) {
+          return { ...n, isRead: true };
+        }
+        return n;
+      });
+
     }
-    ElMessage.success('全部标记为已读')
+    ElMessage.success('Marked as read successfully')
+  } catch (e) {
+    ElMessage.error(e.message ? e.message : 'Mark as read failed')
   } finally {
     markingAll.value = false
   }
@@ -218,8 +229,8 @@ const getNotificationType = (type) => {
 }
 
 const getNotificationTypeText = (type) => {
-  const map = { 1: '评论', 2: '点赞', 3: '关注', 4: '私信', 5: '系统', 6: '管理员' }
-  return map[type] || '通知'
+  const map = { 1: 'Comment', 2: 'Like', 3: 'Follow', 4: 'Message', 5: 'System', 6: 'Admin' }
+  return map[type] || 'Notification'
 }
 
 const formatDate = (date) => new Date(date).toLocaleString()

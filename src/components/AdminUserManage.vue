@@ -16,7 +16,7 @@
 
     <!-- 用户表格 -->
     <el-table :data="filteredUsers" style="width: 100%" border stripe class="morandi-table" v-loading="tableLoading">
-      <el-table-column prop="id" label="ID" width="80" />
+      <!-- <el-table-column prop="id" label="ID" width="80" /> -->
       <el-table-column prop="username" label="User Name" width="120" />
       <el-table-column prop="nickname" label="Nick Name" width="120" />
       <el-table-column prop="email" label="Email" class-name="email-column" />
@@ -163,16 +163,20 @@ import { ref, computed, defineEmits, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { getBoardList } from '~/api/boardApi'
+import debounce from 'lodash/debounce'
+
 import {
   getUserList,
   changeUserPassword,
   activeUser,
   disableUser,
   deleteUser,
-  logoutUser
+  logoutUser,
+  getUserListUsernameLike
 } from '~/api/adminApi'
 import { getRoleDetailList, updateUserRole } from '~/api/permissionApi'
 import { useAuthStore } from '~/stores/auth'
+
 const users = ref([])
 const tableLoading = ref(false)
 const totalUsers = ref(0)
@@ -192,6 +196,17 @@ const isBoardRoleChecked = ref(false)
 const boardPosterInfo = ref([])
 const selectedRoles = ref([])
 const selectedBoards = ref([])
+
+const debouncedFetchUsers = debounce(() => {
+  currentPage.value = 1
+  fetchUsers()
+}, 500)
+
+
+watch(searchQuery, () => {
+  debouncedFetchUsers()
+})
+
 
 const handleRoleCheckBoxChange = (val) => {
 
@@ -287,7 +302,7 @@ const handleConfirmUserInfo = async (curUser) => {
     })
     ElMessage.success('用户信息更新成功')
   } catch (error) {
-    ElMessage.error('提交失败')
+    ElMessage.error(error.message ? error.message : 'Cannot update user info')
     console.error(error)
   }
   
@@ -296,22 +311,11 @@ const handleConfirmUserInfo = async (curUser) => {
   selectedUser.value = []
 }
 
-
-// 过滤用户列表
-const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value
-
-  const query = searchQuery.value.toLowerCase()
-  return users.value.filter(user =>
-    // user.username.toLowerCase().includes(query) ||
-    // user.nickname.toLowerCase().includes(query) ||
-    user.email.toLowerCase().includes(query)
-  )
-})
+const filteredUsers = computed(() => users.value)
 
 const initPage = async (pageNum, limit) => {
   try {
-    const res = await getUserList(0, pageNum,
+    const res = await getUserList(pageNum,
       limit,
       false
     )
@@ -334,10 +338,43 @@ const fetchRoleData = async () => {
     console.log('roleList: ', res)
     roles.value = res.roleDetailsList || []
   } catch (e) {
-    ElMessage.error('获取权限数据失败')
+    ElMessage.error(e.message ? e.message : 'Failed to fetch role data')
     console.error(e)
   }
 }
+
+const fetchUsers = async () => {
+  const size = pageSize.value || 10  // 防止 undefined
+  tableLoading.value = true
+  try {
+    if (searchQuery.value.trim()) {
+      const res = await getUserListUsernameLike(currentPage.value, size, false, searchQuery.value)
+      users.value = res.userInfoList || []
+      totalUsers.value = res.totalRows || 0
+    } else {
+      const res = await getUserList(currentPage.value, size, false)
+      users.value = res.userInfoList || []
+      totalUsers.value = res.totalRows || 0
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '获取用户列表失败')
+  } finally {
+    tableLoading.value = false
+  }
+}
+
+
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  fetchUsers()
+}
+
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+  fetchUsers()
+}
+
+
 
 const fetchBoardPosterInfo = async () => {
   try {
@@ -398,15 +435,15 @@ function refreshUsers() {
   initPage(currentPage.value, pageSize.value)
 }
 
-function handleSizeChange(size) {
-  pageSize.value = size
-  initPage(currentPage.value, pageSize.value)
-}
+// function handleSizeChange(size) {
+//   pageSize.value = size
+//   initPage(currentPage.value, pageSize.value)
+// }
 
-function handleCurrentChange(page) {
-  currentPage.value = page
-  initPage(currentPage.value)
-}
+// function handleCurrentChange(page) {
+//   currentPage.value = page
+//   initPage(currentPage.value)
+// }
 
 async function confirmOperation() {
   console.log("selectedUser", selectedUser.value)

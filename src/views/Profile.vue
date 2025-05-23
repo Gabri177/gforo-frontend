@@ -9,8 +9,23 @@
               @click="showAvatarPreview = true">
               <img :src="userAvatar || '/default-avatar.png'" alt="avatar" class="w-full h-full object-cover">
             </div>
+
             <div class="ml-6 user-info relative">
               <h2 class="text-2xl font-bold text-[#6B7C93]">{{ nickname }}</h2>
+              <div class="flex items-center mt-2">
+                <el-dropdown @command="handleTitleChange">
+                  <el-tag class="morandi-title-tag cursor-pointer" effect="light" type="info">
+                    {{ currentTitle?.name || 'No Title' }}
+                  </el-tag>
+                  <template #dropdown>
+                    <el-dropdown-menu class="morandi-dropdown-menu">
+                      <el-dropdown-item v-for="item in titles" :key="item.id" :command="item.id" class="morandi-dropdown-item">
+                        {{ item.name }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
               <div class="relative group">
                 <p class="text-[#8B93B1] mt-2 truncate max-w-[400px] cursor-pointer">
                   {{ bio || 'No bio yet' }}
@@ -30,6 +45,7 @@
                 </div>
               </div>
             </div>
+
           </div>
 
           <!-- 个人信息卡片 -->
@@ -56,9 +72,10 @@
                   <span class="text-[#8B93B1] w-24">Join Date:</span>
                   <span class="text-[#6B7C93]">{{ joinDate }}</span>
                 </div>
-                
+
               </div>
             </div>
+
 
             <!-- 统计信息 -->
             <div class="p-6 border border-[#C1B8A8] rounded-xl stats-card">
@@ -89,10 +106,10 @@
   </div>
 
   <div class="w-full h-full"><el-dialog v-model="showAvatarPreview" width="auto" center :show-close="true"
-    class="avatar-preview-dialog max-w-[360px]">
-    <img :src="userAvatar || '/default-avatar.png'" alt="avatar preview"
-      class="max-w-full max-h-[80vh] mx-auto rounded-xl object-contain" />
-  </el-dialog></div>
+      class="avatar-preview-dialog max-w-[360px]">
+      <img :src="userAvatar || '/default-avatar.png'" alt="avatar preview"
+        class="max-w-full max-h-[80vh] mx-auto rounded-xl object-contain" />
+    </el-dialog></div>
 </template>
 
 <script setup>
@@ -100,7 +117,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
-
+import { getMyTitles, setMyTitle } from '~/api/titleApi'
 import {
   getUserInfo
 } from '~/api/userApi'
@@ -122,6 +139,26 @@ const status = computed(() => userStore.userInfo.status == '1' ? 'Activated' : '
 const postCount = computed(() => userStore.userInfo.postCount);
 const commentCount = computed(() => userStore.userInfo.commentCount);
 const showAvatarPreview = ref(false) // 控制是否显示大图预览
+
+const titles = ref([]) // 所有称号
+const currentTitle = ref(null) // 当前称号
+
+const handleTitleChange = async (titleId) => {
+  try {
+    await setMyTitle(titleId)
+    currentTitle.value = titles.value.find(t => t.id === titleId)
+    userStore.setUserInfo({
+      ...userStore.userInfo,
+      title: currentTitle.value
+    })
+    ElMessage.success('Title updated!')
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('Failed to update title')
+  }
+}
+
+
 
 //console.log("userInfo Profile", userStore.userInfo)
 
@@ -148,10 +185,16 @@ onMounted(async () => {
     userStore.setUserInfo(userInfo)
     authStore.setAuthInfo(userInfo)
     console.log("userInfo", userInfo, userInfo.permissions)
-    // TODO: 获取其他用户信息（如统计数据等）
-    // const stats = await getUserStats()
-    // postCount.value = stats.posts
-    // commentCount.value = stats.comments
+
+
+    // 获取所有称号
+    const res = await getMyTitles()
+    titles.value = res
+    console.log("titles", titles.value)
+
+    // 设置当前称号
+    const currentId = userInfo.title?.id
+    currentTitle.value = res.find(t => t.id === currentId) || null
 
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
@@ -162,7 +205,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-
 /* 按下效果 */
 .stat-item:active {
   transform: scale(0.97);
@@ -188,22 +230,6 @@ onMounted(async () => {
   border-color: #83B59D !important;
   color: white !important;
   transition: all 0.3s ease !important;
-}
-
-.morandi-button-green:hover {
-  background-color: #6FA189 !important;
-  border-color: #6FA189 !important;
-}
-
-.morandi-button-green:active {
-  background-color: #5C8C75 !important;
-  border-color: #5C8C75 !important;
-}
-
-.morandi-button-green:disabled {
-  background-color: #C5D6CE !important;
-  border-color: #C5D6CE !important;
-  cursor: not-allowed;
 }
 
 /* 修改容器动画和悬浮效果 */
@@ -304,12 +330,6 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   padding: 1rem;
-}
-
-.el-overlay-dialog {
-  display: flex !important;
-  align-items: center;       /* 垂直居中 */
-  justify-content: center;   /* 水平居中 */
 }
 
 /* 定义动画关键帧 */
@@ -490,4 +510,52 @@ onMounted(async () => {
   background-color: #A1A8C1;
   border-radius: 2px;
 }
+
+.morandi-title-tag {
+  background-color: #F1F3F4 !important;
+  color: #6B7C93 !important;
+  border: 1px solid #C1B8A8 !important;
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 4px 10px;
+  transition: all 0.3s ease;
+}
+
+.morandi-title-tag:hover {
+  background-color: #E3E0DB !important;
+  color: #4A4A4A !important;
+  border-color: #A1A8C1 !important;
+}
+
+/* 下拉菜单样式 */
+.morandi-dropdown-menu {
+  background-color: #FDFDFD;
+  border: 1px solid #C1B8A8;
+  box-shadow: 0 4px 12px rgba(193, 184, 168, 0.1);
+  padding: 6px 0;
+  border-radius: 8px;
+}
+
+/* 每一项的样式 */
+.morandi-dropdown-item {
+  color: #6B7C93 !important;
+  font-weight: 500;
+  padding: 8px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 强制修改 el-dropdown-item 的 hover 样式 */
+:deep(.morandi-dropdown-item:hover) {
+  background-color: #E3E0DB !important;
+  color: #4A4A4A !important;
+}
+
+:deep(.morandi-dropdown-item:focus),
+:deep(.morandi-dropdown-item:active) {
+  background-color: #D8D1C6 !important;
+  color: #4A4A4A !important;
+}
+
+
+
 </style>

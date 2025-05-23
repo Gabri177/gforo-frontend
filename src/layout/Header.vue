@@ -19,7 +19,9 @@
 			<div class="flex items-center space-x-6">
 				<!-- 搜索框 -->
 				<div class="relative">
-					<el-input v-model="searchQuery" placeholder="Search Post ..." class="w-[300px]">
+					
+					<el-input v-model="searchQuery" placeholder="Search Post ..." class="w-[300px]"
+						@keyup.enter="handleSearch">
 						<template #prefix>
 							<el-icon class="text-[#6B7C93]">
 								<Search />
@@ -82,6 +84,25 @@ const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 const searchQuery = ref('');
 
+const handleSearch = () => {
+  const keywordTrimmed = searchQuery.value.trim()
+  if (!keywordTrimmed) {
+    ElMessage.warning('Please enter a keyword')
+    return
+  }
+
+  // 如果当前就在 search 页面，手动更改 query 参数
+  if (route.path === '/search') {
+    router.replace({ path: '/search', query: { keyword: keywordTrimmed } })
+	searchQuery.value = ''
+  } else {
+    router.push({ path: '/search', query: { keyword: keywordTrimmed } })
+	searchQuery.value = ''
+  }
+}
+
+
+
 const isAdmin = computed(() => {
 	return (authStore.hasPermission('user:info:any'))
 });
@@ -90,7 +111,7 @@ const isAdmin = computed(() => {
 const navItems = computed(() => {
 	const items = [
 		{ name: 'Home', path: '/' },
-		{ name: 'Message', path: '/message' },
+		// { name: 'Message', path: '/message' },
 	];
 
 	if (route.path.startsWith('/post'))
@@ -260,8 +281,4 @@ const search = () => {
 	height: 60px;
 }
 
-/* 为固定定位的header添加阴影效果 */
-.el-header {
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 </style>

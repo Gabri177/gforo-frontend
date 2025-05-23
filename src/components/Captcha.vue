@@ -126,9 +126,6 @@ onMounted(() => {
 
 <style scoped>
 /* 莫兰迪绿色系 */
-.text-morandi-green { color: #8BA888; }
-.text-morandi-green-dark { color: #6B8368; }
-.border-morandi-green { border-color: #A5B8A3; }
 .morandi-input-green :deep(.el-input__wrapper) {
   background-color: #F8FAF8;
   border: 1px solid #A5B8A3;
@@ -141,20 +138,8 @@ onMounted(() => {
   border-color: #8BA888;
   box-shadow: 0 0 0 1px #8BA888;
 }
-.morandi-button-green:deep(.el-button) {
-  background-color: transparent !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-.morandi-button-green:deep(.el-button:hover) {
-  background-color: #F1F5F1 !important;
-  color: #6B8368 !important;
-}
 
 /* 莫兰迪紫色系 */
-.text-morandi-purple { color: #9B8E9B; }
-.text-morandi-purple-dark { color: #7B6E7B; }
-.border-morandi-purple { border-color: #B5A8B5; }
 .morandi-input-purple :deep(.el-input__wrapper) {
   background-color: #FAF8FA;
   border: 1px solid #B5A8B5;
@@ -167,20 +152,8 @@ onMounted(() => {
   border-color: #9B8E9B;
   box-shadow: 0 0 0 1px #9B8E9B;
 }
-.morandi-button-purple:deep(.el-button) {
-  background-color: transparent !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-.morandi-button-purple:deep(.el-button:hover) {
-  background-color: #F5F1F5 !important;
-  color: #7B6E7B !important;
-}
 
 /* 莫兰迪蓝色系 */
-.text-morandi-blue { color: #8E9EAB; }
-.text-morandi-blue-dark { color: #6E7E8B; }
-.border-morandi-blue { border-color: #A8B8C5; }
 .morandi-input-blue :deep(.el-input__wrapper) {
   background-color: #F8FAFA;
   border: 1px solid #A8B8C5;
@@ -193,20 +166,7 @@ onMounted(() => {
   border-color: #8E9EAB;
   box-shadow: 0 0 0 1px #8E9EAB;
 }
-.morandi-button-blue:deep(.el-button) {
-  background-color: transparent !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-.morandi-button-blue:deep(.el-button:hover) {
-  background-color: #F1F5F7 !important;
-  color: #6E7E8B !important;
-}
 
-/* 莫兰迪棕色系 */
-.text-morandi-brown { color: #A69B8D; }
-.text-morandi-brown-dark { color: #867B6D; }
-.border-morandi-brown { border-color: #C0B5A7; }
 .morandi-input-brown :deep(.el-input__wrapper) {
   background-color: #FAF9F7;
   border: 1px solid #C0B5A7;
@@ -219,20 +179,7 @@ onMounted(() => {
   border-color: #A69B8D;
   box-shadow: 0 0 0 1px #A69B8D;
 }
-.morandi-button-brown:deep(.el-button) {
-  background-color: transparent !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-.morandi-button-brown:deep(.el-button:hover) {
-  background-color: #F5F4F2 !important;
-  color: #867B6D !important;
-}
 
-/* 莫兰迪灰色系 */
-.text-morandi-gray { color: #9A9B9B; }
-.text-morandi-gray-dark { color: #7A7B7B; }
-.border-morandi-gray { border-color: #B4B5B5; }
 .morandi-input-gray :deep(.el-input__wrapper) {
   background-color: #F9F9F9;
   border: 1px solid #B4B5B5;
@@ -244,14 +191,5 @@ onMounted(() => {
 .morandi-input-gray :deep(.el-input__wrapper.is-focus) {
   border-color: #9A9B9B;
   box-shadow: 0 0 0 1px #9A9B9B;
-}
-.morandi-button-gray:deep(.el-button) {
-  background-color: transparent !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-.morandi-button-gray:deep(.el-button:hover) {
-  background-color: #F4F4F4 !important;
-  color: #7A7B7B !important;
 }
 </style>

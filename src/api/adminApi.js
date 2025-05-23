@@ -1,13 +1,26 @@
 import axio from '~/axios/index'
 
-export function getUserList(userId, currentPage, pageSize, isAsc) {
-	let request = `/admin/user/info/${userId}`;
+export function getUserList(currentPage, pageSize, isAsc) {
+	let request = `/admin/user/info`;
 	if (currentPage !== undefined)
 		request += '?currentPage=' + currentPage;
 	if (pageSize !== undefined)
 		request += '&pageSize=' + pageSize;
 	if (isAsc !== undefined)
 		request += '&isAsc=' + isAsc;
+	return axio.get(request);
+}
+
+export function getUserListUsernameLike(currentPage, pageSize, isAsc, username) {
+	let request = `/admin/user/info/username-like`;
+	if (currentPage !== undefined)
+		request += '?currentPage=' + currentPage;
+	if (pageSize !== undefined)
+		request += '&pageSize=' + pageSize;
+	if (isAsc !== undefined)
+		request += '&isAsc=' + isAsc;
+	if (username!== undefined)
+		request += '&username=' + username;
 	return axio.get(request);
 }
 

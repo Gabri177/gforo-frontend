@@ -56,3 +56,14 @@ export function updatePost(postId, title, content){
 export function changePostType(postId, type) {
 	return axio.put(`/post/change-type/${postId}/${type}`);
 }
+
+export function searchPost(keyword, currentPage, pageSize){
+	let request = `/post/search?keyword=${keyword}`;
+	if (currentPage || pageSize)
+		request += '&';
+	if (currentPage != undefined && currentPage!= null)
+		request += `currentPage=${currentPage}&`;
+	if (pageSize != undefined && pageSize!= null)
+		request += `pageSize=${pageSize}`;
+	return axio.get(request);
+}

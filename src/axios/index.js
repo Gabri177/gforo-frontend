@@ -6,7 +6,7 @@ import router from '~/router'
 import { ElMessage } from 'element-plus'
 
 const axio = axios.create({
-  baseURL: 'http://localhost:8080/api'
+  baseURL: import.meta.env.VITE_API_BASE
 })
 
 let isRefreshing = false

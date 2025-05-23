@@ -178,3 +178,11 @@
 .el-message-box__status {
   color: #A1A8C1 !important;
 }
+
+em {
+	color: #83B59D !important; /* 莫兰迪绿色字体 */
+	font-weight: 600;
+	background-color: #e8f0eb; /* 淡绿色背景 */
+	padding: 0 2px;
+	border-radius: 4px;
+  }

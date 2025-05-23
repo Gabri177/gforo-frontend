@@ -84,7 +84,6 @@ import ReturnHome from '~/components/ReturnHome.vue';
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
-const userId = userStore.userInfo.id
 const router = useRouter()
 const route = useRoute()
 const posts = ref([])
@@ -228,19 +227,6 @@ onMounted(async () => {
 :deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
 	background-color: #A1A8C1;
 }
-
-.text-subtle {
-	color: #6B7C93;
-}
-
-.text-accent {
-	color: #A1A8C1;
-}
-
-.bg-blur-box {
-	@apply bg-white/60 backdrop-blur-md border border-[#DAD7D2];
-}
-
 
 /* 莫兰迪风格按钮样式 */
 .morandi-view-btn {

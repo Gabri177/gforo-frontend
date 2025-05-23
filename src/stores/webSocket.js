@@ -41,12 +41,13 @@ export const useWebSocketStore = defineStore('websocket', () => {
 
 	function connect() {
 		if (socket && socket.readyState === WebSocket.OPEN) return;
+		if (status.value === 'connected' || status.value === 'connecting') return;
 
 		const token = getToken();
 		const deviceId = getDeviceId();
 		if (!token || !deviceId) return;
 
-		const wsUrl = `ws://localhost:8081/${deviceId}?token=${token}`;
+		const wsUrl = `${import.meta.env.VITE_WS_BASE}/${deviceId}?token=${token}`;
 		socket = new WebSocket(wsUrl);
 		status.value = 'connecting';
 
@@ -60,14 +61,9 @@ export const useWebSocketStore = defineStore('websocket', () => {
 		socket.onmessage = async (event) => {
 			try {
 				const msg = JSON.parse(event.data);
-				const notificationStore = useNotificationStore();
-				notificationStore.setUnread(true); // 有新通知
+				// const notificationStore = useNotificationStore();
+				// notificationStore.setUnread(true); // 有新通知
 				console.log("收到消息：", msg);
-				if (msg.type == "SYSTEM_MESSAGE") {
-					console.log("收到系统消息：", msg.content);
-					const not = JSON.parse(msg.content);
-					openSystemNotification(not?.title, not?.content);
-				}
 				if (msg.type == "REFRESH_USER_INFO"){
 					
 					const userStore = useUserStore();
@@ -75,7 +71,22 @@ export const useWebSocketStore = defineStore('websocket', () => {
 					const userInfoRes = await getUserInfo();
 					userStore.setUserInfo(userInfoRes);
 					authStore.setAuthInfo(userInfoRes);
+					return ;
 				}
+				if (msg.type == "pong")
+					return ;
+				if (msg.type == "NEW_TITLE"){
+					console.log("收到新称号：", msg.content);
+					const not = JSON.parse(msg.content);
+					openSystemNotification("New Title",  "You get a new title: " + not?.titleName + "!");
+				}
+				if (msg.type == "SYSTEM") {
+					console.log("收到系统消息：", msg.content);
+					const not = JSON.parse(msg.content);
+					openSystemNotification(not?.title, not?.content);
+				}
+				const notificationStore = useNotificationStore();
+				notificationStore.setUnread(true); // 有新通知
 				emitter.emit(msg.type, msg);
 				emitter.emit('message', msg);
 			} catch (e) {

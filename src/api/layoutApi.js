@@ -12,7 +12,7 @@ export const getCarouselList = () => {
  * @param {*} data { imageUrl, title, description, targetUrl }
  */
 export const addCarousel = (data) => {
-  return axio.put('/layout/carousel', data)
+  return axio.post('/layout/carousel', data)
 }
 
 /**
@@ -20,7 +20,7 @@ export const addCarousel = (data) => {
  * @param {*} data { id, imageUrl, title, description, targetUrl }
  */
 export const updateCarousel = (data) => {
-  return axio.post('/layout/carousel', data)
+  return axio.put('/layout/carousel', data)
 }
 
 /**

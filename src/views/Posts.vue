@@ -214,15 +214,9 @@ const router = useRouter();
 const isHintVisible = ref(false);
 const isPostVisible = ref(false);
 const newPostRef = ref(null);
-const allUnreadCount = ref(5);
 const keyword = ref('');
 const orderMode = ref(parseInt(localStorage.getItem('order_mode')) || 0);
 const waitResponse = ref(false);
-const loginUser = ref({
-	id: 1,
-	username: 'testuser',
-	headerUrl: 'https://via.placeholder.com/30'
-});
 const newPost = ref({
 	title: '',
 	content: ''
@@ -247,15 +241,6 @@ const stripMarkdown = (content) => {
 		?.replace(/[*_~`>[\]]/g, '')      // 移除其他markdown符号
 		?.slice(0, 100) || ''             // 限制长度
 }
-
-
-const toggleDropdown = () => {
-	dropdownOpen.value = !dropdownOpen.value;
-};
-const search = () => {
-	// 搜索功能实现
-};
-
 const setOrderMode = (mode) => {
 	console.log('set order mode', mode);
 	orderMode.value = mode;
@@ -294,9 +279,6 @@ const formatDate = (date) => {
 	// 日期格式化功能实现
 	return new Date(date).toLocaleString();
 };
-const handleSelect = (key, keyPath) => {
-	console.log(key, keyPath);
-};
 const addPostClicked = () => {
 	isPostVisible.value = !isPostVisible.value;
 	if (newPostRef.value) {
@@ -317,8 +299,6 @@ const detailPostClicked = (id, title) => {
 	})
 
 }
-
-
 const initPosts = (originalOrderVal, pageChanged) => {
 
 	if (originalOrderVal === undefined)
@@ -349,10 +329,6 @@ initPosts(orderMode.value, page.value.current);
 </script>
 
 <style scoped>
-ul.bg-white\/30 {
-	backdrop-filter: blur(12px);
-	background-color: rgba(255, 255, 255, 0.3);
-}
 
 /* 分页按钮默认背景 */
 :deep(.el-pagination.is-background .el-pager li) {

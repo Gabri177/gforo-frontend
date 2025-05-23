@@ -27,7 +27,7 @@
       class="morandi-table"
       v-loading="loading"
     >
-      <el-table-column prop="id" label="ID" width="80" />
+      <!-- <el-table-column prop="id" label="ID" width="80" /> -->
       <el-table-column prop="title" label="Title" min-width="180" />
       <el-table-column prop="content" label="Content" min-width="250">
         <template #default="scope">
@@ -96,8 +96,8 @@
       </div>
       <template #footer>
         <span>
-          <el-button class="morandi-cancel-btn" @click="confirmDialogVisible = false">取消</el-button>
-          <el-button class="morandi-disable-btn" @click="confirmDelete" :loading="deleteLoading">确认删除</el-button>
+          <el-button class="morandi-view-btn" @click="confirmDialogVisible = false">Cancel</el-button>
+          <el-button class="morandi-disable-btn" @click="confirmDelete" :loading="deleteLoading">Confirm</el-button>
         </span>
       </template>
     </el-dialog>
@@ -164,8 +164,8 @@ async function fetchAnnouncements() {
     console.log(res, "这是公告")
     // announcements.value = res
       // total.value = res.data.data.total
-  } catch {
-    ElMessage.error('获取公告列表失败')
+  } catch (e) {
+    ElMessage.error(e.message? e.message : 'Cannot get announcements')
   } finally {
     loading.value = false
   }
@@ -193,11 +193,11 @@ async function confirmDelete() {
   try {
     deleteLoading.value = true
     await adminDeleteNotification(selectedAnnouncement.value.id)
-    ElMessage.success('删除成功')
+    ElMessage.success('Delete Successfully')
     confirmDialogVisible.value = false
     fetchAnnouncements()
-  } catch {
-    ElMessage.error('删除失败')
+  } catch (e) {
+    ElMessage.error(e.message ? e.message : 'Delete failed')
   } finally {
     deleteLoading.value = false
   }
@@ -211,15 +211,15 @@ async function submitForm() {
     try {
       if (isEdit.value) {
         await adminUpdateNotification({ id: selectedAnnouncement.value.id, ...announcementForm.value })
-        ElMessage.success('更新成功')
+        ElMessage.success('Update Successfully')
       } else {
         await adminPublishNotification(announcementForm.value)
-        ElMessage.success('创建成功')
+        ElMessage.success('Create Successfully')
       }
       dialogVisible.value = false
       fetchAnnouncements()
-    } catch {
-      ElMessage.error('操作失败')
+    } catch (e) {
+      ElMessage.error(e.message ? e.message : 'Operation failed')
     } finally {
       submitLoading.value = false
     }
@@ -257,12 +257,6 @@ fetchAnnouncements()
   background-color: #C1A1A1;
   border-color: #C1A1A1;
   color: #fff;
-}
-
-.morandi-cancel-btn {
-  background-color: #e3e0db;
-  border-color: #c1b8a8;
-  color: #6B7C93;
 }
 
 .morandi-confirm-btn {

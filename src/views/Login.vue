@@ -72,10 +72,12 @@ import {
 } from '~/api/captchaApi';
 import { useUserStore } from '~/stores/user';
 import { useAuthStore } from '~/stores/auth';
+import { useNotificationStore } from '~/stores/notification';
 import { setToken, setRefreshToken } from '~/utils/auth';
 import { getUserInfo } from '~/api/userApi';
 import { SCENE } from '~/constants/scene';
 import { useWebSocketStore } from '~/stores/webSocket';
+import { isUnreadNotification } from '~/api/notificationApi';
 // import { loginUser } from '../api/loginApi';
 
 const webSocketStore = useWebSocketStore();
@@ -140,11 +142,6 @@ const rules = {
 	]
 };
 
-const clearForm = () => {
-	form.username = '';
-	form.password = '';
-};
-
 const onLogin = async () => {
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) {
@@ -185,6 +182,13 @@ const onLogin = async () => {
     loginLoading.value = false;
 	
   }
+  const notificationStore = useNotificationStore();
+  const hasUnread = await isUnreadNotification();
+	if (hasUnread) {
+	console.log('has unread notification');
+	notificationStore.setUnread(true);
+	}
+  	
 };
 
 
@@ -202,9 +206,6 @@ const goToForgetPassword = () => {
 </script>
 
 <style scoped>
-.text-morandi-dark {
-	color: #4A4A4A;
-}
 
 .bg-white {
 	background-color: #FFFFFF;

@@ -10,11 +10,12 @@
                     <el-avatar :size="50" :src="floor?.author?.headerUrl" />
                     <div class="mt-2 font-semibold text-[#6B7C93] hover:text-[#4A5568] hover:underline cursor-pointer truncate max-h-full user-name"
                         :title="floor?.author.name">
-                        {{ floor?.author?.nickname }}
+                        <!-- {{ floor?.author?.nickname }} -->
+                        <UserInfoCard v-if="floor?.author" :user="floor?.author" :boardId="boardId" placement="right"/>
                     </div>
                     <div class="mt-1 flex flex-col">
                         <!-- 这里可以展示用户的成就以及其他信息 -->
-                        <el-tag size="small" class="bg-[#E8EBF0] text-[#6B7C93] border-[#D3D7DE]">Greenhorn</el-tag>
+                        <el-tag size="small" class="bg-[#E8EBF0] text-[#6B7C93] border-[#D3D7DE]">{{ floor?.authorTitle?.titleName }}</el-tag>
                     </div>
                 </div>
             </div>
@@ -433,67 +434,6 @@ defineExpose({
     transition: background-color 2s ease;
 }
 
-/* 楼层容器 */
-.floor {
-    background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(193, 184, 168, 0.05);
-    transition: all 0.3s ease;
-}
-
-.floor:hover {
-    box-shadow: 0 4px 16px rgba(193, 184, 168, 0.08);
-    border-color: #C1B8A8;
-}
-
-/* 用户信息区域 */
-.user-info {
-    border-bottom: 1px solid #C1B8A8;
-}
-
-/* 用户名 */
-.username {
-    color: #4A4A4A;
-    font-weight: 600;
-}
-
-/* 时间、IP和设备信息 */
-.time-info {
-    color: #6B7C93;
-}
-
-/* 楼层号 */
-.floor-number {
-    color: #A1A8C1;
-    font-weight: 600;
-}
-
-/* 内容区域 */
-.content {
-    color: #4A4A4A;
-    line-height: 1.6;
-}
-
-/* 展开/收起按钮 */
-.expand-button {
-    color: #8B9E8B;
-    transition: all 0.3s;
-}
-
-.expand-button:hover {
-    color: #6B7C6B;
-}
-
-/* 回复按钮 */
-.reply-button {
-    color: #8B9E8B;
-    transition: all 0.3s;
-}
-
-.reply-button:hover {
-    color: #6B7C6B;
-}
-
 /* 所有文字按钮的基础样式 */
 :deep(.el-button--text) {
     color: #8B9E8B;
@@ -520,37 +460,6 @@ defineExpose({
 
 :deep(.el-button--success.is-link:hover) {
     color: #6B7C6B;
-}
-
-/* 回复列表 */
-.replies {
-    border-left: 2px solid #C1B8A8;
-}
-
-/* 回复项 */
-.reply-item {
-    background-color: #F8FAFC;
-    border-radius: 8px;
-    transition: all 0.3s;
-}
-
-.reply-item:hover {
-    background-color: #F0F4F8;
-}
-
-/* 回复展开按钮 */
-.replies-expand-button {
-    color: #6B7C93;
-    transition: all 0.3s;
-}
-
-.replies-expand-button:hover {
-    color: #A1A8C1;
-}
-
-/* 回复分页 */
-.replies-pagination {
-    margin-top: 1rem;
 }
 
 /* 回复分页按钮 */
@@ -641,14 +550,6 @@ defineExpose({
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;

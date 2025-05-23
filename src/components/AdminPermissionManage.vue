@@ -118,7 +118,7 @@ const fetchRoleData = async () => {
     console.log('角色数据：', roles.value)
     console.log('权限数据：', permissions.value)
   } catch (e) {
-    ElMessage.error('获取权限数据失败')
+    ElMessage.error(e.message ? e.message : 'Failed to fetch role data')
     console.error(e)
   } finally {
     loading.value = false
@@ -235,7 +235,6 @@ const handleSubmit = async () => {
     dialogVisible.value = false
   } catch (error) {
     ElMessage.error(error.message ? error.message : '提交失败')
-    console.error(e)
   }
 }
 </script>
@@ -271,28 +270,6 @@ const handleSubmit = async () => {
   background-color: #7A957A;
   border-color: #7A957A;
   color: #FFFFFF;
-}
-
-
-.morandi-cancel-btn {
-  background-color: #E3E0DB;
-  border-color: #C1B8A8;
-  color: #6B7C93;
-  transition: all 0.3s ease;
-}
-
-.morandi-cancel-btn:hover,
-.morandi-cancel-btn:focus {
-  background-color: #D5D0C8;
-  border-color: #B3A99A;
-  color: #4A5A70;
-}
-
-.morandi-cancel-btn:active,
-.morandi-cancel-btn.is-active {
-  background-color: #C7C0B6;
-  border-color: #A59B8C;
-  color: #3A4A60;
 }
 
 .morandi-confirm-btn {
