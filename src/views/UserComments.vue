@@ -8,7 +8,7 @@
 			<h2 class="text-2xl font-bold text-[#6B7C93] mb-6">My Comments</h2>
 
 			<!-- 评论列表 -->
-			<div class="space-y-4">
+			<div class="space-y-4" v-if="comments.length > 0">
 				<div v-for="item in comments" :key="item.commentInfo.id"
 					class=" bg-white/30 backdrop-blur-sm border border-white/20 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
 					<div class="flex justify-between items-start">
@@ -68,6 +68,18 @@
 					</div>
 				</div>
 			</div>
+      <el-empty
+          v-else
+          description="You haven't commented on anything yet 🤔"
+          image="https://cdn-icons-png.flaticon.com/512/4326/4326844.png"
+          :image-size="100"
+          class="bg-white/30 border border-white/30 rounded-xl shadow-md py-12 text-[#6B7C93]">
+        <template #bottom>
+          <el-button type="primary" class="morandi-view-btn" @click="router.push('/')">
+            Back to Home
+          </el-button>
+        </template>
+      </el-empty>
 
 			<!-- 分页 -->
 			<div class="mt-6 flex justify-center">
@@ -190,17 +202,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.text-subtle {
-	color: #6B7C93;
-}
-
-.text-accent {
-	color: #A1A8C1;
-}
-
-.bg-blur-box {
-	@apply bg-white/60 backdrop-blur-md border border-[#DAD7D2];
-}
 
 /* 自定义滚动条样式 */
 ::-webkit-scrollbar {

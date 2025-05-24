@@ -11,7 +11,7 @@
                             <span class="flex items-center gap-1">
                                 <el-icon>
                                     <HomeFilled />
-                                </el-icon>首页
+                                </el-icon>Home
                             </span>
                         </el-breadcrumb-item>
                         <el-breadcrumb-item :to="postsPath">{{ parentTitle }}</el-breadcrumb-item>
@@ -40,8 +40,7 @@
 
                 <!-- 楼主帖子 -->
                 <PostFloor :isPost="true" :boardId="boardId" :id="'post-' + postId" ref="originalPostRef" v-if="currentPage == 1" :floor="originalPost"
-                    :floorNum="0" :reply-page-size="replyPageSize" :enable-content-expand="true"
-                    :enable-replies-expand="true" :enableContentExpand="false" @reply="handleReplyPost"
+                    :floorNum="0" :reply-page-size="replyPageSize" :enableContentExpand="false" @reply="handleReplyPost"
                     @delete="handlePostFloorDeletePost" @report="handlePostFloorReportPost"
                     @edit="handlePostFloorEditPost" />
                 <!-- <div class="mt-2 flex items-center gap-4 text-sm text-[#6B7C93]">
@@ -56,7 +55,7 @@
             <div class="mt-6 space-y-4">
                 <PostFloor :isPost="false" :boardId="boardId" v-for="comment, index in pagedComments" :key="comment.id" :id="'comment-' + comment.id"
                     :floorNum="index + 1 + (currentPage - 1) * pageSize" :floor="comment"
-                    :reply-page-size="replyPageSize" :enable-content-expand="true" :enable-replies-expand="true"
+                    :reply-page-size="replyPageSize" :enableContentExpand="false"
                     @reply="handleReply" ref="floorRefs" @delete="handlePostFloorDelete" @report="handlePostFloorReport"
                     @edit="handlePostFloorEdit" />
             </div>
@@ -80,8 +79,8 @@
                     resize="none" class="reply-textarea" />
             </div>
             <template #footer>
-                <span class="dialog-footer">
-                    <el-button type="default"
+                <span>
+                    <el-button class="morandi-disable-btn"
                         @click="dialogVisible = false; isEditting = false; newComment = ''">Cancel</el-button>
                     <el-button type="primary" @click="submitReply">Submit</el-button>
                 </span>
@@ -807,6 +806,33 @@ const scrollToFloorComment = (isForPost, floorId, replyId) => {
 </script>
 
 <style scoped>
+
+.morandi-disable-btn {
+  background-color: #C1A1A1;
+  border-color: #C1A1A1;
+  color: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.morandi-disable-btn:hover,
+.morandi-disable-btn:focus {
+  background-color: #B28E8E;
+  border-color: #B28E8E;
+  color: #FFFFFF;
+}
+
+.morandi-disable-btn:active,
+.morandi-disable-btn.is-active {
+  background-color: #A37A7A;
+  border-color: #A37A7A;
+  color: #FFFFFF;
+}
+
+.morandi-disable-btn:disabled {
+  background-color: #E3E0DB;
+  border-color: #E3E0DB;
+  color: #A1A8C1;
+}
 
 /* 确保内容区域不会超出屏幕 */
 .text-base {

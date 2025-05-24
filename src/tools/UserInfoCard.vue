@@ -3,7 +3,7 @@
 		:popper-options="popperOptions" popper-class="morandi-user-popover">
 		<template #reference>
 			<span class=" user-name-ellipsis text-[#6B7C93] cursor-pointer hover:underline" @click.stop="handleClick">
-				{{ props.addAt ? '@' : '' }}{{ basicUser?.nickname || basicUser?.username }}{{ props.addColon ? ':' : ''
+				{{ props.addAt ? '@' : '' }}{{ basicUser?.nickname || basicUser?.username }}{{ props.addColon ? ' :' : ''
 				}}
 			</span>
 		</template>
@@ -240,12 +240,13 @@ onBeforeUnmount(() => {
 
 .user-name-ellipsis {
 	display: inline-block;
-	max-width: 80px;
+	max-width: 100px;
 	/* 可根据设计适当调整 */
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	vertical-align: middle;
+	vertical-align: baseline;
+  line-height: 1.5;
 }
 
 .card {

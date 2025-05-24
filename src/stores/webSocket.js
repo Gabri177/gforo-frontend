@@ -125,11 +125,15 @@ export const useWebSocketStore = defineStore('websocket', () => {
 		clearTimeout(reconnectTimer);
 
 		if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-			ElMessage.error('网络异常，请检查连接或稍后再试'); // ✅ 提示用户
+			ElMessage({
+				message: 'Connection failed, please check your network',
+				type: 'error',
+				grouping: true,
+			}); // ✅ 提示用户
 			return;
 		}
 
-		reconnectAttempts++; // ✅ 增加尝试次数
+		reconnectAttempts++;
 		console.log(`⚠️ WebSocket 重连第 ${reconnectAttempts} 次`);
 		reconnectTimer = setTimeout(() => {
 			connect();

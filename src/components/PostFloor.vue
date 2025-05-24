@@ -62,7 +62,8 @@
                                     <div class="text-[#4A5568] flex-grow">
                                         <div :class="{ 'line-clamp-2': !reply?.isExpanded && enableContentExpand }"
                                             class="whitespace-pre-wrap break-words break-all">
-                                            {{ reply.id }} == {{ reply?.content }}</div>
+<!--                                            {{ reply.id }} == -->
+                                          {{ reply?.content }}</div>
                                         <div v-if="shouldShowReplyExpandButton(reply?.content) && enableContentExpand"
                                             class="text-center mt-1">
                                             <el-button type="success" link size="small"
@@ -400,6 +401,7 @@ defineExpose({
 </script>
 
 <style scoped>
+
 :deep(.el-button.is-link) {
     transition: all 0.3s ease;
 }

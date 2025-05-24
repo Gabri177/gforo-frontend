@@ -41,16 +41,17 @@
 				</div>
 			</div>
 
-			<div v-else
-				class="flex flex-col items-center justify-center py-12 text-[#6B7C93] bg-white/30 border border-white/30 rounded-xl shadow-md">
-				<img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="No posts"
-					class="w-24 h-24 mb-4 opacity-80" />
-				<p class="text-lg font-semibold mb-2">You haven't posted anything yet 😶</p>
-				<p class="text-sm text-[#8B93B1] mb-4">Why not head back and share your first thought?</p>
-				<el-button type="primary" class="morandi-view-btn" @click="router.push('/')">Back to Home</el-button>
-			</div>
+      <div v-else
+           class="flex flex-col items-center justify-center py-12 text-[#6B7C93] bg-white/30 border border-white/30 rounded-xl shadow-md">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="No posts"
+             class="w-24 h-24 mb-4 opacity-80" />
+        <p class="text-lg font-semibold mb-2">You haven't posted anything yet 😶</p>
+        <p class="text-sm text-[#8B93B1] mb-4">Why not head back and share your first thought?</p>
+        <el-button type="primary" class="morandi-view-btn" @click="router.push('/')">Back to Home</el-button>
+      </div>
 
-			<!-- 分页 -->
+
+      <!-- 分页 -->
 			<div class="mt-6 flex justify-center">
 				<el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
 					:page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next"
@@ -121,18 +122,7 @@ const fetchPosts = async (userId) => {
 	try {
 		if (userId === undefined) {
 			userId = userStore.userInfo.id
-		} 
-		// else {
-		// 	let otherUserInfo;
-		// 	const otherUser = localStorage.getItem('lastVisitedUser')
-		// 	console.log("otherUser: ", otherUser)
-		// 	if (otherUser) {
-		// 		localStorage.removeItem('lastVisitedUser')
-		// 		otherUserInfo = JSON.parse(otherUser)
-		// 		console.log("otherUserInfo: ", otherUserInfo)
-		// 	}
-		// 	userId = otherUserInfo.id
-		// }
+		}
 		const res = await getUserPosts(userId, currentPage.value, pageSize.value, true)
 		posts.value = res.discussPosts
 		total.value = res.totalRows

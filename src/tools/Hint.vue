@@ -10,11 +10,11 @@
 			<p class="dialog-message">{{ props.message }}</p>
 		</div>
 		<template #footer>
-			<el-button class="cancel-button" @click="handleClose">
+			<el-button class="morandi-disable-btn" @click="handleClose">
 				<span class="text-white font-bold">Cancel</span>
 			</el-button>
-			<el-button v-if="props.confirmButton" class="confirm-button" type="primary" @click="handleConfirm">
-				<span class="text-white font-bold" :loading="props.confirmLoading">Confirm</span>
+			<el-button v-if="props.confirmButton" :loading="props.confirmLoading" class="confirm-button" type="primary" @click="handleConfirm">
+				<span class="text-white font-bold">Confirm</span>
 			</el-button>
 		</template>
 	</el-dialog>
@@ -52,6 +52,33 @@ const handleConfirm = () => {
 </script>
 
 <style scoped>
+
+.morandi-disable-btn {
+  background-color: #C1A1A1;
+  border-color: #C1A1A1;
+  color: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.morandi-disable-btn:hover,
+.morandi-disable-btn:focus {
+  background-color: #B28E8E;
+  border-color: #B28E8E;
+  color: #FFFFFF;
+}
+
+.morandi-disable-btn:active,
+.morandi-disable-btn.is-active {
+  background-color: #A37A7A;
+  border-color: #A37A7A;
+  color: #FFFFFF;
+}
+
+.morandi-disable-btn:disabled {
+  background-color: #E3E0DB;
+  border-color: #E3E0DB;
+  color: #A1A8C1;
+}
 
 /* 正文样式 */
 .dialog-message {
