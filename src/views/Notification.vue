@@ -63,10 +63,10 @@
                         notification.comment?.content || 'Your Comment' }}</a>
                   </span>
                   <span v-else-if="notification.type === 6 && notification.entityType == 0">
-                    : {{ notification.title || 'Your Comment' }}
+                    : {{ notification.title || 'Unknown Notification' }}
                   </span>
                   <span v-else-if="notification.type === 6 && notification.entityType == 3">
-                    : {{ notification.title || 'New title has been granted' }}
+                    : {{ notification.title || 'Unknown Notification' }}
                   </span>
                 </template>
                 <template v-else>
@@ -316,4 +316,6 @@ const formatDate = (date) => new Date(date).toLocaleString()
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
+
+
 </style>

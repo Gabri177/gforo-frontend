@@ -48,6 +48,11 @@
             <el-tab-pane label="Title" >
               <AdminTitleManagement v-if="activeTab == 'Title'"/>
             </el-tab-pane>
+
+            <!-- 举报管理 -->
+            <el-tab-pane label="Report">
+              <AdminReportManage v-if="activeTab == 'Report'"/>
+            </el-tab-pane>
           </el-tabs>
         </div>
       </div>
@@ -68,6 +73,7 @@ import AdminPermissionManage from '~/components/AdminPermissionManage.vue'
 import AdminAnnouncement from '~/components/AdminAnnouncement.vue'
 import AdminCarouselManage from '~/components/AdminCarouselManage.vue'
 import AdminTitleManagement from '~/components/AdminTitleManagement.vue'
+import AdminReportManage from "~/components/AdminReportManage.vue";
 
 
 const authStore = useAuthStore()

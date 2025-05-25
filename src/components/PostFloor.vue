@@ -84,6 +84,10 @@
                 <div class="text-xs text-[#718096] mt-1 flex items-center justify-between">
                   <div>{{ formatDate(reply?.createTime) }}</div>
                   <div>
+                    <el-button v-if="!ifShowDeleteBtn(reply?.author?.id, !props.isPost)"
+                               type="danger" link size="small" class="ml-4 self-start"
+                               @click="$emit('report', reply, 1)">Report
+                    </el-button>
                     <el-button v-if="ifShowDeleteBtn(reply?.author?.id, !props.isPost)"
                                type="danger" link size="small" class="ml-4 self-start"
                                @click="$emit('delete', reply, 1)">Delete

@@ -273,3 +273,32 @@ s {
   font-style: italic;
   transition: all 0.3s ease;
 }
+
+
+/* 输入框样式 */
+.el-textarea__inner {
+  background-color: #F5F5F5;
+  border: 1px solid #D4D4D4;
+  border-radius: 8px;
+  color: #4A4A4A;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.el-textarea__inner:hover {
+  border-color: #B8B8B8;
+  background-color: #F8F8F8;
+}
+
+.el-textarea__inner:focus {
+  border-color: #A1A8C1;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 2px rgba(161, 168, 193, 0.1);
+}
+
+.el-textarea__inner::placeholder {
+  color: #9B9B9B;
+}
+

@@ -191,7 +191,7 @@ import UserInfoCard from '~/tools/UserInfoCard.vue';
 
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '~/stores/user';
-import { publishPost, getBoardPostsPage } from '~/api/postAPI';
+import { publishPost, getBoardPostsPage } from '@/api/postApi.js';
 
 const user = {
 	id: 1,

@@ -78,7 +78,7 @@ import { HomeFilled, MoreFilled } from '@element-plus/icons-vue'
 import { getUserPosts } from '~/api/userApi'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
-import { deletePost } from '~/api/postApi'
+import { deletePost } from '@/api/postApi.js'
 import { adminDeletePost } from '~/api/adminApi'
 import ReturnHome from '~/components/ReturnHome.vue';
 

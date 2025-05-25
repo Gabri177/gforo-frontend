@@ -45,7 +45,7 @@
 <script setup>
   import { onMounted, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { searchPost } from '~/api/postApi';
+  import { searchPost } from '@/api/postApi.js';
   import UserInfoCard from '~/tools/UserInfoCard.vue';
   
   const route = useRoute();
