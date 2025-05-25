@@ -1,68 +1,87 @@
 <template>
   <el-dialog
-    v-model="visible"
-    :title="props.title"
-    custom-class="morandi-dialog"
-    width="50%"
-    @close="$emit('update:visible', false)"
-    :align-center="true"
-  
+      v-model="visible"
+      :title="props.title"
+      custom-class="morandi-dialog"
+      width="50%"
+      @close="$emit('update:visible', false)"
+      :align-center="true"
+
   >
-    <div class="p-6 mt-0 py-0">
+    <div class="p-0 mt-3 py-0">
       <el-form :model="postForm">
-        <el-form-item v-if="props.needReplyTitle">
-          <el-input v-model="postForm.title" class="title-input"></el-input>
+        <el-form-item v-if="props.needReplyTitle" class="relative">
+          <el-input v-model="postForm.title" class="title-input" :maxlength="props.maxTitleLength" show-word-limit></el-input>
         </el-form-item>
+
         <el-form-item>
           <v-md-editor
-            v-model="postForm.content"
-            height="400px"
-            class="content-editor"
-            left-toolbar="clear | h bold italic strikethrough quote | ul ol table hr | link image code"
-            right-toolbar="sync-scroll fullscreen"
-            @save="handleSave" 
+              v-model="postForm.content"
+              ref="editorRef"
+              tab-size="4"
+              height="400px"
+              class="content-editor w-full h-full"
+              left-toolbar="clear | h bold italic strikethrough quote | ul ol table hr | link image code"
+              right-toolbar="preview sync-scroll fullscreen"
+              mode="edit"
+              @save="handleSave"
           ></v-md-editor>  <!-- 上面我先隐藏了save组件  后续可以扩展  -->
 
         </el-form-item>
       </el-form>
     </div>
     <template #footer>
-      <div class="mr-2">
-        <el-button class="cancel-button" @click="handleCancel" 
-      size="large" style="margin-top: -16px;">
-        <span class="text-white font-bold">cancel</span>
-      </el-button>
-      <el-button class="confirm-button" type="primary" @click="handleConfirm" :loading="postLoading" 
-      size="large" style="margin-top: -16px;">
-        <span class="text-white font-bold">post</span>
-      </el-button>
+      <div class="footer-container flex justify-between items-center w-full px-4 py-2">
+        <!-- 字数统计 -->
+        <div class="text-sm font-medium text-[#6B7C93]">
+          Characters:
+          <span :class="contentLength > props.maxCharCount ? 'text-red-500' : 'text-[#4A4A4A]'"
+                class="text-sm font-medium text-[#6B7C93]">
+        {{ contentLength }}/{{ props.maxCharCount }}
+      </span>
+        </div>
+
+        <!-- 按钮 -->
+        <div class="mr-2 flex gap-2">
+          <el-button class="cancel-button" @click="handleCancel" size="large" style="margin-top: -16px;">
+            <span class="text-white font-bold">cancel</span>
+          </el-button>
+          <el-button class="confirm-button" type="primary" @click="handleConfirm" :loading="postLoading" size="large"
+                     style="margin-top: -16px;">
+            <span class="text-white font-bold">post</span>
+          </el-button>
+        </div>
       </div>
     </template>
+
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, computed } from 'vue';
-import VMdEditor from '@kangc/v-md-editor';
-import '@kangc/v-md-editor/lib/style/base-editor.css';
-import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
-import '@kangc/v-md-editor/lib/theme/style/github.css';
-import VueMarkdownEditor, { xss } from '@kangc/v-md-editor';
+import {computed, defineEmits, defineProps, onMounted, ref} from 'vue';
+const editorRef = ref(null);
+onMounted(() => {
+  setTimeout(() => {
+    const codemirrorEl = editorRef.value?.$el?.querySelector?.('.CodeMirror');
+    console.log('CodeMirror DOM:', codemirrorEl);
+  }, 1000); // 等待 editor 挂载
+});
+
+const contentLength = computed(() => {
+  return postForm.value.content?.length || 0;
+});
 
 
-VMdEditor.use(githubTheme);
-
-const postLoading = ref(false); 
+const postLoading = ref(false);
 // 这里的save方法暴露给父组件，用于保存编辑器中的内容 
 const handleSave = (text, html) => {
 
-    console.log('text:', text);
-    console.log('html:', html);
+  console.log('text:', text);
+  console.log('html:', html);
 };
 
 const getHtml = (markdownContent) => {
-  const html = xss.process(VueMarkdownEditor.vMdParser.themeConfig.markdownParser.render(markdownContent));
-  return html;
+  return xss.process(VMdEditor.vMdParser.themeConfig.markdownParser.render(markdownContent));
 }
 
 const props = defineProps({
@@ -77,6 +96,14 @@ const props = defineProps({
   needReplyTitle: {
     type: Boolean,
     default: true
+  },
+  maxCharCount: {
+    type: Number,
+    default: 5000
+  },
+  maxTitleLength: {
+    type: Number,
+    default: 50
   }
 });
 
@@ -141,9 +168,22 @@ defineExpose({
   endPostLoading
 });
 
+
+
 </script>
 
 <style scoped>
+
+
+.footer-container {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 0 0 8px 8px;
+  font-family: 'Arial', sans-serif;
+}
+
+
+
 .morandi-dialog {
   background-color: #E3E0DB; /* 莫兰迪冷色调 */
   color: #4a4a4a; /* 字体颜色 */
@@ -167,28 +207,33 @@ defineExpose({
   font-family: 'Arial', sans-serif; /* 修改字体 */
   margin-right: 10px; /* 按钮间距 */
 }
+
 .el-button.cancel-button:hover {
   background-color: #A87A7A; /* 按钮悬停红色 */
   color: #ffffff; /* 按钮悬停字体颜色 */
 }
+
 .el-button.confirm-button {
   background-color: #A1A8C1; /* 莫兰迪蓝色 */
   color: #ffffff; /* 按钮字体颜色 */
   border: none; /* 去掉边框 */
   font-family: 'Arial', sans-serif; /* 修改字体 */
 }
+
 .el-button.confirm-button:hover {
   background-color: #7A87A8; /* 按钮悬停蓝色 */
   color: #ffffff; /* 按钮悬停字体颜色 */
 }
+
 .title-input {
   min-width: 300px; /* 最小宽度 */
   border-radius: 4px; /* 圆角 */
 }
+
 .content-editor {
   min-height: 400px; /* 最小高度 */
   border-radius: 4px; /* 圆角 */
-  padding: 10px; /* 内边距 */
+  padding: 0; /* 内边距 */
 }
 
 </style>

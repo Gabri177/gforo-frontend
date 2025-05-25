@@ -10,11 +10,16 @@
     "postcss": "postcss.config.cjs"
   },
   "dependencies": {
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-markdown": "^6.3.2",
     "@element-plus/icons-vue": "^2.3.1",
     "@fingerprintjs/fingerprintjs": "^4.6.2",
     "@kangc/v-md-editor": "^2.3.18",
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^0.27.2",
+    "codemirror": "^5.65.19",
     "echarts": "^5.6.0",
     "element-plus": "^2.2.30",
     "lodash": "^4.17.21",

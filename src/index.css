@@ -104,7 +104,6 @@
 
 
 
-/* ✅ ElMessageBox confirm 对话框整体 */
 .el-message-box {
   background-color: #F5F5F5 !important;
   border-radius: 16px !important;
@@ -116,7 +115,6 @@
   padding: 24px !important;
 }
 
-/* ✅ 标题和文字 */
 .el-message-box__title {
   font-size: 18px !important;
   color: #4A4A4A !important;
@@ -174,15 +172,104 @@
 }
 
 
-/* ✅ 状态图标颜色 */
 .el-message-box__status {
   color: #A1A8C1 !important;
 }
 
 em {
-	color: #83B59D !important; /* 莫兰迪绿色字体 */
+	color: #83B59D !important;
 	font-weight: 600;
-	background-color: #e8f0eb; /* 淡绿色背景 */
+	background-color: #e8f0eb;
 	padding: 0 2px;
 	border-radius: 4px;
   }
+
+
+/* WebKit 浏览器的滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #A1A8C1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #7A87A8;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+strong {
+  color: #6B7C93;
+  font-weight: 700;
+  background-color: #F0F2F5;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background-color: #E8EBF0;
+  color: #4A4A4A;
+  font-size: 90%;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #D3D7DE;
+}
+
+pre code {
+  display: block;
+  background-color: #F5F5F5;
+  color: #2E3440;
+  border-radius: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  line-height: 1.6;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+pre {
+  background-color: #F5F5F5;
+  border: 1px solid #D3D7DE;
+  border-radius: 12px;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4A4A4A;
+  box-shadow: 0 4px 12px rgba(161, 168, 193, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+pre code {
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  padding: 0;
+  border: none;
+}
+
+s {
+  color: #A1A8C1;
+  text-decoration: line-through;
+  text-decoration-color: #C1B8A8;
+  background-color: rgba(225, 225, 225, 0.3);
+  padding: 0 2px;
+  border-radius: 4px;
+  font-style: italic;
+  transition: all 0.3s ease;
+}

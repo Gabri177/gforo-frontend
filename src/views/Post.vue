@@ -76,7 +76,7 @@
                     <span class="text-[#4A4A4A] font-medium">{{ currentReplyTo }}</span>
                 </div>
                 <el-input v-model="newComment" type="textarea" :rows="4" placeholder="Please input your reply..."
-                    resize="none" class="reply-textarea" />
+                    resize="none" class="reply-textarea" :maxlength="500" show-word-limit/>
             </div>
             <template #footer>
                 <span>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="w-full h-full">
-        <NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" :confirmButton="false"
+        <NewPost ref="newPostRef" v-model:visible="isReplyPostVisible" :confirmButton="false" max-char-count="2000"
             @publish="publishReplyPost" :title="!isEditting ? 'Reply Post' : 'Edit'" :needReplyTitle="isNeedTitle"
             @cancel="isEditting = false" />
     </div>
