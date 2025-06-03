@@ -24,7 +24,7 @@
         <h1 class="text-2xl font-bold text-[#4A4A4A] mb-2">{{ originalPost?.title }}</h1>
 
         <!-- 权限控制的右上角印章按钮 -->
-        <div v-if="hasChangeTypeAuth" class="absolute top-4 right-4 flex gap-2">
+        <div v-if="hasChangeTypeAuth && userStore.isLoggedInState" class="absolute top-4 right-4 flex gap-2">
           <el-button circle size="big" type="primary" class="!bg-[#A1A8C1] !text-white !border-none hover:shadow-lg"
                      @click="handleAddTop">
             <i v-if="originalPost?.type == 1 || originalPost?.type == 3" class="pi pi-sort-up-fill"
